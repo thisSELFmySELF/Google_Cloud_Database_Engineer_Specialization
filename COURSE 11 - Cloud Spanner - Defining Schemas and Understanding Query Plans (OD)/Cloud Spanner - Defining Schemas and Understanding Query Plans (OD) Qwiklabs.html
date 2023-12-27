@@ -1,0 +1,1050 @@
+
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<title>Cloud Spanner - Defining Schemas and Understanding Query Plans (OD) | Qwiklabs</title>
+<meta name="action-cable-url" content="/cable" />
+<script>
+//<![CDATA[
+window.gon={};gon.deployment="googlecoursera-run";
+//]]>
+</script>
+<script>
+  (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer',"GTM-5XSKHDX");
+</script>
+<script src="https://cdn.qwiklabs.com/assets/hallofmirrors/polyfills/webcomponents-loader-8583b47b01e40e6ea7bf1ad443a20b7e79bbdd5eafac009806a228c91a97282c.js"></script>
+<script src="https://cdn.qwiklabs.com/assets/vendor-613520545532a2795a401a8168ca8b698b9ee765a66f5ad9ead806b5c32eabe8.js"></script>
+<script src="https://cdn.qwiklabs.com/assets/application-764552f4bc7e4ee5dc74a9b3fd7ddf41c0c326f6f8253193b6e48f971195330f.js"></script>
+<script src="https://cdn.qwiklabs.com/assets/hallofmirrors/hallofmirrors-a269c09f5c7f842521138f1fd428e70d66d7088c99b06531a79b52ebe3f36260.js"></script>
+<!--[if lt IE 9]>  <![endif]-->
+<script src='http://html5shim.googlecode.com/svn/trunk/html5.js' type='text/javascript'></script>
+<!--[endif]>  <![endif]-->
+<script id='ze-snippet' src='https://static.zdassets.com/ekr/snippet.js?key=511e4158-0aec-4e3c-b2e6-4daa1769f51e'></script>
+
+
+<meta name="csrf-param" content="authenticity_token" />
+<meta name="csrf-token" content="rIubei1adQ35Kj22Fw/1e6Go1kcCWHBkY7zAyNpB/K5CuPVgtmFTkS34Lgv8FVNrfeI44Bx2O3MXpvvP6pz3Jg==" />
+<meta content='width=device-width, initial-scale=1.0, user-scalable=yes' name='viewport'>
+<meta content='1rRsY0INj8RvwB5EF5pwdxt2A2P9aDgAlsICaJ0d5w0' name='google-site-verification'>
+<meta content='#3681E4' property='msapplication-TileColor'>
+<meta content='/favicon-144.png' property='msapplication-TileImage'>
+<meta content='[{&quot;id&quot;:&quot;recaptcha_experiment&quot;,&quot;optimize_id&quot;:&quot;dpViOcLkT3qS4TvL2mRojA&quot;,&quot;title&quot;:&quot;No Recaptcha shown for trusted users&quot;,&quot;variant_index&quot;:1,&quot;variant&quot;:&quot;no_recaptcha&quot;}]' name='active-experiments'>
+<meta content='{&quot;userId&quot;:12197799,&quot;experimentIds&quot;:[&quot;course_upgrade&quot;,&quot;canonical_domain_redirect&quot;,&quot;program_resources&quot;,&quot;program_learning_assignment&quot;,&quot;program_announcements&quot;,&quot;peer_assignment&quot;,&quot;teams&quot;,&quot;oauth_risc_shutoff&quot;,&quot;show_annual_purchase_now&quot;,&quot;programs&quot;,&quot;used_in&quot;,&quot;barker&quot;,&quot;program_groups&quot;,&quot;enforce_codebuild_verdicts&quot;,&quot;chat_off_for_signed_out_users&quot;,&quot;community_forum&quot;,&quot;alexandria_show_bundle_errors&quot;]}' name='help-api-product-data'>
+<meta content='{&quot;groupIds&quot;:[&quot;non_suadmins&quot;,&quot;students&quot;,&quot;non_organization&quot;,&quot;non_program&quot;]}' name='help-api-custom-data'>
+<meta content='In this lab you review schema related features of Cloud Spanner and apply those to a Banking Operations database. You also review the methods and rules by which Cloud Spanner creates query plans.' name='description'>
+<meta content='Qwiklabs' name='author'>
+<meta content='Cloud Spanner - Defining Schemas and Understanding Query Plans (OD) | Qwiklabs' property='og:title'>
+<meta content='website' property='og:type'>
+<meta content='/favicon-144.png' property='og:image'>
+<meta content='Qwiklabs' property='og:site_name'>
+<meta content='In this lab you review schema related features of Cloud Spanner and apply those to a Banking Operations database. You also review the methods and rules by which Cloud Spanner creates query plans.' property='og:description'>
+<meta content='/qwiklabs_logo_900x887.png' property='og:logo' size='900x887'>
+<meta content='/qwiklabs_logo_994x187.png' property='og:logo' size='994x187'>
+
+
+<meta property="og:url" content="https://googlecoursera.qwiklabs.com/focuses/30982024?parent=lti_session" /><link href="https://googlecoursera.qwiklabs.com/focuses/30982024?parent=lti_session" rel="canonical" />
+<link color='#3681E4' href='/favicon-svg.svg' rel='mask-icon'>
+<link href='/favicon-180.png' rel='apple-touch-icon-precomposed'>
+<link href='/favicon-32.png' rel='shortcut icon' type='image/x-icon'>
+
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Oswald:400|Roboto+Mono:400,700|Roboto:300,400,500,700|Google+Sans:300,400,500,700|Google+Sans+Display:400|Material+Icons|Google+Material+Icons|Google+Sans+Text:400,500,700" media="screen" />
+
+<link rel="stylesheet" href="https://cdn.qwiklabs.com/assets/application-4460acd11fd036bbfe937c2e43ee247139dc3ed6bae2fca7e1efad98a408bd4d.css" media="all" />
+<link rel="stylesheet" href="https://www.gstatic.com/glue/cookienotificationbar/cookienotificationbar.min.css" media="screen" />
+
+
+<style>
+  :root {
+    --primary-text-on-surface-color: #1a73e8;
+    --primary-text-on-surface-color-dark: #1568d6;
+    --primary-text-on-surface-color-darker: #135ec1;
+    --primary-text-on-surface-color-darkest: #1154ac;
+    --primary-surface-color: #1a73e8;
+    --primary-surface-color-rgb: 26,115,232;
+    --primary-surface-color-light: #d1e3fa;
+    --primary-surface-color-lightest: #e8f1fd;
+    --text-on-primary-color: #ffffff;
+    --accent-text-on-surface-color: #f29900;
+    --accent-surface-color: #f9ab00;
+    --accent-surface-color-rgb: 249,171,0;
+    --accent-surface-color-light: #ffefcc;
+    --text-on-accent-color: #202124;
+  }
+</style>
+
+<style>
+  :root {
+    --navbar-height: 64px;
+  }
+</style>
+
+
+
+</head>
+<body class='lab-show l-full no-nav application-new focuses focuses-show lab-show l-full no-nav '>
+<div class='header-container'>
+<div class='header'>
+<ql-toolbar jumpEnabled>
+<div class='header__title' slot='title'>
+<ql-icon-button label="Back" href="https://www.coursera.org/" id="e70315341b391842" target="_self" tip="Back">arrow_back</ql-icon-button>
+<h1 class='ql-headline-6'>Cloud Spanner - Defining Schemas and Understanding Query Plans (OD)</h1>
+</div>
+<div class='header__actions' slot='action'>
+<ql-icon-button id='control-panel-target' style='display: none;'>
+dashboard
+</ql-icon-button>
+<ql-menu for='control-panel-target' id='control-panel-menu'></ql-menu>
+<ql-icon-button class='mobile-hide' icon='help_outline' id='help-menu-button' label='Open help menu' tip='Help'></ql-icon-button>
+<ql-menu for='help-menu-button' id='help-menu'>
+<ql-menu-item data-analytics-action='opened_help' data-analytics-label='lab' label='Help Center' onclick='hallofmirrors.helpService.startHelp({&quot;productData&quot;:{&quot;userId&quot;:12197799},&quot;context&quot;:&quot;lab&quot;})'></ql-menu-item>
+<ql-menu-item href='mailto:support@qwiklabs.com' label='Email support'></ql-menu-item>
+<ql-menu-item label='Chat support' onClick='ql.chat.open()'></ql-menu-item>
+</ql-menu>
+
+<ql-icon-button class='mobile-hide' icon='language' id='language' label='Select your language preference' tip='Language'></ql-icon-button>
+<ql-menu for='language'>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ar' href='/focuses/30982024?locale=ar&amp;parent=lti_session' label='العربية‬‎' lang='ar'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='de' href='/focuses/30982024?locale=de&amp;parent=lti_session' label='Deutsch' lang='de'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='en' href='/focuses/30982024?locale=en&amp;parent=lti_session' label='English' lang='en'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='es' href='/focuses/30982024?locale=es&amp;parent=lti_session' label='español (Latinoamérica)' lang='es'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='fr' href='/focuses/30982024?locale=fr&amp;parent=lti_session' label='français' lang='fr'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='fr_CA' href='/focuses/30982024?locale=fr_CA&amp;parent=lti_session' label='français (Canada)' lang='fr-CA'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='he' href='/focuses/30982024?locale=he&amp;parent=lti_session' label='עברית' lang='he'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='id' href='/focuses/30982024?locale=id&amp;parent=lti_session' label='bahasa Indonesia' lang='id'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='it' href='/focuses/30982024?locale=it&amp;parent=lti_session' label='Italiano' lang='it'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ja' href='/focuses/30982024?locale=ja&amp;parent=lti_session' label='日本語' lang='ja'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ko' href='/focuses/30982024?locale=ko&amp;parent=lti_session' label='한국어' lang='ko'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='pl' href='/focuses/30982024?locale=pl&amp;parent=lti_session' label='Polski' lang='pl'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='pt_BR' href='/focuses/30982024?locale=pt_BR&amp;parent=lti_session' label='português (Brasil)' lang='pt-BR'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='pt_PT' href='/focuses/30982024?locale=pt_PT&amp;parent=lti_session' label='português (Portugal)' lang='pt-PT'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ru' href='/focuses/30982024?locale=ru&amp;parent=lti_session' label='русский' lang='ru'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='tr' href='/focuses/30982024?locale=tr&amp;parent=lti_session' label='Türkçe' lang='tr'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='uk' href='/focuses/30982024?locale=uk&amp;parent=lti_session' label='український' lang='uk'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='zh' href='/focuses/30982024?locale=zh&amp;parent=lti_session' label='简体中文' lang='zh'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='zh_TW' href='/focuses/30982024?locale=zh_TW&amp;parent=lti_session' label='繁體中文' lang='zh-TW'></ql-menu-item>
+</ql-menu>
+
+
+<ql-icon-button id='my_account' label='My account' tip='My account'>
+<ql-avatar src='https://lh3.googleusercontent.com/a/ACg8ocI6s7UhNvX_oCOJMPhLJPmqhqIgwu_5AK0t7wpjF-5jmQo=s320-c'></ql-avatar>
+</ql-icon-button>
+<ql-menu for='my_account' id='my_account_menu' style='max-height: 640px'>
+<div class='my-account-menu'>
+<ql-avatar class='l-mtl l-mbl' size='120' src='https://lh3.googleusercontent.com/a/ACg8ocI6s7UhNvX_oCOJMPhLJPmqhqIgwu_5AK0t7wpjF-5jmQo=s320-c'></ql-avatar>
+<div class='my-account-menu__user-info l-mbl'>
+<h4 class='ql-subhead-1'>Justin Ho</h4>
+<p class='ql-body-2 text--light'>cliffdove@gmail.com</p>
+<p class='ql-body-2 text--light'>
+</p>
+<a class="text--green ql-subhead-2" href="/my_account/payments"><ql-chip positive>
+0 Credits
+</ql-chip>
+</a></div>
+<div class='buttons l-mbl'>
+<a class="button button--hairline" id="settings" href="/my_account/profile">Settings</a>
+</div>
+<hr>
+<ql-button data-analytics-action='clicked_sign_out' href='/users/sign_out' method='delete'>
+Sign Out
+</ql-button>
+<div class='privacy l-mtl'>
+<a target="_blank" class="ql-caption text--light" href="/privacy_policy">Privacy</a>
+<span class='ql-caption text--light l-mls l-mrs'>&middot;</span>
+<a class="ql-caption text--light" href="/terms_of_service">Terms</a>
+</div>
+</div>
+</ql-menu>
+
+</div>
+</ql-toolbar>
+
+</div>
+</div>
+
+<nav class='nav-panel js-nav-panel'>
+<div class='nav-panel__logo'>
+<div class="custom-logo">Qwiklabs</div>
+</div>
+<nav class='ql-sidenav'>
+<ql-sidenav-item href='/' icon='home' label='Home'></ql-sidenav-item>
+
+<ql-sidenav-item href='/catalog' icon='school' label='Catalog'></ql-sidenav-item>
+
+<ql-sidenav-item href='/profile' icon='event_note' label='Profile'></ql-sidenav-item>
+
+</nav>
+
+</nav>
+<div class='nav-panel__overlay js-nav-toggle'></div>
+
+<main class='js-main' id='jump-content'>
+<div class='l-main-wrapper' id='main-wrapper'>
+
+
+
+
+<div class='lab-assessment__tab js-open-lab-assessment-panel'>
+<button class='js-lab-assessment-total-score'>
+—/100
+</button>
+</div>
+<div aria-labelledby='lab-assessment-checkpoint' class='lab-assessment__panel js-lab-assessment-panel' role='dialog'>
+<div class='lab-assessment__panel__header'>
+<h4 id='lab-assessment-checkpoint'>Checkpoints</h4>
+<ql-icon-button class='js-close-lab-assessment-panel' icon='arrow_forward' label='Close dialog'></ql-icon-button>
+</div>
+<div class='lab-assessment__step'>
+<p class='lab-assessment__step__title' id='lab-assessment-step-title'>
+Load Data into Portfolio, Category, and Product Tables
+</p>
+<div class='lab-assessment__step__action'>
+<ql-button class='js-show-run-step-button' description='Load Data into Portfolio, Category, and Product Tables' step_no='1'>
+Check my progress
+</ql-button>
+<p class='lab-assessment__step__score'>
+<span class='js-assessment-step-score-1'>
+</span>
+/ 30
+</p>
+</div>
+</div>
+
+<div class='lab-assessment__step'>
+<p class='lab-assessment__step__title' id='lab-assessment-step-title'>
+Load Data into Campaigns Table
+</p>
+<div class='lab-assessment__step__action'>
+<ql-button class='js-show-run-step-button' description='Load Data into Campaigns Table' step_no='2'>
+Check my progress
+</ql-button>
+<p class='lab-assessment__step__score'>
+<span class='js-assessment-step-score-2'>
+</span>
+/ 20
+</p>
+</div>
+</div>
+
+<div class='lab-assessment__step'>
+<p class='lab-assessment__step__title' id='lab-assessment-step-title'>
+Add column to Category Table
+</p>
+<div class='lab-assessment__step__action'>
+<ql-button class='js-show-run-step-button' description='Add column to Category Table' step_no='3'>
+Check my progress
+</ql-button>
+<p class='lab-assessment__step__score'>
+<span class='js-assessment-step-score-3'>
+</span>
+/ 20
+</p>
+</div>
+</div>
+
+<div class='lab-assessment__step'>
+<p class='lab-assessment__step__title' id='lab-assessment-step-title'>
+Add secondary index to Category table
+</p>
+<div class='lab-assessment__step__action'>
+<ql-button class='js-show-run-step-button' description='Add secondary index to Category table' step_no='4'>
+Check my progress
+</ql-button>
+<p class='lab-assessment__step__score'>
+<span class='js-assessment-step-score-4'>
+</span>
+/ 30
+</p>
+</div>
+</div>
+
+</div>
+<ql-drawer-container class='js-lab-state' data-analytics-payload='{&quot;label&quot;:&quot;Cloud Spanner - Defining Schemas and Understanding Query Plans (OD)&quot;,&quot;lab_name&quot;:&quot;Cloud Spanner - Defining Schemas and Understanding Query Plans (OD)&quot;,&quot;classroom_name&quot;:null,&quot;deployment&quot;:&quot;googlecoursera-run&quot;}' data-credits='0.0' data-focus-id='30982024' data-lab-billing-limit='0.0' data-lab-duration='5400' data-parent='lti_session' data-recaptcha-enabled id='lab-container'>
+<ql-drawer id='terminal-drawer' slot='drawer'>
+<iframe allow='clipboard-read' class='terminal' id='embedded-resource'></iframe>
+</ql-drawer>
+<ql-drawer-content class='js-lab-wrapper' id='lab-content' slot='drawer-content'>
+<ql-drawer-container id='lab-content-container'>
+<ql-drawer id='control-panel-drawer' open slot='drawer' width='320'>
+<ql-lab-control-panel class='ql-lab-control-panel__max-height control-panel js-lab-control-panel' connectionFiles='[]' labControlButton='{&quot;disabled&quot;:false,&quot;pending&quot;:false,&quot;running&quot;:false}' labDetails='[]' labTimer='{&quot;ticking&quot;:false,&quot;secondsRemaining&quot;:5400}' studentResources='[]'>
+<script src="https://www.recaptcha.net/recaptcha/api.js?render=6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr"   ></script>
+        <script>
+          // Define function so that we can call it again later if we need to reset it
+          // This executes reCAPTCHA and then calls our callback.
+          function executeRecaptchaForStartLab() {
+            grecaptcha.ready(function() {
+              grecaptcha.execute('6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr', {action: 'start_lab'}).then(function(token) {
+                setInputWithRecaptchaResponseTokenForStartLab('g-recaptcha-response-data-start-lab', token)
+              });
+            });
+          };
+          // Invoke immediately
+          executeRecaptchaForStartLab()
+
+          // Async variant so you can await this function from another async function (no need for
+          // an explicit callback function then!)
+          // Returns a Promise that resolves with the response token.
+          async function executeRecaptchaForStartLabAsync() {
+            return new Promise((resolve, reject) => {
+             grecaptcha.ready(async function() {
+                resolve(await grecaptcha.execute('6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr', {action: 'start_lab'}))
+              });
+            })
+          };
+
+                  var setInputWithRecaptchaResponseTokenForStartLab = function(id, token) {
+          var element = document.getElementById(id);
+          if (element !== null) element.value = token;
+        }
+
+        </script>
+<input type="hidden" name="g-recaptcha-response-data[start_lab]" id="g-recaptcha-response-data-start-lab" data-sitekey="6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr" class="g-recaptcha g-recaptcha-response "/>
+
+<div aria-live='polite' class='hidden' id='recaptcha-v2-start-lab' slot='recaptcha'>
+<script src="https://www.recaptcha.net/recaptcha/api.js" async defer ></script>
+<div data-sitekey="6LeOI8IUAAAAAPkHlMAE9NReCD_1WD81iYlBlCnV" data-callback="recaptchaComplete" data-expired-callback="expireV2Token" class="g-recaptcha "></div>
+          <noscript>
+            <div>
+              <div style="width: 302px; height: 422px; position: relative;">
+                <div style="width: 302px; height: 422px; position: absolute;">
+                  <iframe
+                    src="https://www.recaptcha.net/recaptcha/api/fallback?k=6LeOI8IUAAAAAPkHlMAE9NReCD_1WD81iYlBlCnV"
+                    name="ReCAPTCHA"
+                    style="width: 302px; height: 422px; border-style: none; border: 0; overflow: hidden;">
+                  </iframe>
+                </div>
+              </div>
+              <div style="width: 300px; height: 60px; border-style: none;
+                bottom: 12px; left: 25px; margin: 0px; padding: 0px; right: 25px;
+                background: #f9f9f9; border: 1px solid #c1c1c1; border-radius: 3px;">
+                <textarea id="g-recaptcha-response" name="g-recaptcha-response"
+                  class="g-recaptcha-response"
+                  style="width: 250px; height: 40px; border: 1px solid #c1c1c1;
+                  margin: 10px 25px; padding: 0px; resize: none;">
+                </textarea>
+              </div>
+            </div>
+          </noscript>
+
+</div>
+</ql-lab-control-panel>
+</ql-drawer>
+<ql-drawer-content id='lab-instructions' slot='drawer-content'>
+<div class='lab-content-container'>
+<div class='alert alert--fake js-alert'>
+<p class='alert__message js-alert-message' role='alert'></p>
+<ql-icon-button class='alert__close js-alert-close' icon='clear'></ql-icon-button>
+<iframe class='l-ie-iframe-fix' tabindex='-1'></iframe>
+</div>
+<div class='lab-content__renderable-instructions js-lab-content'>
+<div class='lab-preamble'>
+<h1 class='lab-preamble__title'>
+Cloud Spanner - Defining Schemas and Understanding Query Plans (OD)
+</h1>
+<div class='lab-preamble__details subtitle-headline-1'>
+<span>1 hour 30 minutes</span>
+<span>Free</span>
+<div class='lab__rating'>
+<a aria-label="Lab Reviews" href="/focuses/30982024/reviews?parent=lti_session"><div class='rateit' data-rateit-readonly='true' data-rateit-value='4.403'></div>
+
+</a></div>
+</div>
+</div>
+<div class='lab-outline-place-holder'></div>
+
+<div class='markdown-lab-instructions js-markdown-instructions' id='markdown-lab-instructions'>
+
+<h2 id="step1">GSP1050</h2>
+<p><img alt="Google Cloud Self-Paced Labs logo" src="https://cdn.qwiklabs.com/GMOHykaqmlTHiqEeQXTySaMXYPHeIvaqa2qHEzw6Occ%3D"></p>
+<h2 id="step2">Overview</h2>
+<p>Cloud Spanner is Google’s fully managed, horizontally scalable relational database service. Customers in financial services, gaming, retail and many other industries trust it to run their most demanding workloads, where consistency and availability at scale are critical.</p>
+<p>In this lab you review schema related features of Cloud Spanner and apply those to a Banking Operations database. You also review the methods and rules by which Cloud Spanner creates query plans.</p>
+<h2 id="step3">Objectives</h2>
+<p>In this lab, you learn to modify schema related attributes of a Cloud Spanner instance.</p>
+<ul>
+<li>Load data into tables</li>
+<li>Use pre-defined Python client library code to load data</li>
+<li>Query data with client libraries</li>
+<li>Make updates to the database schema</li>
+<li>Add a Secondary Index</li>
+<li>Examine Query plans</li>
+</ul>
+<h2 id="step4">Setup and Requirements</h2>
+<h3>Qwiklabs setup</h3>
+<h3>Before you click the Start Lab button</h3>
+<p>Read these instructions. Labs are timed and you cannot pause them. The timer, which starts when you click <strong>Start Lab</strong>, shows how long Google Cloud resources will be made available to you.</p>
+<p>This hands-on lab lets you do the lab activities yourself in a real cloud environment, not in a simulation or demo environment. It does so by giving you new, temporary credentials that you use to sign in and access Google Cloud for the duration of the lab.</p>
+<h3>What you need</h3>
+<p>To complete this lab, you need:</p>
+<ul>
+<li>Access to a standard internet browser (Chrome browser recommended).</li>
+<li>Time to complete the lab.</li>
+</ul>
+<ql-infobox>
+<strong>Note:</strong> If you have a personal Google Cloud account or project, do not use it for this lab.
+</ql-infobox>
+<ql-infobox>
+<strong>Note:</strong> If you are using a Pixelbook, open an Incognito window to run this lab.
+</ql-infobox>
+<h3>Cloud Console</h3>
+<h3>Log in to Google Cloud Console</h3>
+<ol>
+<li>Using the browser tab or window you are using for this lab session, copy the <strong>Username</strong> from the <strong>Connection Details</strong> panel and click the <strong>Open Google Console</strong> button.</li>
+</ol>
+<ql-infobox><strong>Note: </strong>If you are asked to choose an account, click <b>Use another account</b>.</ql-infobox>
+<ol start="2">
+<li>Paste in the <strong>Username</strong>, and then the <strong>Password</strong> as prompted.</li>
+<li>Click <strong>Next</strong>.</li>
+<li>Accept the terms and conditions.</li>
+</ol>
+<p>Since this is a temporary account, which will last only as long as this lab:</p>
+<ul>
+<li>Do not add recovery options</li>
+<li>Do not sign up for free trials</li>
+</ul>
+<ol start="5">
+<li>Once the console opens, view the list of services by clicking the <strong>Navigation menu</strong> (<img alt="Navigation menu icon" src="https://cdn.qwiklabs.com/tkgw1TDgj4Q%2BYKQUW4jUFd0O5OEKlUMBRYbhlCrF0WY%3D">) at the top-left.</li>
+</ol>
+<p><img alt="Navigation menu" src="https://cdn.qwiklabs.com/RIuVVYUkGtVaWhxtIFJugxyy%2FORWQYw7OrLR0bJlReI%3D"></p>
+<h3>Activate Cloud Shell</h3>
+<p>Cloud Shell is a virtual machine that contains development tools. It offers a persistent 5-GB home directory and runs on Google Cloud. Cloud Shell provides command-line access to your Google Cloud resources. <code>gcloud</code> is the command-line tool for Google Cloud. It comes pre-installed on Cloud Shell and supports tab completion.</p>
+<ol>
+<li>
+<p>Click the <strong>Activate Cloud Shell</strong> button (<img alt="Activate Cloud Shell icon" src="https://cdn.qwiklabs.com/ep8HmqYGdD%2FkUncAAYpV47OYoHwC8%2Bg0WK%2F8sidHquE%3D">) at the top right of the console.</p>
+</li>
+<li>
+<p>Click <strong>Continue</strong>.<br>
+It takes a few moments to provision and connect to the environment. When you are connected, you are also authenticated, and the project is set to your <em>PROJECT_ID</em>.</p>
+</li>
+</ol>
+<h4>Sample commands</h4>
+<ul>
+<li>List the active account name:</li>
+</ul>
+<ql-code-block language="plaintext">
+gcloud auth list
+</ql-code-block>
+<p>(Output)</p>
+<ql-code-block language="plaintext" output="">
+Credentialed accounts:
+ - &lt;myaccount&gt;@&lt;mydomain&gt;.com (active)
+</ql-code-block>
+<p>(Example output)</p>
+<ql-code-block language="plaintext" output="">
+Credentialed accounts:
+ - google1623327_student@qwiklabs.net
+</ql-code-block>
+<ul>
+<li>List the project ID:</li>
+</ul>
+<ql-code-block language="plaintext">
+gcloud config list project
+</ql-code-block>
+<p>(Output)</p>
+<ql-code-block language="plaintext" output="">
+[core]
+project = &lt;project_ID&gt;
+</ql-code-block>
+<p>(Example output)</p>
+<ql-code-block language="plaintext" output="">
+[core]
+project = qwiklabs-gcp-44776a13dea667a6
+</ql-code-block>
+<ql-infobox>
+<strong>Note: </strong>Full documentation of <strong>gcloud</strong> is available in the <a href="https://cloud.google.com/sdk/gcloud" target="_blank">gcloud CLI overview guide</a>.
+</ql-infobox>
+<h3>Cloud Spanner Instance</h3>
+<p>In order to allow you to move more quickly through this lab a Cloud Spanner instance, database, and tables were automatically created for you.</p>
+<p>Here are some details for your reference:</p>
+<table>
+
+<tr>
+<th>Item</th>
+<th>Name</th>
+<th>Details</th>
+</tr>
+
+
+<tr>
+<td>Cloud Spanner Instance</td>
+<td>banking-ops-instance</td>
+<td>This is the project-level instance</td>
+</tr>
+<tr>
+<td>Cloud Spanner Database</td>
+<td>banking-ops-db</td>
+<td>This is the instance specific database</td>
+</tr>
+<tr>
+<td>Table</td>
+<td>Portfolio</td>
+<td>Contains top-level bank offerings</td>
+</tr>
+<tr>
+<td>Table</td>
+<td>Category</td>
+<td>Contains second-tier bank offering groupings</td>
+</tr>
+<tr>
+<td>Table</td>
+<td>Product</td>
+<td>Contains specific line-item bank offerings</td>
+</tr>
+<tr>
+<td>Table</td>
+<td>Campaigns</td>
+<td>Contains details on marketing initiatives</td>
+</tr>
+
+</table>
+<h2 id="step5">Task 1. Load data into tables</h2>
+<p>The <strong>banking-ops-db</strong> was created with empty tables.  Follow the steps below to load data into three of the tables (<strong>Portfolio</strong>, <strong>Category</strong>, and <strong>Product</strong>).</p>
+<ol>
+<li>
+<p>From the Cloud Console, open the navigation menu (<img alt="console_nav_small.png" src="https://cdn.qwiklabs.com/%2BnHJDKUfemAVQPMPb%2BAcqH0ZqkvrGALIBL1p582JNCQ%3D">), under <strong>Databases</strong> click <strong>Spanner</strong>.</p>
+</li>
+<li>
+<p>The instance name is <strong>banking-ops-instance</strong>, click on the name to explore the databases.</p>
+</li>
+<li>
+<p>The associated database is named <strong>banking-ops-db</strong>. Click on the name, scroll down to <strong>Tables</strong>, and you will see there are four tables already in place.</p>
+</li>
+<li>
+<p>On the left pane of the Console, click <strong>Spanner Studio</strong>.  Then click the <strong>+ New SQL Editor Tab</strong> button in the right frame.</p>
+</li>
+<li>
+<p>This takes you to the <strong>Query</strong> page. Paste the insert statements below as a single block to load the <strong>Portfolio</strong> table.  Spanner will execute each in succession. Click <strong>Run</strong>:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+insert into Portfolio (PortfolioId, Name, ShortName, PortfolioInfo) values (1, "Banking", "Bnkg", "All Banking Business");
+insert into Portfolio (PortfolioId, Name, ShortName, PortfolioInfo) values (2, "Asset Growth", "AsstGrwth", "All Asset Focused Products");
+insert into Portfolio (PortfolioId, Name, ShortName, PortfolioInfo) values (3, "Insurance", "Ins", "All Insurance Focused Products");
+</ql-code-block>
+<ol start="6">
+<li>
+<p>The lower page of the screen shows the results of inserting the data one row at a time. A green checkmark also appears on each row of inserted data. The <strong>Portfolio</strong> table now has three rows.</p>
+</li>
+<li>
+<p>Click <strong>Clear Query</strong> in the top portion of the page.</p>
+</li>
+<li>
+<p>Paste the insert statements below as a single block to load the <strong>Category</strong> table. Click <strong>Run</strong>:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+insert into Category (CategoryId,PortfolioId,CategoryName) values (1,1,"Cash");
+insert into Category (CategoryId,PortfolioId,CategoryName) values (2,2,"Investments - Short Return");
+insert into Category (CategoryId,PortfolioId,CategoryName) values (3,2,"Annuities");
+insert into Category (CategoryId,PortfolioId,CategoryName) values (4,3,"Life Insurance");
+</ql-code-block>
+<ol start="9">
+<li>
+<p>The lower page of the screen shows the results of inserting the data one row at a time. A green checkmark also appears on each row of inserted data. The <strong>Category</strong> table now has four rows.</p>
+</li>
+<li>
+<p>Click <strong>Clear Query</strong> in the top portion of the page.</p>
+</li>
+<li>
+<p>Paste the insert statements below as a single block to load the <strong>Product</strong> table. Click <strong>Run</strong>:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+insert into Product (ProductId,CategoryId,PortfolioId,ProductName,ProductAssetCode,ProductClass) values (1,1,1,"Checking Account","ChkAcct","Banking LOB");
+insert into Product (ProductId,CategoryId,PortfolioId,ProductName,ProductAssetCode,ProductClass) values (2,2,2,"Mutual Fund Consumer Goods","MFundCG","Investment LOB");
+insert into Product (ProductId,CategoryId,PortfolioId,ProductName,ProductAssetCode,ProductClass) values (3,3,2,"Annuity Early Retirement","AnnuFixed","Investment LOB");
+insert into Product (ProductId,CategoryId,PortfolioId,ProductName,ProductAssetCode,ProductClass) values (4,4,3,"Term Life Insurance","TermLife","Insurance LOB");
+insert into Product (ProductId,CategoryId,PortfolioId,ProductName,ProductAssetCode,ProductClass) values (5,1,1,"Savings Account","SavAcct","Banking LOB");
+insert into Product (ProductId,CategoryId,PortfolioId,ProductName,ProductAssetCode,ProductClass) values (6,1,1,"Personal Loan","PersLn","Banking LOB");
+insert into Product (ProductId,CategoryId,PortfolioId,ProductName,ProductAssetCode,ProductClass) values (7,1,1,"Auto Loan","AutLn","Banking LOB");
+insert into Product (ProductId,CategoryId,PortfolioId,ProductName,ProductAssetCode,ProductClass) values (8,4,3,"Permanent Life Insurance","PermLife","Insurance LOB");
+insert into Product (ProductId,CategoryId,PortfolioId,ProductName,ProductAssetCode,ProductClass) values (9,2,2,"US Savings Bonds","USSavBond","Investment LOB");
+</ql-code-block>
+<ol start="12">
+<li>
+<p>The lower page of the screen shows the results of inserting the data one row at a time. A green checkmark also appears on each row of inserted data. The <strong>Product</strong> table now has nine rows.</p>
+</li>
+<li>
+<p>Click <strong>Check my progress</strong> to verify the objective.</p>
+</li>
+</ol>
+<ql-activity-tracking step="1">
+    Load Data into  Portfolio, Category, and Product Tables
+</ql-activity-tracking>
+<h2 id="step6">Task 2. Use pre-built Python client library code to load data</h2>
+<p>You will be using the client libraries written in Python for the next several steps.</p>
+<ol>
+<li>Open the <strong>Cloud Shell</strong> and paste the commands below to create and change into a new directory to hold the required files.</li>
+</ol>
+<ql-code-block language="plaintext">
+mkdir python-helper
+cd python-helper
+</ql-code-block>
+<ol start="2">
+<li>Next download two files. One is used to setup the environment. The other is the lab code.</li>
+</ol>
+<ql-code-block language="plaintext">
+wget https://storage.googleapis.com/cloud-training/OCBL373/requirements.txt
+wget https://storage.googleapis.com/cloud-training/OCBL373/snippets.py
+</ql-code-block>
+<ol start="3">
+<li>Create an isolated Python environment and install dependencies for the Cloud Spanner client.</li>
+</ol>
+<ql-code-block language="plaintext">
+virtualenv env
+source env/bin/activate
+pip install -r requirements.txt
+</ql-code-block>
+<ol start="4">
+<li>The <strong>snippets.py</strong> is a consolidated file with multiple Cloud Spanner DDL, DML, and DCL functions that you are going to use as a helper during this lab.  Execute <strong>snippets.py</strong> using the <strong>insert_data</strong> argument to populate the <strong>Campaigns</strong> table.</li>
+</ol>
+<ql-code-block language="plaintext">
+python snippets.py banking-ops-instance --database-id  banking-ops-db insert_data
+</ql-code-block>
+<ol start="5">
+<li>Click <strong>Check my progress</strong> to verify the objective.</li>
+</ol>
+<ql-activity-tracking step="2">
+    Load Data into Campaigns Table
+</ql-activity-tracking>
+<h2 id="step7">Task 3. Query data with client libraries</h2>
+<p>The <strong>query_data()</strong> function in <strong>snippets.py</strong> can be used to query your database.  In this case you use it to confirm the data loaded into the <strong>Campaigns</strong> table. You will not change any code, the section is shown here for your reference.</p>
+<ql-code-block output="">
+def query_data(instance_id, database_id):
+    """Queries sample data from the database using SQL."""
+    spanner_client = spanner.Client()
+    instance = spanner_client.instance(instance_id)
+    database = instance.database(database_id)
+    with database.snapshot() as snapshot:
+        results = snapshot.execute_sql(
+            "SELECT CampaignId,PortfolioId,CampaignStartDate,CampaignEndDate,CampaignName,CampaignBudget FROM Campaigns"
+        )
+        for row in results:
+            print(u"CampaignId: {}, PortfolioId: {}, CampaignStartDate: {}, CampaignEndDate: {}, CampaignName: {}, CampaignBudget: {}".format(*row))
+</ql-code-block>
+<ol>
+<li>Execute <strong>snippets.py</strong> using the <strong>query_data</strong> argument to query the <strong>Campaigns</strong> table.</li>
+</ol>
+<ql-code-block language="plaintext">
+python snippets.py banking-ops-instance --database-id  banking-ops-db query_data
+</ql-code-block>
+<p>The result should look like the following</p>
+<ql-code-block output="">
+CampaignId: 1, PortfolioId: 1, CampaignStartDate: 2022-06-07, CampaignEndDate: 2022-06-07, CampaignName: New Account Reward, CampaignBudget: 15000
+CampaignId: 2, PortfolioId: 2, CampaignStartDate: 2022-06-07, CampaignEndDate: 2022-06-07, CampaignName: Intro to Investments, CampaignBudget: 5000
+CampaignId: 3, PortfolioId: 2, CampaignStartDate: 2022-06-07, CampaignEndDate: 2022-06-07, CampaignName: Youth Checking Accounts, CampaignBudget: 25000
+CampaignId: 4, PortfolioId: 3, CampaignStartDate: 2022-06-07, CampaignEndDate: 2022-06-07, CampaignName: Protect Your Family, CampaignBudget: 10000
+</ql-code-block>
+<h2 id="step8">Task 4. Updating the database schema</h2>
+<p>As part of your DBA responsibilities you are required to add a new column called <strong>MarketingBudget</strong> to the <strong>Category</strong> table. Adding a new column to an existing table requires an update to your database schema. Cloud Spanner supports schema updates to a database while the database continues to serve traffic. Schema updates do not require taking the database offline and they do not lock entire tables or columns; you can continue reading and writing data to the database during the schema update.</p>
+<h3>Adding a column using Python</h3>
+<p>The <strong>update_ddl()</strong> method of the <strong>Database</strong> class is used to modify the schema.</p>
+<p>Use the <strong>add_column()</strong> function in <strong>snippets.py</strong> which implements that method. You will not change any code, the section is shown here for your reference.</p>
+<ql-code-block output="">
+def add_column(instance_id, database_id):
+    """Adds a new column to the Albums table in the example database."""
+    spanner_client = spanner.Client()
+    instance = spanner_client.instance(instance_id)
+    database = instance.database(database_id)
+    operation = database.update_ddl(
+        ["ALTER TABLE Category ADD COLUMN MarketingBudget INT64"]
+    )
+    print("Waiting for operation to complete...")
+    operation.result(OPERATION_TIMEOUT_SECONDS)
+    print("Added the MarketingBudget column.")
+</ql-code-block>
+<ol>
+<li>Execute <strong>snippets.py</strong> using the <strong>add_column</strong> argument.</li>
+</ol>
+<ql-code-block language="plaintext">
+python snippets.py banking-ops-instance --database-id  banking-ops-db add_column
+</ql-code-block>
+<ol start="2">
+<li>Click <strong>Check my progress</strong> to verify the objective.</li>
+</ol>
+<ql-activity-tracking step="3">
+    Add column to Category table
+</ql-activity-tracking>
+<h3>Other options to add a column to an existing table include the following:</h3>
+<h4>Issuing a DDL command via the gcloud CLI.</h4>
+<ql-infobox><strong>Note: </strong>This option is shown as an alternate example. <b>Do not issue this command.</b></ql-infobox>
+<p>The code sample below completes the same task you just executed via Python.</p>
+<ql-code-block output="">
+gcloud spanner databases ddl update banking-ops-db --instance=banking-ops-instance --ddl='ALTER TABLE Category ADD COLUMN MarketingBudget INT64;'
+</ql-code-block>
+<h4>Issuing a DDL command in the Cloud Console.</h4>
+<ql-infobox><strong>Note: </strong>This option is shown as an alternate example. <b>Do not perform this action.</b></ql-infobox>
+<ol>
+<li>Click the table name in the Database listing.</li>
+<li>Click <strong>Write DDL</strong> in the top right corner of the page.</li>
+<li>Paste the appropriate DDL in the <strong>DDL Templates</strong> box.</li>
+<li>Click <strong>Submit</strong>.</li>
+</ol>
+<p><img alt="AddColumnUI.png" src="https://cdn.qwiklabs.com/Dzg51UTSEHJBD9bsoPilSbU%2BjCpauT9adVyMHxSLBP0%3D"></p>
+<h3>Write data to the new column</h3>
+<p>The following code writes data to the new column. It sets <strong>MarketingBudget</strong> to 100000 for the row with a <strong>CategoryId</strong> of 1 and a <strong>PortfolioId</strong> of 1 and to 500000 for the row with a <strong>CategoryId</strong> of 3 and a <strong>PortfolioId</strong> of 2. You will not change any code, the section is shown here for your reference.</p>
+<ql-code-block output="">
+def update_data(instance_id, database_id):
+    """Updates sample data in the database.
+    This updates the `MarketingBudget` column which must be created before
+    running this sample. You can add the column by running the `add_column`
+    sample or by running this DDL statement against your database
+    """
+    spanner_client = spanner.Client()
+    instance = spanner_client.instance(instance_id)
+    database = instance.database(database_id)
+    with database.batch() as batch:
+        batch.update(
+            table="Category",
+            columns=("CategoryId", "PortfolioId", "MarketingBudget"),
+            values=[(1, 1, 100000), (3, 2, 500000)],
+        )
+    print("Updated data.")
+</ql-code-block>
+<ol>
+<li>Execute <strong>snippets.py</strong> using the <strong>update_data</strong> argument.</li>
+</ol>
+<ql-code-block language="plaintext">
+python snippets.py banking-ops-instance --database-id  banking-ops-db update_data
+</ql-code-block>
+<ol start="2">
+<li>Query the table again to see the update. Execute <strong>snippets.py</strong> using the <strong>query_data_with_new_column</strong> argument.</li>
+</ol>
+<ql-code-block language="plaintext">
+python snippets.py banking-ops-instance --database-id  banking-ops-db query_data_with_new_column
+</ql-code-block>
+<p>The result should be:</p>
+<ql-code-block output="">
+CategoryId: 1, PortfolioId: 1, MarketingBudget: 100000
+CategoryId: 2, PortfolioId: 2, MarketingBudget: None
+CategoryId: 3, PortfolioId: 2, MarketingBudget: 500000
+CategoryId: 4, PortfolioId: 3, MarketingBudget: None
+</ql-code-block>
+<h2 id="step9">Task 5. Add a Secondary Index</h2>
+<p>Suppose you wanted to fetch all rows of Categories that have CategoryNames values in a certain range. You could read all values from the <strong>CategoryName</strong> column using a SQL statement or a read call, and then discard the rows that don't meet the criteria, but doing this full table scan is expensive, especially for tables with a lot of rows. Instead you can speed up the retrieval of rows when searching by non-primary key columns by creating a secondary index on the table.</p>
+<p>Adding a secondary index to an existing table requires a schema update. Like other schema updates, Cloud Spanner supports adding an index while the database continues to serve traffic. Cloud Spanner populates the index with data (also known as a "backfill") under the hood. Backfills might take several minutes to complete, but you don't have to take the database offline or avoid writing to certain tables or columns during this process.</p>
+<h3>Add a secondary index using the Python client library</h3>
+<p>Use the <strong>add_index()</strong> method to create a secondary index. You will not change any code, the section is shown here for your reference.</p>
+<ql-code-block output="">
+def add_index(instance_id, database_id):
+    """Adds a simple index to the example database."""
+    spanner_client = spanner.Client()
+    instance = spanner_client.instance(instance_id)
+    database = instance.database(database_id)
+    operation = database.update_ddl(
+        ["CREATE INDEX CategoryByCategoryName ON Category(CategoryName)"]
+    )
+    print("Waiting for operation to complete...")
+    operation.result(OPERATION_TIMEOUT_SECONDS)
+    print("Added the CategoryByCategoryName index.")
+</ql-code-block>
+<ol>
+<li>Execute <strong>snippets.py</strong> using the <strong>add_index</strong> argument.</li>
+</ol>
+<ql-code-block language="plaintext">
+python snippets.py banking-ops-instance --database-id  banking-ops-db add_index
+</ql-code-block>
+<ol start="2">
+<li>Click <strong>Check my progress</strong> to verify the objective.</li>
+</ol>
+<ql-activity-tracking step="4">
+    Add secondary index to Category table
+</ql-activity-tracking>
+<h3>Read using the index</h3>
+<p>To read using the index, invoke a variation of the <strong>read()</strong> method with an index included. You will not change any code, the section is shown here for your reference.</p>
+<ql-code-block output="">
+def read_data_with_index(instance_id, database_id):
+    """Reads sample data from the database using an index.
+    """
+    spanner_client = spanner.Client()
+    instance = spanner_client.instance(instance_id)
+    database = instance.database(database_id)
+    with database.snapshot() as snapshot:
+        keyset = spanner.KeySet(all_=True)
+        results = snapshot.read(
+            table="Category",
+            columns=("CategoryId", "CategoryName"),
+            keyset=keyset,
+            index="CategoryByCategoryName",
+        )
+        for row in results:
+            print("CategoryId: {}, CategoryName: {}".format(*row))
+</ql-code-block>
+<ol>
+<li>Execute <strong>snippets.py</strong> using the <strong>read_data_with_index</strong> argument.</li>
+</ol>
+<ql-code-block language="plaintext">
+python snippets.py banking-ops-instance --database-id  banking-ops-db read_data_with_index
+</ql-code-block>
+<p>The result should look like this:</p>
+<ql-code-block output="">
+CategoryId: 3, CategoryName: Annuities
+CategoryId: 1, CategoryName: Cash
+CategoryId: 2, CategoryName: Investments - Short Return
+CategoryId: 4, CategoryName: Life Insurance
+</ql-code-block>
+<h3>Add an index with a STORING clause</h3>
+<p>You might have noticed that the read example above did not include reading the <strong>MarketingBudget</strong> column. This is because Cloud Spanner's read interface does not support the ability to join an index with a data table to look up values that are not stored in the index.</p>
+<p>To bypass this restriction, create an alternate definition of the <strong>CategoryByCategoryName</strong> index that stores a copy of <strong>MarketingBudget</strong> in the index.</p>
+<p>Use the <strong>update_ddl()</strong> method of the Database class to add an index with a <strong>STORING</strong> clause. You will not change any code, the section is shown here for your reference.</p>
+<ql-code-block output="">
+def add_storing_index(instance_id, database_id):
+    """Adds an storing index to the example database."""
+    spanner_client = spanner.Client()
+    instance = spanner_client.instance(instance_id)
+    database = instance.database(database_id)
+    operation = database.update_ddl(
+        [
+            "CREATE INDEX CategoryByCategoryName2 ON Category(CategoryName)"
+            "STORING (MarketingBudget)"
+        ]
+    )
+    print("Waiting for operation to complete...")
+    operation.result(OPERATION_TIMEOUT_SECONDS)
+    print("Added the CategoryByCategoryName2 index.")
+</ql-code-block>
+<ol>
+<li>Execute <strong>snippets.py</strong> using the <strong>add_storing_index</strong> argument.</li>
+</ol>
+<ql-code-block language="plaintext">
+python snippets.py banking-ops-instance --database-id  banking-ops-db add_storing_index
+</ql-code-block>
+<p>Now you can execute a read that fetches the <strong>CategoryId</strong>, <strong>CategoryName</strong>, and <strong>MarketingBudget</strong> columns while using the <strong>CategoryByCategoryName2</strong> index. You will not change any code, the section is shown here for your reference.</p>
+<ql-code-block output="">
+def read_data_with_storing_index(instance_id, database_id):
+    """Reads sample data from the database using an index with a storing
+    clause.
+    """
+    spanner_client = spanner.Client()
+    instance = spanner_client.instance(instance_id)
+    database = instance.database(database_id)
+    with database.snapshot() as snapshot:
+        keyset = spanner.KeySet(all_=True)
+        results = snapshot.read(
+            table="Category",
+            columns=("CategoryId", "CategoryName", "MarketingBudget"),
+            keyset=keyset,
+            index="CategoryByCategoryName2",
+        )
+        for row in results:
+            print(u"CategoryNameId: {}, CategoryName: {}, " "MarketingBudget: {}".format(*row))
+</ql-code-block>
+<ol start="2">
+<li>Execute <strong>snippets.py</strong> using the <strong>read_data_with_storing_index</strong> argument.</li>
+</ol>
+<ql-code-block language="plaintext">
+python snippets.py banking-ops-instance --database-id  banking-ops-db read_data_with_storing_index
+</ql-code-block>
+<p>The result should be</p>
+<ql-code-block output="">
+CategoryNameId: 3, CategoryName: Annuities, MarketingBudget: 500000
+CategoryNameId: 1, CategoryName: Cash, MarketingBudget: 100000
+CategoryNameId: 2, CategoryName: Investments - Short Return, MarketingBudget: None
+CategoryNameId: 4, CategoryName: Life Insurance, MarketingBudget: None
+</ql-code-block>
+<h2 id="step10">Task 6. Examine Query plans</h2>
+<p>In this section, you will explore Cloud Spanner <strong>Query Plans</strong>.</p>
+<ol>
+<li>Return to the <strong>Cloud Console</strong>, it should still be on the <strong>Query</strong> tab of <strong>Spanner Studio</strong>. Clear any existing query, paste, and <strong>Run</strong> the following query:</li>
+</ol>
+<ql-code-block language="plaintext">
+SELECT Name, ShortName, CategoryName
+FROM Portfolio
+INNER JOIN Category
+ON Portfolio.PortfolioId = Category.PortfolioId;
+</ql-code-block>
+<ol start="2">
+<li>The result should look like this:</li>
+</ol>
+<p><img alt="PlanQuery.png" src="https://cdn.qwiklabs.com/QosB%2FiaYpgbhNDn64OIco55bOqdU1oJ4KhWu6bXBLgw%3D"></p>
+<h3>Life of a query</h3>
+<p>A SQL query in Cloud Spanner is first compiled into an execution plan, then it is sent to an initial root server for execution. The root server is chosen so as to minimize the number of hops to reach the data being queried. The root server then:</p>
+<ul>
+<li>Initiates remote execution of subplans (if necessary)</li>
+<li>Waits for results from the remote executions</li>
+<li>Handles any remaining local execution steps such as aggregating results</li>
+<li>Returns results for the query</li>
+</ul>
+<p>Remote servers that receive a subplan act as the "root" server for their subplan, following the same model as the top-most root server. The result is a tree of remote executions. Conceptually, query execution flows from top to bottom, and query results are returned from bottom to top. The following diagram shows this pattern:</p>
+<p><img alt="SPNPlan.png" src="https://cdn.qwiklabs.com/Igqkg2relBkipUPIeMtZxFaX%2FtsFNi9kxAG0pWfToyk%3D"></p>
+<h3>Aggregate Query</h3>
+<p>Now take look at the query plan for an aggregated query.</p>
+<ol>
+<li>On the <strong>Query</strong> tab of <strong>Spanner Studio</strong>, clear the existing query, paste, and <strong>Run</strong> the following query.</li>
+</ol>
+<ql-code-block language="plaintext">
+SELECT pr.ProductId, COUNT(*) AS ProductCount
+FROM Product AS pr
+WHERE pr.ProductId &lt; 100
+GROUP BY pr.ProductId;
+</ql-code-block>
+<ol start="2">
+<li>Once the query completes click on the <strong>Explanation</strong> tab below the query body to examine the query plan.</li>
+</ol>
+<p>Cloud Spanner sends the execution plan to a root server that coordinates the query execution and performs the remote distribution of subplans.</p>
+<p>This execution plan starts with a serialization which orders all values returned.  Then the plan completes an initial hash aggregate operator to preliminarily calculate results.  Then a distributed union is executed which distributes subplans to remote servers whose splits satisfy <strong>ProductId &lt; 100</strong>.  The distributed union sends results to a final hash aggregate operator. The aggregate operator performs the COUNT aggregation by <strong>ProductId</strong> and returns results to a serialize result operator.  Finally a scan is conducted to order the results to be returned.</p>
+<p>The result should look like this:</p>
+<p><img alt="SPNAggPlan.png" src="https://cdn.qwiklabs.com/f8d2DO9yHhj0jF8yEkJRAFCIT%2Fc%2FZYL2csAwCfH0C2o%3D"></p>
+<ql-infobox><strong>Tip:</strong>To get more details for each step in the query plan, click on any of the operators and the right side of the screen will change accordingly.</ql-infobox>
+<p><img alt="SPNPlanDetail.png" src="https://cdn.qwiklabs.com/giUUMqlkQGb94XLe8YpNI8pGYEJVDm70fy%2F4sYb4Oyg%3D"></p>
+<h3>Co-located join queries</h3>
+<p>Interleaved tables are physically stored with their rows of related tables co-located. A join between interleaved tables is known as a co-located join. Co-located joins can offer performance benefits over joins that require indexes or back joins.</p>
+<ol>
+<li>On the <strong>Query</strong> tab of <strong>Spanner Studio</strong>, clear the existing query, paste, and <strong>Run</strong> the following query.</li>
+</ol>
+<ql-code-block language="plaintext">
+SELECT c.CategoryName, pr.ProductName
+FROM Category AS c, Product AS pr
+WHERE c.PortfolioId = pr.PortfolioId AND c.CategoryId = pr.CategoryId;
+</ql-code-block>
+<ol start="2">
+<li>Once the query completes click on the <strong>Explanation</strong> tab below the query body to examine the query plan.</li>
+</ol>
+<p>This execution plan starts with a distributed union, which distributes subplans to remote servers that have splits of the table <strong>Category</strong>. Because <strong>Product</strong> is an interleaved table of <strong>Category</strong>, each remote server is able to execute the entire subplan on each remote server without requiring a join to a different server.</p>
+<p>The subplans contain a cross apply. Each cross apply performs a table scan on table <strong>Category</strong> to retrieve <strong>PortfolioId</strong>, <strong>CategoryId</strong>, and <strong>CategoryName</strong>. The cross apply then maps output from the table scan to output from an index scan on index <strong>CategoryByCategoryName</strong>, subject to a filter of the <strong>PortfolioId</strong> in the index matching the <strong>PortfolioId</strong> from the table scan output. Each cross apply sends its results to a serialize result operator which serializes the <strong>CategoryName</strong> and <strong>ProductName</strong> data and returns results to the local distributed unions. The distributed union aggregates results from the local distributed unions and returns them as the query result.</p>
+<p><img alt="SPNColocated.png" src="https://cdn.qwiklabs.com/QlT%2FIeqGNbUh5hTDkWbVrAcoxKb4mWuTmm1RxAtuJyo%3D"></p>
+<h2 id="step11">Congratulations!</h2>
+<p>You now have now a solid understanding of schema related features of Cloud Spanner as well as the methods by which Spanner creates query plans.</p>
+<h3>Finish your quest</h3>
+<p>This self-paced lab is part of the <strong>Create and Manage Cloud Spanner Databases</strong> quest. A quest is a series of related labs that form a learning path. Completing this quest earns you a badge to recognize your achievement. You can make your badge (or badges) public and link to them in your online resume or social media account. Enroll in this quest and get immediate completion credit if you have successfully completed this lab. Search for other available quests in the <a href="https://www.cloudskillsboost.google/catalog/" target="_blank">Cloud Skills Boost catalog</a>.</p>
+<p>Copyright 2022 Google LLC All rights reserved. Google and the Google logo are trademarks of Google LLC. All other company and product names may be trademarks of the respective companies with which they are associated.</p>
+
+</div>
+</div>
+
+
+<div class='lab-content__end-lab-button js-end-lab-button-container hidden'>
+<ql-lab-control-button class='js-end-lab-button' running></ql-lab-control-button>
+</div>
+<!-- / TODO: Move recommendations into the end lab modal -->
+</div>
+<div aria-label='Lab Table of Contents' class='outline-container' id='js-outline-container' role='navigation'>
+<ul class='lab-content__outline js-lab-content-outline'>
+<li><a href="#step1">GSP1050</a></li><li><a href="#step2">Overview</a></li><li><a href="#step3">Objectives</a></li><li><a href="#step4">Setup and Requirements</a></li><li><a href="#step5">Task 1. Load data into tables</a></li><li><a href="#step6">Task 2. Use pre-built Python client library code to load data</a></li><li><a href="#step7">Task 3. Query data with client libraries</a></li><li><a href="#step8">Task 4. Updating the database schema</a></li><li><a href="#step9">Task 5. Add a Secondary Index</a></li><li><a href="#step10">Task 6. Examine Query plans</a></li><li><a href="#step11">Congratulations!</a></li>
+</ul>
+</div>
+</ql-drawer-content>
+</ql-drawer-container>
+</ql-drawer-content>
+</ql-drawer-container>
+<ql-snackbar id='alert-snackbar'></ql-snackbar>
+
+
+
+</div>
+</main>
+
+<span class='hidden' id='flash-sibling-before'></span>
+<ql-snackbar></ql-snackbar>
+
+<script data-glue-cookie-notification-bar-category='2B' src='https://www.gstatic.com/glue/cookienotificationbar/cookienotificationbar.min.js'></script>
+
+<ql-dialog headline='Score Details' icon='task_alt' id='jupyter-feedback-modal'>
+<iframe id='jupyter-feedback-frame' srcdoc='' title='Jupyter Feedback'></iframe>
+</ql-dialog>
+
+<div class='modal fade' id='lab-details-modal'>
+<div class='modal-container'>
+<div class='modal-content mdl-shadow--24dp'>
+<div class='modal-body'>
+<p class='l-mbm'>
+In this lab you review schema related features of Cloud Spanner and apply those to a Banking Operations database. You also review the methods and rules by which Cloud Spanner creates query plans.
+</p>
+<p>
+This lab is included in the quest
+<a href="/quests/213">Create and Manage Cloud Spanner Databases</a>.
+If you complete this lab you&#39;ll receive credit for it when you enroll in this quest.
+</p>
+<p class='small-label l-mbs'>
+<strong>
+Duration:
+</strong>
+1m setup
+&middot;
+90m access
+&middot;
+90m completion
+</p>
+<p class='small-label l-mbs'>
+<strong>AWS Region:</strong>
+[] <strong></strong>
+</p>
+<p class='small-label l-mbs'>
+<span><strong>Levels: </strong>introductory</span>
+</p>
+<p class='small-label'>
+<strong>
+Permalink:
+</strong>
+<a href="https://googlecoursera.qwiklabs.com/catalog_lab/4994">https://googlecoursera.qwiklabs.com/catalog_lab/4994</a>
+</p>
+</div>
+<div class='modal-actions'>
+<a class='button button--text' data-dismiss='modal'>
+Got It
+</a>
+</div>
+
+
+</div>
+</div>
+<iframe class='l-ie-iframe-fix' tabindex='-1' title='modal'></iframe>
+</div>
+<ql-dialog headline='How satisfied are you with this lab?&lt;span aria-hidden=&quot;true&quot;&gt;*&lt;/span&gt;' id='lab-review-dialog'>
+<form class="simple_form js-lab-review-form" id="new_lab_review" action="/lab_reviews" accept-charset="UTF-8" data-remote="true" method="post"><input name="utf8" type="hidden" value="&#x2713;" autocomplete="off" /><div aria-labelledby='lab-review-dialog' aria-required='true' aria-valuemax='5' aria-valuemin='0' aria-valuenow='0' class='rateit js-rateit' data-rateit-max='5' data-rateit-min='0' data-rateit-resetable='false' data-rateit-step='1' data-rateit-value='0' id='lab-review-rateit' role='slider' tabindex='0'></div>
+<div class='l-mtm'>
+
+<div class="control-group hidden lab_review_user_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" value="12197799" name="lab_review[user_id]" id="lab_review_user_id" /></div></div>
+<div class="control-group hidden lab_review_classroom_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" name="lab_review[classroom_id]" id="lab_review_classroom_id" /></div></div>
+<div class="control-group hidden lab_review_lab_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" value="4994" name="lab_review[lab_id]" id="lab_review_lab_id" /></div></div>
+<div class="control-group hidden lab_review_focus_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" name="lab_review[focus_id]" id="lab_review_focus_id" /></div></div>
+<div class="control-group hidden lab_review_rating"><div class="controls"><input class="hidden js-rating-input" autocomplete="off" type="hidden" name="lab_review[rating]" id="lab_review_rating" /></div></div>
+<div class="control-group text optional lab_review_comment"><label class="text optional control-label" for="lab_review_comment">Additional Comments</label><div class="controls"><textarea class="text optional" name="lab_review[comment]" id="lab_review_comment">
+</textarea></div></div>
+</div>
+</form><ql-button disabled id='submit' label='Submit' slot='action' text></ql-button>
+</ql-dialog>
+
+<ql-dialog headline='All done? If you end this lab, you will lose all your work. You may not be able to restart the lab if there is a quota limit. Are you sure you want to end this lab?' icon='error_outline' id='js-lab-are-you-sure-dialog'>
+<ql-button id='js-are-you-sure-button' label='Submit' slot='action' text></ql-button>
+</ql-dialog>
+
+
+<script>
+  $(function() {
+    ql.initMaterialInputs();
+    initChosen();
+    initSearch();
+    initTabs();
+    ql.list.init();
+    ql.favoriting.init();
+    ql.header.myAccount.init();
+    initTooltips();
+    ql.autocomplete.init();
+    ql.modals.init();
+    ql.toggleButtons.init();
+    ql.analytics.init();
+    ql.chat.init();
+  ql.jumpContent.init();
+  ql.labControlPanel.addRecaptchaErrorHandler();
+  initLabContent();
+  ql.labOutline.links.init();
+  initLabReviewModal();
+  initLabReviewTranslations( {"star_amount_1":"1 of 5 stars","star_amount_2":"2 of 5 stars","star_amount_3":"3 of 5 stars","star_amount_4":"4 of 5 stars","star_amount_5":"5 of 5 stars"} )
+  ql.labAssessment.init();
+  ql.labData.init();
+  initLabTranslations( {"are_you_sure":"All done? If you end this lab, you will lose all your work. You may not be able to restart the lab if there is a quota limit. Are you sure you want to end this lab?","in_progress":"*In Progress*","ending":"*Ending*","starting":"*Starting, please wait*","end_concurrent_labs":"Sorry, you can only run one lab at a time. To start this lab, please confirm that you want all of your existing labs to end.","copied":"Copied","no_resource":"Error retrieving resource.","no_support":"No Support","mac_press":"Press ⌘-C to copy","thanks_review":"Thanks for reviewing this lab.","windows_press":"Press Ctrl-C to copy","days":"days"} );
+  ql.labRun.init();
+  ql.navPanel.init();
+  ql.navigation.init();
+  
+  });
+</script>
+
+</body>
+</html>
+

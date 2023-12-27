@@ -1,0 +1,859 @@
+
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<title>Creating SQL Server Databases on Compute Engine | Qwiklabs</title>
+<meta name="action-cable-url" content="/cable" />
+<script>
+//<![CDATA[
+window.gon={};gon.deployment="googlecoursera-run";
+//]]>
+</script>
+<script>
+  (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer',"GTM-5XSKHDX");
+</script>
+<script src="https://cdn.qwiklabs.com/assets/hallofmirrors/polyfills/webcomponents-loader-8583b47b01e40e6ea7bf1ad443a20b7e79bbdd5eafac009806a228c91a97282c.js"></script>
+<script src="https://cdn.qwiklabs.com/assets/vendor-613520545532a2795a401a8168ca8b698b9ee765a66f5ad9ead806b5c32eabe8.js"></script>
+<script src="https://cdn.qwiklabs.com/assets/application-764552f4bc7e4ee5dc74a9b3fd7ddf41c0c326f6f8253193b6e48f971195330f.js"></script>
+<script src="https://cdn.qwiklabs.com/assets/hallofmirrors/hallofmirrors-53579c8602b4c89dd0f1ade9c7d5e535ef7c3e1546fea5e0468d970052bd60fb.js"></script>
+<!--[if lt IE 9]>  <![endif]-->
+<script src='http://html5shim.googlecode.com/svn/trunk/html5.js' type='text/javascript'></script>
+<!--[endif]>  <![endif]-->
+<script id='ze-snippet' src='https://static.zdassets.com/ekr/snippet.js?key=511e4158-0aec-4e3c-b2e6-4daa1769f51e'></script>
+
+
+<meta name="csrf-param" content="authenticity_token" />
+<meta name="csrf-token" content="dUMFmODoHYTfbPbYyKirGkLi8jTc0emtMqyazy2ZdXzlsbhawdwD5UHoqCRD19DPNpY049C+RTO12lLdtzuewQ==" />
+<meta content='width=device-width, initial-scale=1.0, user-scalable=yes' name='viewport'>
+<meta content='1rRsY0INj8RvwB5EF5pwdxt2A2P9aDgAlsICaJ0d5w0' name='google-site-verification'>
+<meta content='#3681E4' property='msapplication-TileColor'>
+<meta content='/favicon-144.png' property='msapplication-TileImage'>
+<meta content='[{&quot;id&quot;:&quot;recaptcha_experiment&quot;,&quot;optimize_id&quot;:&quot;dpViOcLkT3qS4TvL2mRojA&quot;,&quot;title&quot;:&quot;No Recaptcha shown for trusted users&quot;,&quot;variant_index&quot;:1,&quot;variant&quot;:&quot;no_recaptcha&quot;}]' name='active-experiments'>
+<meta content='{&quot;userId&quot;:12197799,&quot;experimentIds&quot;:[&quot;course_upgrade&quot;,&quot;canonical_domain_redirect&quot;,&quot;program_resources&quot;,&quot;program_learning_assignment&quot;,&quot;program_announcements&quot;,&quot;peer_assignment&quot;,&quot;teams&quot;,&quot;oauth_risc_shutoff&quot;,&quot;search_updates&quot;,&quot;show_annual_purchase_now&quot;,&quot;programs&quot;,&quot;used_in&quot;,&quot;barker&quot;,&quot;program_groups&quot;,&quot;enforce_codebuild_verdicts&quot;,&quot;chat_off_for_signed_out_users&quot;,&quot;community_forum&quot;,&quot;alexandria_show_bundle_errors&quot;]}' name='help-api-product-data'>
+<meta content='{&quot;groupIds&quot;:[&quot;non_suadmins&quot;,&quot;students&quot;,&quot;non_organization&quot;,&quot;non_program&quot;]}' name='help-api-custom-data'>
+<meta content='In this lab, you will provision a SQL Server machine in a private network. Then, you will create a Windows machine in a public network that you can use to adminstrate the database server. You will also create a Linux client in the public network that can be used to connect to the database. Lastly, you will setup a firewall rule that allows access to the SQL Server database only from the private network.' name='description'>
+<meta content='Qwiklabs' name='author'>
+<meta content='Creating SQL Server Databases on Compute Engine | Qwiklabs' property='og:title'>
+<meta content='website' property='og:type'>
+<meta content='/favicon-144.png' property='og:image'>
+<meta content='Qwiklabs' property='og:site_name'>
+<meta content='In this lab, you will provision a SQL Server machine in a private network. Then, you will create a Windows machine in a public network that you can use to adminstrate the database server. You will also create a Linux client in the public network that can be used to connect to the database. Lastly, you will setup a firewall rule that allows access to the SQL Server database only from the private network.' property='og:description'>
+<meta content='/qwiklabs_logo_900x887.png' property='og:logo' size='900x887'>
+<meta content='/qwiklabs_logo_994x187.png' property='og:logo' size='994x187'>
+
+
+<meta property="og:url" content="https://googlecoursera.qwiklabs.com/focuses/31004477?parent=lti_session" /><link href="https://googlecoursera.qwiklabs.com/focuses/31004477?parent=lti_session" rel="canonical" />
+<link color='#3681E4' href='/favicon-svg.svg' rel='mask-icon'>
+<link href='/favicon-180.png' rel='apple-touch-icon-precomposed'>
+<link href='/favicon-32.png' rel='shortcut icon' type='image/x-icon'>
+
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Oswald:400|Roboto+Mono:400,700|Roboto:300,400,500,700|Google+Sans:300,400,500,700|Google+Sans+Display:400|Material+Icons|Google+Material+Icons|Google+Sans+Text:400,500,700" media="screen" />
+
+<link rel="stylesheet" href="https://cdn.qwiklabs.com/assets/application-edc88b659d478c138e12de45354d6e27fda904c51d367223d97eb4d41608b847.css" media="all" />
+<link rel="stylesheet" href="https://www.gstatic.com/glue/cookienotificationbar/cookienotificationbar.min.css" media="screen" />
+
+
+<style>
+  :root {
+    --primary-text-on-surface-color: #1a73e8;
+    --primary-text-on-surface-color-dark: #1568d6;
+    --primary-text-on-surface-color-darker: #135ec1;
+    --primary-text-on-surface-color-darkest: #1154ac;
+    --primary-surface-color: #1a73e8;
+    --primary-surface-color-rgb: 26,115,232;
+    --primary-surface-color-light: #d1e3fa;
+    --primary-surface-color-lightest: #e8f1fd;
+    --text-on-primary-color: #ffffff;
+    --accent-text-on-surface-color: #f29900;
+    --accent-surface-color: #f9ab00;
+    --accent-surface-color-rgb: 249,171,0;
+    --accent-surface-color-light: #ffefcc;
+    --text-on-accent-color: #202124;
+  }
+</style>
+
+<style>
+  :root {
+    --navbar-height: 64px;
+  }
+</style>
+
+
+
+</head>
+<body class='lab-show l-full no-nav application-new focuses focuses-show lab-show l-full no-nav '>
+<div class='header-container'>
+<div class='header'>
+<ql-toolbar jumpEnabled>
+<div class='header__title' slot='title'>
+<ql-icon-button label="Back" href="https://www.coursera.org/" id="3b058035403298b2" target="_self" tip="Back">arrow_back</ql-icon-button>
+<h1 class='ql-headline-6'>Creating SQL Server Databases on Compute Engine</h1>
+</div>
+<div class='header__actions' slot='action'>
+<ql-icon-button id='control-panel-target' style='display: none;'>
+dashboard
+</ql-icon-button>
+<ql-menu for='control-panel-target' id='control-panel-menu'></ql-menu>
+<ql-icon-button class='mobile-hide' icon='help_outline' id='help-menu-button' label='Open help menu' tip='Help'></ql-icon-button>
+<ql-menu for='help-menu-button' id='help-menu'>
+<ql-menu-item data-analytics-action='opened_help' data-analytics-label='lab' label='Help Center' onclick='hallofmirrors.helpService.startHelp({&quot;productData&quot;:{&quot;userId&quot;:12197799},&quot;context&quot;:&quot;lab&quot;})'></ql-menu-item>
+<ql-menu-item href='mailto:support@qwiklabs.com' label='Email support'></ql-menu-item>
+<ql-menu-item label='Chat support' onClick='ql.chat.open()'></ql-menu-item>
+</ql-menu>
+
+<ql-icon-button class='mobile-hide' icon='language' id='language' label='Select your language preference' tip='Language'></ql-icon-button>
+<ql-menu for='language'>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ar' href='/focuses/31004477?locale=ar&amp;parent=lti_session' label='العربية‬‎' lang='ar'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='de' href='/focuses/31004477?locale=de&amp;parent=lti_session' label='Deutsch' lang='de'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='en' href='/focuses/31004477?locale=en&amp;parent=lti_session' label='English' lang='en'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='es' href='/focuses/31004477?locale=es&amp;parent=lti_session' label='español (Latinoamérica)' lang='es'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='fr' href='/focuses/31004477?locale=fr&amp;parent=lti_session' label='français' lang='fr'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='fr_CA' href='/focuses/31004477?locale=fr_CA&amp;parent=lti_session' label='français (Canada)' lang='fr-CA'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='he' href='/focuses/31004477?locale=he&amp;parent=lti_session' label='עברית' lang='he'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='id' href='/focuses/31004477?locale=id&amp;parent=lti_session' label='bahasa Indonesia' lang='id'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='it' href='/focuses/31004477?locale=it&amp;parent=lti_session' label='Italiano' lang='it'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ja' href='/focuses/31004477?locale=ja&amp;parent=lti_session' label='日本語' lang='ja'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ko' href='/focuses/31004477?locale=ko&amp;parent=lti_session' label='한국어' lang='ko'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='pl' href='/focuses/31004477?locale=pl&amp;parent=lti_session' label='Polski' lang='pl'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='pt_BR' href='/focuses/31004477?locale=pt_BR&amp;parent=lti_session' label='português (Brasil)' lang='pt-BR'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='pt_PT' href='/focuses/31004477?locale=pt_PT&amp;parent=lti_session' label='português (Portugal)' lang='pt-PT'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ru' href='/focuses/31004477?locale=ru&amp;parent=lti_session' label='русский' lang='ru'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='tr' href='/focuses/31004477?locale=tr&amp;parent=lti_session' label='Türkçe' lang='tr'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='uk' href='/focuses/31004477?locale=uk&amp;parent=lti_session' label='український' lang='uk'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='zh' href='/focuses/31004477?locale=zh&amp;parent=lti_session' label='简体中文' lang='zh'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='zh_TW' href='/focuses/31004477?locale=zh_TW&amp;parent=lti_session' label='繁體中文' lang='zh-TW'></ql-menu-item>
+</ql-menu>
+
+
+<ql-icon-button id='my_account' label='My account' tip='My account'>
+<ql-avatar src='https://lh3.googleusercontent.com/a/ACg8ocI6s7UhNvX_oCOJMPhLJPmqhqIgwu_5AK0t7wpjF-5jmQo=s320-c'></ql-avatar>
+</ql-icon-button>
+<ql-menu for='my_account' id='my_account_menu' style='max-height: 640px'>
+<div class='my-account-menu'>
+<ql-avatar class='l-mtl l-mbl' size='120' src='https://lh3.googleusercontent.com/a/ACg8ocI6s7UhNvX_oCOJMPhLJPmqhqIgwu_5AK0t7wpjF-5jmQo=s320-c'></ql-avatar>
+<div class='my-account-menu__user-info l-mbl'>
+<h4 class='ql-subhead-1'>Justin Ho</h4>
+<p class='ql-body-2 text--light'>cliffdove@gmail.com</p>
+<p class='ql-body-2 text--light'>
+</p>
+<a class="text--green ql-subhead-2" href="/my_account/payments"><ql-chip positive>
+0 Credits
+</ql-chip>
+</a></div>
+<div class='buttons l-mbl'>
+<a class="button button--hairline" id="settings" href="/my_account/profile">Settings</a>
+</div>
+<hr>
+<ql-button data-analytics-action='clicked_sign_out' href='/users/sign_out' method='delete'>
+Sign Out
+</ql-button>
+<div class='privacy l-mtl'>
+<a target="_blank" class="ql-caption text--light" href="/privacy_policy">Privacy</a>
+<span class='ql-caption text--light l-mls l-mrs'>&middot;</span>
+<a class="ql-caption text--light" href="/terms_of_service">Terms</a>
+</div>
+</div>
+</ql-menu>
+
+</div>
+</ql-toolbar>
+
+</div>
+</div>
+
+<nav class='nav-panel js-nav-panel'>
+<div class='nav-panel__logo'>
+<div class="custom-logo">Qwiklabs</div>
+</div>
+<nav class='ql-sidenav'>
+<ql-sidenav-item href='/' icon='home' label='Home'></ql-sidenav-item>
+
+<ql-sidenav-item href='/catalog' icon='school' label='Catalog'></ql-sidenav-item>
+
+<ql-sidenav-item href='/profile' icon='event_note' label='Profile'></ql-sidenav-item>
+
+</nav>
+
+</nav>
+<div class='nav-panel__overlay js-nav-toggle'></div>
+
+<main class='js-main' id='jump-content'>
+<div class='l-main-wrapper' id='main-wrapper'>
+
+
+
+
+<div class='lab-assessment__tab js-open-lab-assessment-panel'>
+<button class='js-lab-assessment-total-score'>
+—/100
+</button>
+</div>
+<div aria-labelledby='lab-assessment-checkpoint' class='lab-assessment__panel js-lab-assessment-panel' role='dialog'>
+<div class='lab-assessment__panel__header'>
+<h4 id='lab-assessment-checkpoint'>Checkpoints</h4>
+<ql-icon-button class='js-close-lab-assessment-panel' icon='arrow_forward' label='Close dialog'></ql-icon-button>
+</div>
+<div class='lab-assessment__step'>
+<p class='lab-assessment__step__title' id='lab-assessment-step-title'>
+Create client and server VMs
+</p>
+<div class='lab-assessment__step__action'>
+<ql-button class='js-show-run-step-button' description='Create client and server VMs' step_no='1'>
+Check my progress
+</ql-button>
+<p class='lab-assessment__step__score'>
+<span class='js-assessment-step-score-1'>
+</span>
+/ 50
+</p>
+</div>
+</div>
+
+<div class='lab-assessment__step'>
+<p class='lab-assessment__step__title' id='lab-assessment-step-title'>
+Connect to the database from a client
+</p>
+<div class='lab-assessment__step__action'>
+<ql-button class='js-show-run-step-button' description='Connect to the database from a client' step_no='2'>
+Check my progress
+</ql-button>
+<p class='lab-assessment__step__score'>
+<span class='js-assessment-step-score-2'>
+</span>
+/ 50
+</p>
+</div>
+</div>
+
+</div>
+<ql-drawer-container class='js-lab-state' data-analytics-payload='{&quot;label&quot;:&quot;Creating SQL Server Databases on Compute Engine&quot;,&quot;lab_name&quot;:&quot;Creating SQL Server Databases on Compute Engine&quot;,&quot;classroom_name&quot;:null,&quot;deployment&quot;:&quot;googlecoursera-run&quot;}' data-credits='0.0' data-focus-id='31004477' data-lab-billing-limit='0.0' data-lab-duration='7200' data-parent='lti_session' data-recaptcha-enabled id='lab-container'>
+<ql-drawer id='terminal-drawer' slot='drawer'>
+<iframe allow='clipboard-read' class='terminal' id='embedded-resource'></iframe>
+</ql-drawer>
+<ql-drawer-content class='js-lab-wrapper' id='lab-content' slot='drawer-content'>
+<ql-drawer-container id='lab-content-container'>
+<ql-drawer id='control-panel-drawer' open slot='drawer' width='320'>
+<ql-lab-control-panel class='ql-lab-control-panel__max-height control-panel js-lab-control-panel' connectionFiles='[]' labControlButton='{&quot;disabled&quot;:false,&quot;pending&quot;:false,&quot;running&quot;:false}' labDetails='[]' labTimer='{&quot;ticking&quot;:false,&quot;secondsRemaining&quot;:7200}' studentResources='[]'>
+<script src="https://www.recaptcha.net/recaptcha/api.js?render=6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr"   ></script>
+        <script>
+          // Define function so that we can call it again later if we need to reset it
+          // This executes reCAPTCHA and then calls our callback.
+          function executeRecaptchaForStartLab() {
+            grecaptcha.ready(function() {
+              grecaptcha.execute('6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr', {action: 'start_lab'}).then(function(token) {
+                setInputWithRecaptchaResponseTokenForStartLab('g-recaptcha-response-data-start-lab', token)
+              });
+            });
+          };
+          // Invoke immediately
+          executeRecaptchaForStartLab()
+
+          // Async variant so you can await this function from another async function (no need for
+          // an explicit callback function then!)
+          // Returns a Promise that resolves with the response token.
+          async function executeRecaptchaForStartLabAsync() {
+            return new Promise((resolve, reject) => {
+             grecaptcha.ready(async function() {
+                resolve(await grecaptcha.execute('6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr', {action: 'start_lab'}))
+              });
+            })
+          };
+
+                  var setInputWithRecaptchaResponseTokenForStartLab = function(id, token) {
+          var element = document.getElementById(id);
+          if (element !== null) element.value = token;
+        }
+
+        </script>
+<input type="hidden" name="g-recaptcha-response-data[start_lab]" id="g-recaptcha-response-data-start-lab" data-sitekey="6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr" class="g-recaptcha g-recaptcha-response "/>
+
+<div aria-live='polite' class='hidden' id='recaptcha-v2-start-lab' slot='recaptcha'>
+<script src="https://www.recaptcha.net/recaptcha/api.js" async defer ></script>
+<div data-sitekey="6LeOI8IUAAAAAPkHlMAE9NReCD_1WD81iYlBlCnV" data-callback="recaptchaComplete" data-expired-callback="expireV2Token" class="g-recaptcha "></div>
+          <noscript>
+            <div>
+              <div style="width: 302px; height: 422px; position: relative;">
+                <div style="width: 302px; height: 422px; position: absolute;">
+                  <iframe
+                    src="https://www.recaptcha.net/recaptcha/api/fallback?k=6LeOI8IUAAAAAPkHlMAE9NReCD_1WD81iYlBlCnV"
+                    name="ReCAPTCHA"
+                    style="width: 302px; height: 422px; border-style: none; border: 0; overflow: hidden;">
+                  </iframe>
+                </div>
+              </div>
+              <div style="width: 300px; height: 60px; border-style: none;
+                bottom: 12px; left: 25px; margin: 0px; padding: 0px; right: 25px;
+                background: #f9f9f9; border: 1px solid #c1c1c1; border-radius: 3px;">
+                <textarea id="g-recaptcha-response" name="g-recaptcha-response"
+                  class="g-recaptcha-response"
+                  style="width: 250px; height: 40px; border: 1px solid #c1c1c1;
+                  margin: 10px 25px; padding: 0px; resize: none;">
+                </textarea>
+              </div>
+            </div>
+          </noscript>
+
+</div>
+</ql-lab-control-panel>
+</ql-drawer>
+<ql-drawer-content id='lab-instructions' slot='drawer-content'>
+<div class='lab-content-container'>
+<div class='alert alert--fake js-alert'>
+<p class='alert__message js-alert-message' role='alert'></p>
+<ql-icon-button class='alert__close js-alert-close' icon='clear'></ql-icon-button>
+<iframe class='l-ie-iframe-fix' tabindex='-1'></iframe>
+</div>
+<div class='lab-content__renderable-instructions js-lab-content'>
+<div class='lab-preamble'>
+<h1 class='lab-preamble__title'>
+Creating SQL Server Databases on Compute Engine
+</h1>
+<div class='lab-preamble__details subtitle-headline-1'>
+<span>2 hours </span>
+<span>Free</span>
+<div class='lab__rating'>
+<a aria-label="Lab Reviews" href="/focuses/31004477/reviews?parent=lti_session"><div class='rateit' data-rateit-readonly='true' data-rateit-value='4.2359'></div>
+
+</a><ql-button aria-label='Rate Lab' id='rate-lab-btn' label='Rate Lab' text></ql-button>
+</div>
+</div>
+</div>
+<div class='lab-outline-place-holder'></div>
+
+<div class='markdown-lab-instructions js-markdown-instructions' id='markdown-lab-instructions'>
+
+<h2 id="step1">Overview</h2>
+<p>In this lab, you provision a SQL Server database server in a private network. Then, you create a Windows machine in a public network that you can use to administer that server. You also create a Linux client in the public network that can be used to connect to the database. Lastly, you set up a firewall rule that allows access to the SQL Server database only from the private network.</p>
+<h3>Objectives</h3>
+<p>In this lab, you learn how to perform the following tasks:</p>
+<ul>
+<li>
+<p>Create client and server VMs.</p>
+</li>
+<li>
+<p>Administer your database server.</p>
+</li>
+<li>
+<p>Connect to the database from a client.</p>
+</li>
+</ul>
+<h2 id="step2">Setup and requirements</h2>
+<p>For each lab, you get a new Google Cloud project and set of resources for a fixed time at no cost.</p>
+<ol>
+<li>
+<p>Sign in to Qwiklabs using an <strong>incognito window</strong>.</p>
+</li>
+<li>
+<p>Note the lab's access time (for example, <code>1:15:00</code>), and make sure you can finish within that time.<br>
+There is no pause feature. You can restart if needed, but you have to start at the beginning.</p>
+</li>
+<li>
+<p>When ready, click <strong>Start lab</strong>.</p>
+</li>
+<li>
+<p>Note your lab credentials (<strong>Username</strong> and <strong>Password</strong>). You will use them to sign in to the Google Cloud Console.</p>
+</li>
+<li>
+<p>Click <strong>Open Google Console</strong>.</p>
+</li>
+<li>
+<p>Click <strong>Use another account</strong> and copy/paste credentials for <strong>this</strong> lab into the prompts.<br>
+If you use other credentials, you'll receive errors or <strong>incur charges</strong>.</p>
+</li>
+<li>
+<p>Accept the terms and skip the recovery resource page.</p>
+</li>
+</ol>
+<aside class="warning"><p><strong>Note:</strong> Do not click <strong>End Lab</strong> unless you have finished the lab or want to restart it. This clears your work and removes the project.
+  </p>
+</aside>
+<h2 id="step3">Task 1. Create client and server VMs</h2>
+<ol>
+<li>
+<p>Open a new web browser window and navigate to the Google Cloud Console (console.cloud.google.com).</p>
+</li>
+<li>
+<p>Use the project selector to choose
+the first project with a leading name of 'qwiklabs-gcp.'</p>
+</li>
+<li>
+<p>On the <strong>Navigation menu</strong> (<img alt="Navigation menu icon." src="https://cdn.qwiklabs.com/tkgw1TDgj4Q%2BYKQUW4jUFd0O5OEKlUMBRYbhlCrF0WY%3D">), click <strong>Cloud Overview</strong>.</p>
+</li>
+<li>
+<p>In the <strong>Project info</strong> section, find your Project ID and copy and paste it into a text file. (<em>You will need it later</em>.)</p>
+</li>
+</ol>
+<p><img alt="The highlighted Project ID within the Project info pane" src="https://cdn.qwiklabs.com/AP9wcXr6t4Os7M8WhD8i5uz3GhAEKE5Jxc8Ct7ocuAs%3D"></p>
+<ol start="5">
+<li>Click the <strong>Activate Cloud Shell</strong> (<img alt="The Activate Cloud Shell icon." src="https://cdn.qwiklabs.com/ep8HmqYGdD%2FkUncAAYpV47OYoHwC8%2Bg0WK%2F8sidHquE%3D">) icon in the upper right of the Console.</li>
+</ol>
+<p>The Cloud Shell terminal will open in a pane at the bottom of the window.</p>
+<ol start="6">
+<li>
+<p>To clone a GitHub repository that includes a completed version of the last lab, enter the following command:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+git clone https://github.com/GoogleCloudPlatform/training-data-analyst
+</ql-code-block>
+<ol start="7">
+<li>
+<p>Change to the following folder:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+cd ~/training-data-analyst/courses/db-migration/terraform-sql-server-on-gce/
+</ql-code-block>
+<ol start="8">
+<li>
+<p>Type <strong>ls</strong> and you see this folder has the Terraform files completed from the last lab.</p>
+</li>
+<li>
+<p>Click <strong>Open Editor</strong>, and when prompted, click <strong>Open in a new window</strong>.</p>
+</li>
+<li>
+<p>Navigate to <strong>training-data-analyst/courses/db-migration/terraform-sql-server-on-gce/</strong> folder, open the <strong>terraform.tfvars</strong> file.</p>
+</li>
+<li>
+<p>Change the <code>project_id</code> variable to match your project's ID.</p>
+</li>
+<li>
+<p>Create a SQL Server machine in the private network. Add a file named <strong>vm-sql-server-windows.tf</strong>, and paste the following Terraform code into it:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+# Create Windows SQL Server in Private VPC
+resource "google_compute_instance" "sql-server-windows" {
+  name         = "sql-server-windows-${random_id.instance_id.hex}"
+  machine_type = "e2-standard-2"
+  zone         = var.gcp_zone_1
+  tags         = ["allow-rdp", "allow-sql"]
+  boot_disk {
+    initialize_params {
+      image = "windows-sql-cloud/sql-2017-express-windows-2016-dc-v20200414"
+    }
+  }
+  network_interface {
+    network        = google_compute_network.private-vpc.name
+    subnetwork     = google_compute_subnetwork.private-subnet_1.name
+    # access_config { } - Remove access_config for no External IP
+  }
+}
+output "sql-server-windows" {
+  value = google_compute_instance.sql-server-windows.name
+}
+output "sql-server-windows-external-ip" {
+  value = "NONE"
+}
+output "tsql-server-windows-internal-ip" {
+  value = google_compute_instance.sql-server-windows.network_interface.0.network_ip
+}
+</ql-code-block>
+<ol start="13">
+<li>
+<p>Create a Windows machine in the public network that can be used to administer the SQL Server. Add a file named <strong>vm-windows-admin.tf</strong>, and paste the following Terraform code into it:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+# Create VM Windows Admin
+resource "google_compute_instance" "windows-admin" {
+  name         = "windows-admin-${random_id.instance_id.hex}"
+  machine_type = "e2-standard-2"
+  zone         = var.gcp_zone_1
+  tags         = ["allow-rdp"]
+  boot_disk {
+    initialize_params {
+      image = "windows-cloud/windows-server-2016-dc-v20200424"
+    }
+  }
+  network_interface {
+    network       = google_compute_network.public-vpc.name
+    subnetwork    = google_compute_subnetwork.public-subnet_1.name
+    access_config { }
+  }
+}
+output "windows-admin-name" {
+  value = google_compute_instance.windows-admin.name
+}
+output "windows-admin-external-ip" {
+  value = google_compute_instance.windows-admin.network_interface.0.access_config.0.nat_ip
+}
+output "windows-admin-internal-ip" {
+  value = google_compute_instance.windows-admin.network_interface.0.network_ip
+}
+</ql-code-block>
+<ql-infobox><strong>Note: </strong>Because this server is in the public network, you can RDP into it. Once there, you RDP into the SQL Server in the private network to administer it.</ql-infobox>
+<ol start="14">
+<li>
+<p>Create one more machine, a Linux client that you can use to connect to the SQL Server. Add another file named <strong>vm-sql-client.tf</strong>, and then add the following Terraform code to it:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+# Create VM SQL Client
+resource "google_compute_instance" "sql-client" {
+  name         = "sql-client-${random_id.instance_id.hex}"
+  machine_type = "e2-micro"
+  zone         = var.gcp_zone_1
+  tags         = ["allow-ssh"]
+  boot_disk {
+    initialize_params {
+      image = "ubuntu-os-cloud/ubuntu-1604-xenial-v20200429"
+    }
+  }
+  metadata_startup_script = "sudo apt-get update;"
+  network_interface {
+    network       = google_compute_network.public-vpc.name
+    subnetwork    = google_compute_subnetwork.public-subnet_1.name
+    access_config { }
+  }
+}
+output "sql-client-name" {
+  value = google_compute_instance.sql-client.name
+}
+output "sql-client-external-ip" {
+  value = google_compute_instance.sql-client.network_interface.0.access_config.0.nat_ip
+}
+output "sql-client-internal-ip" {
+  value = google_compute_instance.sql-client.network_interface.0.network_ip
+}
+</ql-code-block>
+<ql-infobox><strong>Note: </strong>This is a Unbuntu Linux machine that you install the SQL Server client software on and use to test the connection to the SQL Server database.</ql-infobox>
+<ol start="15">
+<li>
+<p>Create a firewall rule to allow communication to the SQL Server from the private network. Open the <strong>vpc-firewall-rules-private.tf</strong> file, and add the following firewall rule to the end:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+# allow SQL only from public subnet
+resource "google_compute_firewall" "private-allow-sql" {
+  name    = "${google_compute_network.private-vpc.name}-allow-sql"
+  network = google_compute_network.private-vpc.name
+  allow {
+    protocol = "tcp"
+    ports    = ["1433"]
+  }
+  source_ranges = [
+    "${var.subnet_cidr_public}"
+  ]
+  target_tags = ["allow-sql"]
+}
+</ql-code-block>
+<ol start="16">
+<li>
+<p>To initialize Terraform and create the plan, return the Cloud Shell terminal and enter the following commands:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+terraform init
+terraform plan
+</ql-code-block>
+<ol start="17">
+<li>
+<p>To create the resources, run the following command:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+terraform apply -auto-approve
+</ql-code-block>
+<p>Click <em>Check my progress</em> to verify the objective.
+<ql-activity-tracking step="1">
+Create client and server VMs
+</ql-activity-tracking></p>
+<h2 id="step4">Task 2. Administer your database server</h2>
+<ol>
+<li>
+<p>When the Terraform process completes, on the <strong>Navigation menu</strong> (<img alt="Navigation menu icon." src="https://cdn.qwiklabs.com/tkgw1TDgj4Q%2BYKQUW4jUFd0O5OEKlUMBRYbhlCrF0WY%3D">), click <strong>Compute Engine</strong>.</p>
+</li>
+<li>
+<p>Several machines should be listed, and you need to keep track of usernames and passwords. To do that, open a text editor on your computer and paste the following template into it:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+Windows Admin RDP Login
+Username:
+Password:
+SQL Server RDP Login
+Internal IP:
+Username:
+Password:
+SQL Server User
+Username:
+Password:
+</ql-code-block>
+<ol start="3">
+<li>
+<p>Find the <code>windows-admin-</code> machine, click the dropdown arrow on the RDP button, and select <strong>Set Windows password</strong>.</p>
+</li>
+<li>
+<p>Change the username to any name you like, and click <strong>Set</strong> to generate the password.</p>
+</li>
+<li>
+<p>Copy the password to the clipboard, and then record the username and password in the text file you created.</p>
+</li>
+<li>
+<p>In the same way, generate a username and password for the machine with the name <code>sql-server-windows-</code>. Don't forget to record the username and password in your text file. Also, find the internal IP address of your SQL Server machine and record it in your text file.</p>
+</li>
+<li>
+<p>Log in to RDP for the Windows admin machine.</p>
+</li>
+<li>
+<p>On the Windows <strong>Start</strong> menu, select the <strong>Remote Desktop</strong> shortcut. You can close the Server Manager dashboard.</p>
+</li>
+<li>
+<p>Enter the internal IP address of the SQL Server, and click <strong>Connect</strong>. Then, log in with the username and password you recorded.</p>
+</li>
+</ol>
+<p>You should be logged in to the SQL Server machine. You can close the Server Manager dashboard on this machine.</p>
+<ol start="10">
+<li>To create a SQL Server user login, click the <strong>Start</strong> menu and type <strong>ssms</strong>, and then select the shortcut to <strong>Microsoft SQL Server Management Studio</strong>.</li>
+</ol>
+<p>When Management Studio starts, the local server name should already be filled in.</p>
+<ol start="11">
+<li>
+<p>Click <strong>Connect</strong> to log in to it.</p>
+</li>
+<li>
+<p>In Object Explorer, right-click the <strong>Server</strong> at the top and select <strong>Properties</strong>.</p>
+</li>
+<li>
+<p>Click the <strong>Security</strong> tab, and then select <strong>SQL Server and Windows authentication mode</strong>.</p>
+</li>
+<li>
+<p>Click <strong>OK</strong> and read the message, and then click <strong>OK</strong> to dismiss it.</p>
+</li>
+<li>
+<p>To restart the SQL Server, right-click it again in Object Explorer and select <strong>Restart</strong>. Agree when prompted, and then give the server a few seconds to restart. You might have to click the <strong>Refresh</strong> button to see that it is restarted.</p>
+</li>
+<li>
+<p>In Object Explorer, double-click <strong>Security</strong> and then <strong>Logins</strong> to expand them.</p>
+</li>
+<li>
+<p>Right-click <strong>Logins</strong>, and select <strong>New Login</strong>.</p>
+</li>
+</ol>
+<ul>
+<li>
+<p>Specify a username in the <strong>Login-name</strong> text box.</p>
+</li>
+<li>
+<p>Select <strong>SQL Server authentication</strong>.</p>
+</li>
+<li>
+<p>Set the password and clear <strong>Enforce password policy</strong>.</p>
+</li>
+<li>
+<p>Click <strong>OK</strong> to create the login.</p>
+</li>
+</ul>
+<ol start="18">
+<li>
+<p>Record the username and password for the SQL Server user you just created in your text file.</p>
+</li>
+<li>
+<p>Close the remote desktop session to the SQL Server machine and the RDP connection to the Windows admin machine.</p>
+</li>
+</ol>
+<h2 id="step5">Task 3. Connect to the database from a client</h2>
+<ol>
+<li>
+<p>Return to the Google Cloud Console and the Compute Engine service.</p>
+</li>
+<li>
+<p>Click <strong>SSH</strong> next to the <code>sql-client-</code> machine.</p>
+</li>
+<li>
+<p>Install the SQL Server client software on this machine and test the login you just created. When your SSH connection is established, enter the following commands:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
+curl https://packages.microsoft.com/config/ubuntu/16.04/prod.list | sudo tee /etc/apt/sources.list.d/msprod.list
+sudo apt-get update
+sudo apt-get install mssql-tools unixodbc-dev
+</ql-code-block>
+<ql-infobox><strong>Note: </strong>Select <b>Yes</b> each time you are prompted.</ql-infobox>
+<ol start="4">
+<li>
+<p>Enter the following commands so the SQL client is in your path:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+echo 'export PATH="$PATH:/opt/mssql-tools/bin"' &gt;&gt; ~/.bash_profile
+echo 'export PATH="$PATH:/opt/mssql-tools/bin"' &gt;&gt; ~/.bashrc
+source ~/.bashrc
+</ql-code-block>
+<p>Click <em>Check my progress</em> to verify the objective.
+<ql-activity-tracking step="2">
+Connect to the database from a client
+</ql-activity-tracking></p>
+<ol start="5">
+<li>
+<p>Using your machine's IP address and the SQL Server username you created, enter the following command and the password when prompted:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+sqlcmd -S 10.2.2.3,1433 -U username
+</ql-code-block>
+<p>If you don't get an error, your client login worked. At this point, there's no database so there's nothing else to do, but you have a complete solution in place. Your database server is in a secure network with no public access. You have a Windows machine in the public network that can be used to administer the database, and you have a client machine that can access the database via the SQL Server port.</p>
+<ol start="6">
+<li>
+<p>Type <strong>quit</strong> to exit the <code>sqlcmd</code>, and then close your SSH session.</p>
+</li>
+<li>
+<p>Return to the Cloud Shell terminal, and then enter the following command to delete everything you create earlier in the lab:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+terraform destroy -auto-approve
+</ql-code-block>
+<p>Congratulations! You have provisioned a SQL Server machine in a private network. Then, you created a Windows machine in a public network that you used to administer the database server. You also created a Linux client in the public network that was used to connect to the database. Lastly, you set up a firewall rule that allowed access to the SQL Server database only from the private network.</p>
+<h2 id="step6">End your lab</h2>
+<p>When you have completed your lab, click <strong>End Lab</strong>. Google Cloud Skills Boost removes the resources you’ve used and cleans the account for you.</p>
+<p>You will be given an opportunity to rate the lab experience. Select the applicable number of stars, type a comment, and then click <strong>Submit</strong>.</p>
+<p>The number of stars indicates the following:</p>
+<ul>
+<li>1 star = Very dissatisfied</li>
+<li>2 stars = Dissatisfied</li>
+<li>3 stars = Neutral</li>
+<li>4 stars = Satisfied</li>
+<li>5 stars = Very satisfied</li>
+</ul>
+<p>You can close the dialog box if you don't want to provide feedback.</p>
+<p>For feedback, suggestions, or corrections, please use the <strong>Support</strong> tab.</p>
+<p>Copyright 2022 Google LLC All rights reserved. Google and the Google logo are trademarks of Google LLC. All other company and product names may be trademarks of the respective companies with which they are associated.</p>
+
+</div>
+</div>
+
+
+<div class='lab-content__end-lab-button js-end-lab-button-container hidden'>
+<ql-lab-control-button class='js-end-lab-button' running></ql-lab-control-button>
+</div>
+<!-- / TODO: Move recommendations into the end lab modal -->
+</div>
+<div aria-label='Lab Table of Contents' class='outline-container' id='js-outline-container' role='navigation'>
+<ul class='lab-content__outline js-lab-content-outline'>
+<li><a href="#step1">Overview</a></li><li><a href="#step2">Setup and requirements</a></li><li><a href="#step3">Task 1. Create client and server VMs</a></li><li><a href="#step4">Task 2. Administer your database server</a></li><li><a href="#step5">Task 3. Connect to the database from a client</a></li><li><a href="#step6">End your lab</a></li>
+</ul>
+</div>
+</ql-drawer-content>
+</ql-drawer-container>
+</ql-drawer-content>
+</ql-drawer-container>
+<ql-snackbar id='alert-snackbar'></ql-snackbar>
+
+
+
+</div>
+</main>
+
+<span class='hidden' id='flash-sibling-before'></span>
+<ql-snackbar></ql-snackbar>
+
+<script data-glue-cookie-notification-bar-category='2B' src='https://www.gstatic.com/glue/cookienotificationbar/cookienotificationbar.min.js'></script>
+
+<ql-dialog headline='Score Details' icon='task_alt' id='jupyter-feedback-modal'>
+<iframe id='jupyter-feedback-frame' srcdoc='' title='Jupyter Feedback'></iframe>
+</ql-dialog>
+
+<div class='modal fade' id='lab-details-modal'>
+<div class='modal-container'>
+<div class='modal-content mdl-shadow--24dp'>
+<div class='modal-body'>
+<p class='l-mbm'>
+In this lab, you will provision a SQL Server machine in a private network. Then, you will create a Windows machine in a public network that you can use to adminstrate the database server. You will also create a Linux client in the public network that can be used to connect to the database. Lastly, you will setup a firewall rule that allows access to the SQL Server database only from the private network.
+</p>
+<p class='small-label l-mbs'>
+<strong>
+Duration:
+</strong>
+0m setup
+&middot;
+120m access
+&middot;
+60m completion
+</p>
+<p class='small-label l-mbs'>
+<strong>AWS Region:</strong>
+[] <strong></strong>
+</p>
+<p class='small-label l-mbs'>
+<span><strong>Levels: </strong>intermediate</span>
+</p>
+<p class='small-label'>
+<strong>
+Permalink:
+</strong>
+<a href="https://googlecoursera.qwiklabs.com/catalog_lab/2779">https://googlecoursera.qwiklabs.com/catalog_lab/2779</a>
+</p>
+</div>
+<div class='modal-actions'>
+<a class='button button--text' data-dismiss='modal'>
+Got It
+</a>
+</div>
+
+
+</div>
+</div>
+<iframe class='l-ie-iframe-fix' tabindex='-1' title='modal'></iframe>
+</div>
+<ql-dialog headline='How satisfied are you with this lab?&lt;span aria-hidden=&quot;true&quot;&gt;*&lt;/span&gt;' id='lab-review-dialog'>
+<form class="simple_form js-lab-review-form" id="new_lab_review" action="/lab_reviews" accept-charset="UTF-8" data-remote="true" method="post"><input name="utf8" type="hidden" value="&#x2713;" autocomplete="off" /><div aria-labelledby='lab-review-dialog' aria-required='true' aria-valuemax='5' aria-valuemin='0' aria-valuenow='0' class='rateit js-rateit' data-rateit-max='5' data-rateit-min='0' data-rateit-resetable='false' data-rateit-step='1' data-rateit-value='0' id='lab-review-rateit' role='slider' tabindex='0'></div>
+<div class='l-mtm'>
+
+<div class="control-group hidden lab_review_user_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" value="12197799" name="lab_review[user_id]" id="lab_review_user_id" /></div></div>
+<div class="control-group hidden lab_review_classroom_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" name="lab_review[classroom_id]" id="lab_review_classroom_id" /></div></div>
+<div class="control-group hidden lab_review_lab_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" value="2779" name="lab_review[lab_id]" id="lab_review_lab_id" /></div></div>
+<div class="control-group hidden lab_review_focus_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" name="lab_review[focus_id]" id="lab_review_focus_id" /></div></div>
+<div class="control-group hidden lab_review_rating"><div class="controls"><input class="hidden js-rating-input" autocomplete="off" type="hidden" name="lab_review[rating]" id="lab_review_rating" /></div></div>
+<div class="control-group text optional lab_review_comment"><label class="text optional control-label" for="lab_review_comment">Additional Comments</label><div class="controls"><textarea class="text optional" name="lab_review[comment]" id="lab_review_comment">
+</textarea></div></div>
+</div>
+</form><ql-button disabled id='submit' label='Submit' slot='action' text></ql-button>
+</ql-dialog>
+
+<ql-dialog headline='All done? If you end this lab, you will lose all your work. You may not be able to restart the lab if there is a quota limit. Are you sure you want to end this lab?' icon='error_outline' id='js-lab-are-you-sure-dialog'>
+<ql-button id='js-are-you-sure-button' label='Submit' slot='action' text></ql-button>
+</ql-dialog>
+
+
+<script>
+  $(function() {
+    ql.initMaterialInputs();
+    initChosen();
+    initSearch();
+    initTabs();
+    ql.list.init();
+    ql.favoriting.init();
+    ql.header.myAccount.init();
+    initTooltips();
+    ql.autocomplete.init();
+    ql.modals.init();
+    ql.toggleButtons.init();
+    ql.analytics.init();
+    ql.chat.init();
+  ql.jumpContent.init();
+  ql.labControlPanel.addRecaptchaErrorHandler();
+  initLabContent();
+  ql.labOutline.links.init();
+  initLabReviewModal();
+  initLabReviewTranslations( {"star_amount_1":"1 of 5 stars","star_amount_2":"2 of 5 stars","star_amount_3":"3 of 5 stars","star_amount_4":"4 of 5 stars","star_amount_5":"5 of 5 stars"} )
+  ql.labAssessment.init();
+  ql.labData.init();
+  initLabTranslations( {"are_you_sure":"All done? If you end this lab, you will lose all your work. You may not be able to restart the lab if there is a quota limit. Are you sure you want to end this lab?","in_progress":"*In Progress*","ending":"*Ending*","starting":"*Starting, please wait*","end_concurrent_labs":"Sorry, you can only run one lab at a time. To start this lab, please confirm that you want all of your existing labs to end.","copied":"Copied","no_resource":"Error retrieving resource.","no_support":"No Support","mac_press":"Press ⌘-C to copy","thanks_review":"Thanks for reviewing this lab.","windows_press":"Press Ctrl-C to copy","days":"days"} );
+  ql.labRun.init();
+  ql.navPanel.init();
+  ql.navigation.init();
+  
+  });
+</script>
+
+</body>
+</html>
+

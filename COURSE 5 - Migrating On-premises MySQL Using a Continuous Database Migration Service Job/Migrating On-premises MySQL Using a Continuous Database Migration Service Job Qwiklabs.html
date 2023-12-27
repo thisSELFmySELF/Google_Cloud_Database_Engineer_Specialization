@@ -1,0 +1,1171 @@
+
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<title>Migrating On-premises MySQL Using a Continuous Database Migration Service Job | Qwiklabs</title>
+<meta name="action-cable-url" content="/cable" />
+<script>
+//<![CDATA[
+window.gon={};gon.deployment="googlecoursera-run";
+//]]>
+</script>
+<script>
+  (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer',"GTM-5XSKHDX");
+</script>
+<script src="https://cdn.qwiklabs.com/assets/hallofmirrors/polyfills/webcomponents-loader-8583b47b01e40e6ea7bf1ad443a20b7e79bbdd5eafac009806a228c91a97282c.js"></script>
+<script src="https://cdn.qwiklabs.com/assets/vendor-613520545532a2795a401a8168ca8b698b9ee765a66f5ad9ead806b5c32eabe8.js"></script>
+<script src="https://cdn.qwiklabs.com/assets/application-b4c1ba27bff5cfc342d726ccb6d3a8cb4b5ac06e2e4f81b428783b0e94509b48.js"></script>
+<script src="https://cdn.qwiklabs.com/assets/hallofmirrors/hallofmirrors-6a75474522419d1502d269c186ad8e9615ea8ffb93b320075299479d1255b437.js"></script>
+<!--[if lt IE 9]>  <![endif]-->
+<script src='http://html5shim.googlecode.com/svn/trunk/html5.js' type='text/javascript'></script>
+<!--[endif]>  <![endif]-->
+<script id='ze-snippet' src='https://static.zdassets.com/ekr/snippet.js?key=511e4158-0aec-4e3c-b2e6-4daa1769f51e'></script>
+
+
+<meta name="csrf-param" content="authenticity_token" />
+<meta name="csrf-token" content="LOUEa2oFsw+zOGYBCEjxsZs+9cG6Aj8uBzIIKgOOYgyfeLAbTpkJFU1MKg7gFvet1uaLdvFrILNHBdBevVXK4g==" />
+<meta content='width=device-width, initial-scale=1.0, user-scalable=yes' name='viewport'>
+<meta content='1rRsY0INj8RvwB5EF5pwdxt2A2P9aDgAlsICaJ0d5w0' name='google-site-verification'>
+<meta content='#3681E4' property='msapplication-TileColor'>
+<meta content='/favicon-144.png' property='msapplication-TileImage'>
+<meta content='[{&quot;id&quot;:&quot;recaptcha_experiment&quot;,&quot;optimize_id&quot;:&quot;dpViOcLkT3qS4TvL2mRojA&quot;,&quot;title&quot;:&quot;No Recaptcha shown for trusted users&quot;,&quot;variant_index&quot;:1,&quot;variant&quot;:&quot;no_recaptcha&quot;}]' name='active-experiments'>
+<meta content='{&quot;userId&quot;:12197799,&quot;experimentIds&quot;:[&quot;course_upgrade&quot;,&quot;canonical_domain_redirect&quot;,&quot;show_annual_purchase_now&quot;,&quot;search_updates&quot;,&quot;oauth_risc_shutoff&quot;,&quot;chat_off_for_signed_out_users&quot;,&quot;teams&quot;,&quot;enforce_codebuild_verdicts&quot;,&quot;community_forum&quot;,&quot;peer_assignment&quot;,&quot;program_resources&quot;,&quot;barker&quot;,&quot;program_learning_assignment&quot;,&quot;pre_course_quest_migration&quot;,&quot;program_groups&quot;,&quot;alexandria_show_bundle_errors&quot;,&quot;programs&quot;,&quot;used_in&quot;]}' name='help-api-product-data'>
+<meta content='{&quot;groupIds&quot;:[&quot;non_suadmins&quot;,&quot;students&quot;,&quot;non_organization&quot;,&quot;non_program&quot;]}' name='help-api-custom-data'>
+<meta content='In this lab, you migrate an on-premises MySQL database (running on a virtual machine) to Cloud SQL for MySQL using a continuous Database Migration Service job and VPC peering for connectivity. After you create and run the migration job, you confirm that an initial copy of your database has been successfully migrated to your Cloud SQL for MySQL instance. Then, you explore how continuous migration jobs continue to apply data updates from your source database to your Cloud SQL instance until you choose to complete the job. To conclude the migration job, you promote the Cloud SQL instance to be a new standalone database for reading and writing data.' name='description'>
+<meta content='Qwiklabs' name='author'>
+<meta content='Migrating On-premises MySQL Using a Continuous Database Migration Service Job | Qwiklabs' property='og:title'>
+<meta content='website' property='og:type'>
+<meta content='/favicon-144.png' property='og:image'>
+<meta content='Qwiklabs' property='og:site_name'>
+<meta content='In this lab, you migrate an on-premises MySQL database (running on a virtual machine) to Cloud SQL for MySQL using a continuous Database Migration Service job and VPC peering for connectivity. After you create and run the migration job, you confirm that an initial copy of your database has been successfully migrated to your Cloud SQL for MySQL instance. Then, you explore how continuous migration jobs continue to apply data updates from your source database to your Cloud SQL instance until you choose to complete the job. To conclude the migration job, you promote the Cloud SQL instance to be a new standalone database for reading and writing data.' property='og:description'>
+<meta content='/qwiklabs_logo_900x887.png' property='og:logo' size='900x887'>
+<meta content='/qwiklabs_logo_994x187.png' property='og:logo' size='994x187'>
+
+
+<meta property="og:url" content="https://googlecoursera.qwiklabs.com/focuses/30756619?parent=lti_session" /><link href="https://googlecoursera.qwiklabs.com/focuses/30756619?parent=lti_session" rel="canonical" />
+<link color='#3681E4' href='/favicon-svg.svg' rel='mask-icon'>
+<link href='/favicon-180.png' rel='apple-touch-icon-precomposed'>
+<link href='/favicon-32.png' rel='shortcut icon' type='image/x-icon'>
+
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Oswald:400|Roboto+Mono:400,700|Roboto:300,400,500,700|Google+Sans:300,400,500,700|Google+Sans+Display:400|Material+Icons|Google+Material+Icons|Google+Sans+Text:400,500,700" media="screen" />
+
+<link rel="stylesheet" href="https://cdn.qwiklabs.com/assets/application-de99c9a7d498d77141405f7054ca08b1e88a44676934f8cf8a3e6f2e0bbc55b4.css" media="all" />
+
+
+<style>
+  :root {
+    --primary-text-on-surface-color: #1a73e8;
+    --primary-text-on-surface-color-dark: #1568d6;
+    --primary-text-on-surface-color-darker: #135ec1;
+    --primary-text-on-surface-color-darkest: #1154ac;
+    --primary-surface-color: #1a73e8;
+    --primary-surface-color-rgb: 26,115,232;
+    --primary-surface-color-light: #d1e3fa;
+    --primary-surface-color-lightest: #e8f1fd;
+    --text-on-primary-color: #ffffff;
+    --accent-text-on-surface-color: #f29900;
+    --accent-surface-color: #f9ab00;
+    --accent-surface-color-rgb: 249,171,0;
+    --accent-surface-color-light: #ffefcc;
+    --text-on-accent-color: #202124;
+  }
+</style>
+
+<style>
+  :root {
+    --navbar-height: 64px;
+  }
+</style>
+
+
+
+</head>
+<body class='lab-show l-full no-nav application-new focuses focuses-show lab-show l-full no-nav '>
+<div class='header-container'>
+<div class='header'>
+<ql-toolbar jumpEnabled>
+<div class='header__title' slot='title'>
+<ql-icon-button label="Back" href="https://www.coursera.org/" id="501478be83d89342" target="_self" tip="Back">arrow_back</ql-icon-button>
+<h1 class='ql-headline-6'>Migrating On-premises MySQL Using a Continuous Database Migration Service Job</h1>
+</div>
+<div class='header__actions' slot='action'>
+<ql-icon-button id='control-panel-target' style='display: none;'>
+dashboard
+</ql-icon-button>
+<ql-menu for='control-panel-target' id='control-panel-menu'></ql-menu>
+<ql-icon-button class='mobile-hide' icon='help_outline' id='help-menu-button' label='Open help menu' tip='Help'></ql-icon-button>
+<ql-menu for='help-menu-button' id='help-menu'>
+<ql-menu-item data-analytics-action='opened_help' data-analytics-label='lab' label='Help Center' onclick='hallofmirrors.helpService.startHelp({&quot;productData&quot;:{&quot;userId&quot;:12197799},&quot;context&quot;:&quot;lab&quot;})'></ql-menu-item>
+<ql-menu-item href='mailto:support@qwiklabs.com' label='Email support'></ql-menu-item>
+<ql-menu-item label='Chat support' onClick='ql.chat.open()'></ql-menu-item>
+</ql-menu>
+
+<ql-icon-button class='mobile-hide' icon='language' id='language' label='Select your language preference' tip='Language'></ql-icon-button>
+<ql-menu for='language'>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ar' href='/focuses/30756619?locale=ar&amp;parent=lti_session' label='العربية‬‎' lang='ar'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='de' href='/focuses/30756619?locale=de&amp;parent=lti_session' label='Deutsch' lang='de'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='en' href='/focuses/30756619?locale=en&amp;parent=lti_session' label='English' lang='en'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='es' href='/focuses/30756619?locale=es&amp;parent=lti_session' label='español (Latinoamérica)' lang='es'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='fr' href='/focuses/30756619?locale=fr&amp;parent=lti_session' label='français' lang='fr'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='fr_CA' href='/focuses/30756619?locale=fr_CA&amp;parent=lti_session' label='français (Canada)' lang='fr-CA'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='he' href='/focuses/30756619?locale=he&amp;parent=lti_session' label='עברית' lang='he'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='id' href='/focuses/30756619?locale=id&amp;parent=lti_session' label='bahasa Indonesia' lang='id'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='it' href='/focuses/30756619?locale=it&amp;parent=lti_session' label='Italiano' lang='it'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ja' href='/focuses/30756619?locale=ja&amp;parent=lti_session' label='日本語' lang='ja'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ko' href='/focuses/30756619?locale=ko&amp;parent=lti_session' label='한국어' lang='ko'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='pl' href='/focuses/30756619?locale=pl&amp;parent=lti_session' label='Polski' lang='pl'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='pt_BR' href='/focuses/30756619?locale=pt_BR&amp;parent=lti_session' label='português (Brasil)' lang='pt-BR'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='pt_PT' href='/focuses/30756619?locale=pt_PT&amp;parent=lti_session' label='português (Portugal)' lang='pt-PT'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ru' href='/focuses/30756619?locale=ru&amp;parent=lti_session' label='русский' lang='ru'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='tr' href='/focuses/30756619?locale=tr&amp;parent=lti_session' label='Türkçe' lang='tr'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='uk' href='/focuses/30756619?locale=uk&amp;parent=lti_session' label='український' lang='uk'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='zh' href='/focuses/30756619?locale=zh&amp;parent=lti_session' label='简体中文' lang='zh'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='zh_TW' href='/focuses/30756619?locale=zh_TW&amp;parent=lti_session' label='繁體中文' lang='zh-TW'></ql-menu-item>
+</ql-menu>
+
+
+<ql-icon-button id='my_account' label='My account' tip='My account'>
+<ql-avatar src='https://lh3.googleusercontent.com/a/ACg8ocI6s7UhNvX_oCOJMPhLJPmqhqIgwu_5AK0t7wpjF-5jmQo=s320-c'></ql-avatar>
+</ql-icon-button>
+<ql-menu for='my_account' id='my_account_menu' style='max-height: 640px'>
+<div class='my-account-menu'>
+<ql-avatar class='l-mtl l-mbl' size='120' src='https://lh3.googleusercontent.com/a/ACg8ocI6s7UhNvX_oCOJMPhLJPmqhqIgwu_5AK0t7wpjF-5jmQo=s320-c'></ql-avatar>
+<div class='my-account-menu__user-info l-mbl'>
+<h4 class='ql-subhead-1'>Justin Ho</h4>
+<p class='ql-body-2 text--light'>cliffdove@gmail.com</p>
+<p class='ql-body-2 text--light'>
+</p>
+<a class="text--green ql-subhead-2" href="/my_account/payments"><ql-chip positive>
+0 Credits
+</ql-chip>
+</a></div>
+<div class='buttons l-mbl'>
+<a class="button button--hairline" id="settings" href="/my_account/profile">Settings</a>
+</div>
+<hr>
+<ql-button data-analytics-action='clicked_sign_out' href='/users/sign_out' method='delete'>
+Sign Out
+</ql-button>
+<div class='privacy l-mtl'>
+<a target="_blank" class="ql-caption text--light" href="/privacy_policy">Privacy</a>
+<span class='ql-caption text--light l-mls l-mrs'>&middot;</span>
+<a class="ql-caption text--light" href="/terms_of_service">Terms</a>
+</div>
+</div>
+</ql-menu>
+
+</div>
+</ql-toolbar>
+
+</div>
+</div>
+
+<nav class='nav-panel js-nav-panel'>
+<div class='nav-panel__logo'>
+<div class="custom-logo">Qwiklabs</div>
+</div>
+<nav class='ql-sidenav'>
+<ql-sidenav-item href='/' icon='home' label='Home'></ql-sidenav-item>
+
+<ql-sidenav-item href='/catalog' icon='school' label='Catalog'></ql-sidenav-item>
+
+<ql-sidenav-item href='/profile' icon='event_note' label='Profile'></ql-sidenav-item>
+
+</nav>
+
+</nav>
+<div class='nav-panel__overlay js-nav-toggle'></div>
+
+<main class='js-main' id='jump-content'>
+<div class='l-main-wrapper' id='main-wrapper'>
+
+
+
+
+<div class='lab-assessment__tab js-open-lab-assessment-panel'>
+<button class='js-lab-assessment-total-score'>
+—/100
+</button>
+</div>
+<div aria-labelledby='lab-assessment-checkpoint' class='lab-assessment__panel js-lab-assessment-panel' role='dialog'>
+<div class='lab-assessment__panel__header'>
+<h4 id='lab-assessment-checkpoint'>Checkpoints</h4>
+<ql-icon-button class='js-close-lab-assessment-panel' icon='arrow_forward' label='Close dialog'></ql-icon-button>
+</div>
+<div class='lab-assessment__step'>
+<p class='lab-assessment__step__title' id='lab-assessment-step-title'>
+Create Connection profile for the mysql source instance
+</p>
+<div class='lab-assessment__step__action'>
+<ql-button class='js-show-run-step-button' description='Create Connection profile for the mysql source instance' step_no='1'>
+Check my progress
+</ql-button>
+<p class='lab-assessment__step__score'>
+<span class='js-assessment-step-score-1'>
+</span>
+/ 20
+</p>
+</div>
+</div>
+
+<div class='lab-assessment__step'>
+<p class='lab-assessment__step__title' id='lab-assessment-step-title'>
+Create, run and review the status of a continious job migration
+</p>
+<div class='lab-assessment__step__action'>
+<ql-button class='js-show-run-step-button' description='Create, run and review the status of a continious job migration' step_no='2'>
+Check my progress
+</ql-button>
+<p class='lab-assessment__step__score'>
+<span class='js-assessment-step-score-2'>
+</span>
+/ 20
+</p>
+</div>
+</div>
+
+<div class='lab-assessment__step'>
+<p class='lab-assessment__step__title' id='lab-assessment-step-title'>
+Confirm the data in Cloud SQL for MySQL
+</p>
+<div class='lab-assessment__step__action'>
+<ql-button class='js-show-run-step-button' description='Confirm the data in Cloud SQL for MySQL' step_no='3'>
+Check my progress
+</ql-button>
+<p class='lab-assessment__step__score'>
+<span class='js-assessment-step-score-3'>
+</span>
+/ 20
+</p>
+</div>
+</div>
+
+<div class='lab-assessment__step'>
+<p class='lab-assessment__step__title' id='lab-assessment-step-title'>
+Test the continuous migration of data from the source to the destination instance.
+</p>
+<div class='lab-assessment__step__action'>
+<ql-button class='js-show-run-step-button' description='Test the continuous migration of data from the source to the destination instance.' step_no='4'>
+Check my progress
+</ql-button>
+<p class='lab-assessment__step__score'>
+<span class='js-assessment-step-score-4'>
+</span>
+/ 20
+</p>
+</div>
+</div>
+
+<div class='lab-assessment__step'>
+<p class='lab-assessment__step__title' id='lab-assessment-step-title'>
+Promote Cloud SQL to be the primary instance
+</p>
+<div class='lab-assessment__step__action'>
+<ql-button class='js-show-run-step-button' description='Promote Cloud SQL to be the primary instance' step_no='5'>
+Check my progress
+</ql-button>
+<p class='lab-assessment__step__score'>
+<span class='js-assessment-step-score-5'>
+</span>
+/ 20
+</p>
+</div>
+</div>
+
+</div>
+<ql-drawer-container class='js-lab-state' data-analytics-payload='{&quot;label&quot;:&quot;Migrating On-premises MySQL Using a Continuous Database Migration Service Job&quot;,&quot;lab_name&quot;:&quot;Migrating On-premises MySQL Using a Continuous Database Migration Service Job&quot;,&quot;classroom_name&quot;:null,&quot;deployment&quot;:&quot;googlecoursera-run&quot;}' data-credits='0.0' data-focus-id='30756619' data-lab-billing-limit='0.0' data-lab-duration='5400' data-parent='lti_session' data-recaptcha-enabled id='lab-container'>
+<ql-drawer id='terminal-drawer' slot='drawer'>
+<iframe allow='clipboard-read' class='terminal' id='embedded-resource'></iframe>
+</ql-drawer>
+<ql-drawer-content class='js-lab-wrapper' id='lab-content' slot='drawer-content'>
+<ql-drawer-container id='lab-content-container'>
+<ql-drawer id='control-panel-drawer' open slot='drawer' width='320'>
+<ql-lab-control-panel class='ql-lab-control-panel__max-height control-panel js-lab-control-panel' connectionFiles='[]' labControlButton='{&quot;disabled&quot;:false,&quot;pending&quot;:false,&quot;running&quot;:false}' labDetails='[]' labTimer='{&quot;ticking&quot;:false,&quot;secondsRemaining&quot;:5400}' studentResources='[]'>
+<script src="https://www.recaptcha.net/recaptcha/api.js?render=6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr"   ></script>
+        <script>
+          // Define function so that we can call it again later if we need to reset it
+          // This executes reCAPTCHA and then calls our callback.
+          function executeRecaptchaForStartLab() {
+            grecaptcha.ready(function() {
+              grecaptcha.execute('6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr', {action: 'start_lab'}).then(function(token) {
+                setInputWithRecaptchaResponseTokenForStartLab('g-recaptcha-response-data-start-lab', token)
+              });
+            });
+          };
+          // Invoke immediately
+          executeRecaptchaForStartLab()
+
+          // Async variant so you can await this function from another async function (no need for
+          // an explicit callback function then!)
+          // Returns a Promise that resolves with the response token.
+          async function executeRecaptchaForStartLabAsync() {
+            return new Promise((resolve, reject) => {
+             grecaptcha.ready(async function() {
+                resolve(await grecaptcha.execute('6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr', {action: 'start_lab'}))
+              });
+            })
+          };
+
+                  var setInputWithRecaptchaResponseTokenForStartLab = function(id, token) {
+          var element = document.getElementById(id);
+          if (element !== null) element.value = token;
+        }
+
+        </script>
+<input type="hidden" name="g-recaptcha-response-data[start_lab]" id="g-recaptcha-response-data-start-lab" data-sitekey="6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr" class="g-recaptcha g-recaptcha-response "/>
+
+<div aria-live='polite' class='hidden' id='recaptcha-v2-start-lab' slot='recaptcha'>
+<script src="https://www.recaptcha.net/recaptcha/api.js" async defer ></script>
+<div data-sitekey="6LeOI8IUAAAAAPkHlMAE9NReCD_1WD81iYlBlCnV" data-callback="recaptchaComplete" data-expired-callback="expireV2Token" class="g-recaptcha "></div>
+          <noscript>
+            <div>
+              <div style="width: 302px; height: 422px; position: relative;">
+                <div style="width: 302px; height: 422px; position: absolute;">
+                  <iframe
+                    src="https://www.recaptcha.net/recaptcha/api/fallback?k=6LeOI8IUAAAAAPkHlMAE9NReCD_1WD81iYlBlCnV"
+                    name="ReCAPTCHA"
+                    style="width: 302px; height: 422px; border-style: none; border: 0; overflow: hidden;">
+                  </iframe>
+                </div>
+              </div>
+              <div style="width: 300px; height: 60px; border-style: none;
+                bottom: 12px; left: 25px; margin: 0px; padding: 0px; right: 25px;
+                background: #f9f9f9; border: 1px solid #c1c1c1; border-radius: 3px;">
+                <textarea id="g-recaptcha-response" name="g-recaptcha-response"
+                  class="g-recaptcha-response"
+                  style="width: 250px; height: 40px; border: 1px solid #c1c1c1;
+                  margin: 10px 25px; padding: 0px; resize: none;">
+                </textarea>
+              </div>
+            </div>
+          </noscript>
+
+</div>
+</ql-lab-control-panel>
+</ql-drawer>
+<ql-drawer-content id='lab-instructions' slot='drawer-content'>
+<div class='lab-content-container'>
+<div class='alert alert--fake js-alert'>
+<p class='alert__message js-alert-message' role='alert'></p>
+<ql-icon-button class='alert__close js-alert-close' icon='clear'></ql-icon-button>
+<iframe class='l-ie-iframe-fix' tabindex='-1'></iframe>
+</div>
+<div class='lab-content__renderable-instructions js-lab-content'>
+<div class='lab-preamble'>
+<h1 class='lab-preamble__title'>
+Migrating On-premises MySQL Using a Continuous Database Migration Service Job
+</h1>
+<div class='lab-preamble__details subtitle-headline-1'>
+<span>1 hour 30 minutes</span>
+<span>Free</span>
+<div class='lab__rating'>
+<a aria-label="Lab Reviews" href="/focuses/30756619/reviews?parent=lti_session"><div class='rateit' data-rateit-readonly='true' data-rateit-value='4.5212'></div>
+
+</a></div>
+</div>
+</div>
+<div class='lab-outline-place-holder'></div>
+
+<div class='markdown-lab-instructions js-markdown-instructions' id='markdown-lab-instructions'>
+
+<h2 id="step1">Overview</h2>
+<p>Database Migration Service provides options for one-time and continuous jobs to migrate data to Cloud SQL using different connectivity options, including IP allowlists, VPC peering, and reverse SSH tunnels (see documentation on connectivity options in the <a href="https://cloud.google.com/database-migration/docs/mysql/configure-connectivity" target="_blank">Configure connectivity Guide</a>).</p>
+<p>In this lab, you migrate an on-premises MySQL database (running on a virtual machine) to Cloud SQL for MySQL using a continuous Database Migration Service job and VPC peering for connectivity.</p>
+<p>After you create and run the migration job, you confirm that an initial copy of your database has been successfully migrated to your Cloud SQL for MySQL instance. You also explore how continuous migration jobs apply data updates from your source database to your Cloud SQL instance. To conclude the migration job, you promote the Cloud SQL instance to be a standalone database for reading and writing data.</p>
+<h2 id="step2">Objectives</h2>
+<p>In this lab, you learn how to configure a continuous Database Migration Service job to migrate databases from a MySQL instance to Cloud SQL for MySQL.</p>
+<ul>
+<li>Create a profile for a source connection to a MySQL instance (e.g., on-premises MySQL).</li>
+<li>Configure connectivity between the source and destination database instances using VPC peering.</li>
+<li>Create, run, and verify a continuous migration job using Database Migration Service.</li>
+<li>Promote the destination instance (Cloud SQL for MySQL) to be a standalone database for reading and writing data.</li>
+</ul>
+<h2 id="step3">Setup</h2>
+<p>For each lab, you get a new Google Cloud project and set of resources for a fixed time at no cost.</p>
+<ol>
+<li>
+<p>Sign in to Qwiklabs using an <strong>incognito window</strong>.</p>
+</li>
+<li>
+<p>Note the lab's access time (for example, <code>1:15:00</code>), and make sure you can finish within that time.<br>
+There is no pause feature. You can restart if needed, but you have to start at the beginning.</p>
+</li>
+<li>
+<p>When ready, click <strong>Start lab</strong>.</p>
+</li>
+<li>
+<p>Note your lab credentials (<strong>Username</strong> and <strong>Password</strong>). You will use them to sign in to the Google Cloud Console.</p>
+</li>
+<li>
+<p>Click <strong>Open Google Console</strong>.</p>
+</li>
+<li>
+<p>Click <strong>Use another account</strong> and copy/paste credentials for <strong>this</strong> lab into the prompts.<br>
+If you use other credentials, you'll receive errors or <strong>incur charges</strong>.</p>
+</li>
+<li>
+<p>Accept the terms and skip the recovery resource page.</p>
+</li>
+</ol>
+<aside class="warning"><p><strong>Note:</strong> Do not click <strong>End Lab</strong> unless you have finished the lab or want to restart it. This clears your work and removes the project.
+  </p>
+</aside>
+
+<h4>How to start your lab and sign in to the Console</h4>
+<ol>
+<li>
+<p>Click the <strong>Start Lab</strong> button. If you need to pay for the lab, a pop-up opens for you to select your payment method.
+On the left is a panel populated with the temporary credentials that you must use for this lab.</p>
+<p><img alt="Credentials panel" src="https://cdn.qwiklabs.com/%2FtHp4GI5VSDyTtdqi3qDFtevuY014F88%2BFow%2FadnRgE%3D"></p>
+</li>
+<li>
+<p>Copy the username, and then click <strong>Open Google Console</strong>.
+The lab spins up resources, and then opens another tab that shows the <strong>Choose an account</strong> page.</p>
+<ql-infobox><strong>Note: </strong>Open the tabs in separate windows, side-by-side.</ql-infobox>
+</li>
+<li>
+<p>On the Choose an account page, click <strong>Use Another Account</strong>. The Sign in page opens.</p>
+<p><img alt="Choose an account dialog box with Use Another Account option highlighted " src="https://cdn.qwiklabs.com/eQ6xPnPn13GjiJP3RWlHWwiMjhooHxTNvzfg1AL2WPw%3D"></p>
+</li>
+<li>
+<p>Paste the username that you copied from the Connection Details panel. Then copy and paste the password.</p>
+</li>
+</ol>
+<ql-warningbox><strong>Note: </strong>You must use the credentials from the Connection Details panel. Do not use your Google Cloud Skills Boost credentials. If you have your own Google Cloud account, do not use it for this lab (avoids incurring charges).</ql-warningbox>
+<ol start="5">
+<li>Click through the subsequent pages:</li>
+</ol>
+<ul>
+<li>Accept the terms and conditions.</li>
+<li>Do not add recovery options or two-factor authentication (because this is a temporary account).</li>
+<li>Do not sign up for free trials.</li>
+</ul>
+<p>After a few moments, the Cloud console opens in this tab.</p>
+<ql-infobox><strong>Note: </strong>You can view the menu with a list of Google Cloud Products and Services by clicking the <b>Navigation menu</b> at the top-left.
+<img alt="Cloud Console Menu" src="https://cdn.qwiklabs.com/9vT7xPlxoNP%2FPsK0J8j0ZPFB4HnnpaIJVCDByaBrSHg%3D">
+</ql-infobox>
+
+<h3>Activate Google Cloud Shell</h3>
+<p>Google Cloud Shell is a virtual machine that is loaded with development tools. It offers a persistent 5GB home directory and runs on the Google Cloud.</p>
+<p>Google Cloud Shell provides command-line access to your Google Cloud resources.</p>
+<ol>
+<li>
+<p>In Cloud console, on the top right toolbar, click the Open Cloud Shell button.</p>
+<p><img alt="Highlighted Cloud Shell icon" src="https://cdn.qwiklabs.com/00tA48qOVOyHrSa1DA7LwccfwQ9Z%2BE6dkvQ1MYPHzhQ%3D"></p>
+</li>
+<li>
+<p>Click <strong>Continue</strong>.</p>
+</li>
+</ol>
+<p>It takes a few moments to provision and connect to the environment. When you are connected, you are already authenticated, and the project is set to your <em>PROJECT_ID</em>. For example:</p>
+<p><img alt="Project ID highlighted in the Cloud Shell Terminal" src="https://cdn.qwiklabs.com/hmMK0W41Txk%2B20bQyuDP9g60vCdBajIS%2B52iI2f4bYk%3D"></p>
+<p><strong>gcloud</strong> is the command-line tool for Google Cloud. It comes pre-installed on Cloud Shell and supports tab-completion.</p>
+<ul>
+<li>You can list the active account name with this command:</li>
+</ul>
+<ql-code-block language="plaintext">
+gcloud auth list
+</ql-code-block>
+<p><strong>Output:</strong></p>
+<ql-code-block output="">
+Credentialed accounts:
+ - @.com (active)
+</ql-code-block>
+<p><strong>Example output:</strong></p>
+<ql-code-block output="">
+Credentialed accounts:
+ - google1623327_student@qwiklabs.net
+ </ql-code-block>
+<ul>
+<li>You can list the project ID with this command:</li>
+</ul>
+<ql-code-block language="plaintext">
+gcloud config list project
+</ql-code-block>
+<p><strong>Output:</strong></p>
+<ql-code-block output="">
+[core]
+project = 
+</ql-code-block>
+<p><strong>Example output:</strong></p>
+<ql-code-block output="">
+[core]
+project = qwiklabs-gcp-44776a13dea667a6
+</ql-code-block>
+<ql-infobox><strong>Note: </strong>
+  Full documentation of <strong>gcloud</strong> is available in the
+  <a href="https://cloud.google.com/sdk/gcloud" target="_blank">
+    gcloud CLI overview guide
+  </a>.
+</ql-infobox>
+
+<h3>Verify that the Database Migration API is enabled</h3>
+<ol>
+<li>In the Google Cloud Console, enter <strong>Database Migration API</strong> in the top search bar. Click on the result for <strong>Database Migration API</strong>.</li>
+</ol>
+<p>This page will either show status information or give you the option to enable the API.</p>
+<ol start="2">
+<li>If necessary, enable the API.</li>
+</ol>
+<h3>Verify that the Service Networking API is enabled</h3>
+<ol>
+<li>In the Google Cloud Console, enter <strong>Service Networking API</strong> in the top search bar. Click on the result for <strong>Service Networking API</strong>.</li>
+</ol>
+<p>This page will either show status information or give you the option to enable the API.</p>
+<ol start="2">
+<li>If necessary, enable the API.</li>
+</ol>
+<h2 id="step4">Task 1. Get the connectivity information for the MySQL source instance</h2>
+<p>In this task, you identify the internal IP address of the source database instance that you will migrate to Cloud SQL.</p>
+<ol>
+<li>
+<p>In the Google Cloud Console, on the <strong>Navigation menu</strong> (<img alt="Navigation menu icon" src="https://cdn.qwiklabs.com/tkgw1TDgj4Q%2BYKQUW4jUFd0O5OEKlUMBRYbhlCrF0WY%3D">), click <strong>Compute Engine</strong> &gt; <strong>VM instances</strong>.</p>
+</li>
+<li>
+<p>Locate the line with the instance called <strong>dms-mysql-training-vm-v2</strong>.</p>
+</li>
+<li>
+<p>Copy the value for <strong>Internal IP</strong> (e.g., 10.128.0.2).</p>
+</li>
+</ol>
+<h2 id="step5">Task 2. Create a new connection profile for the MySQL source instance</h2>
+<p>A connection profile stores information about the source database instance (e.g., on-premises MySQL) and is used by Database Migration Service to migrate data from the source to your destination Cloud SQL database instance. After you create a connection profile, it can be reused across migration jobs.</p>
+<ol>
+<li>
+<p>In the Google Cloud Console, on the <strong>Navigation menu</strong> (<img alt="Navigation menu icon" src="https://cdn.qwiklabs.com/tkgw1TDgj4Q%2BYKQUW4jUFd0O5OEKlUMBRYbhlCrF0WY%3D">), click <strong>Database Migration &gt; Connection profiles</strong>.</p>
+</li>
+<li>
+<p>Click <strong>Create Profile</strong>.</p>
+</li>
+<li>
+<p>For <strong>Database engine</strong>, select <strong>MySQL</strong>.</p>
+</li>
+<li>
+<p>Enter the required information for a connection profile:</p>
+</li>
+</ol>
+<table>
+
+<tr>
+<th><strong>Property</strong></th>
+<th><strong>Value</strong></th>
+</tr>
+
+
+<tr>
+<td><strong>Connection profile name</strong></td>
+<td><strong>mysql-vm</strong></td>
+</tr>
+<tr>
+<td><strong>Connection profile ID</strong></td>
+<td>keep the auto-generated value</td>
+</tr>
+<tr>
+<td><strong>Hostname or IP address</strong></td>
+<td>enter the internal IP for the MySQL source instance that you copied in the previous task (e.g., 10.128.0.2)</td>
+</tr>
+<tr>
+<td><strong>Port</strong></td>
+<td><strong>3306</strong></td>
+</tr>
+<tr>
+<td><strong>Username</strong></td>
+<td><strong>admin</strong></td>
+</tr>
+<tr>
+<td><strong>Password</strong></td>
+<td><strong>changeme</strong></td>
+</tr>
+
+</table>
+<ol start="5">
+<li>
+<p>For <strong>Connection profile region</strong> select <ql-variable key="project_0.startup_script.gcp_region" placeholder="(region)"></ql-variable>.</p>
+</li>
+<li>
+<p>For the <strong>Encryption Type</strong>, select <strong>None</strong>.</p>
+</li>
+<li>
+<p>Click <strong>Create</strong>.</p>
+</li>
+</ol>
+<p>A new connection profile named <strong>mysql-vm</strong> will appear in the Connections profile list.</p>
+<p>Click <em>Check my progress</em> to verify the objective.
+<ql-activity-tracking step="1">
+Create a connection profile for the MySQL source instance.
+</ql-activity-tracking></p>
+<h2 id="step6">Task 3. Create and start a continuous migration job</h2>
+<p>When you create a new migration job, you first define the source database instance using a previously created connection profile. Then you create a new destination database instance and configure connectivity between the source and destination instances.</p>
+<p>In this task, you use the migration job interface to create a new Cloud SQL for MySQL database instance and set it as the destination for the continuous migration job from the MySQL source instance.</p>
+<h3>Create a new continuous migration job</h3>
+<ol>
+<li>
+<p>In the Google Cloud Console, on the <strong>Navigation menu</strong> (<img alt="Navigation menu icon" src="https://cdn.qwiklabs.com/tkgw1TDgj4Q%2BYKQUW4jUFd0O5OEKlUMBRYbhlCrF0WY%3D">), click <strong>Database Migration &gt; Migration jobs</strong>.</p>
+</li>
+<li>
+<p>Click <strong>Create Migration Job</strong>.</p>
+</li>
+<li>
+<p>For <strong>Create a migration job</strong>, on the <strong>Get Started</strong> tab, use the following values:</p>
+</li>
+</ol>
+<table>
+
+<tr>
+<th><strong>Property</strong></th>
+<th><strong>Value</strong></th>
+</tr>
+
+
+<tr>
+<td><strong>Migration job name</strong></td>
+<td><strong>vm-to-cloudsql</strong></td>
+</tr>
+<tr>
+<td><strong>Migration job ID</strong></td>
+<td>keep the auto-generated value</td>
+</tr>
+<tr>
+<td><strong>Source database engine</strong></td>
+<td><strong>MySQL</strong></td>
+</tr>
+<tr>
+<td><strong>Destination region</strong></td>
+<td><strong><ql-variable key="project_0.startup_script.gcp_region" placeholder="(region)"></ql-variable></strong></td>
+</tr>
+<tr>
+<td><strong>Migration job type</strong></td>
+<td><strong>Continuous</strong></td>
+</tr>
+
+</table>
+<p>Leave all other settings as default.</p>
+<ol start="4">
+<li>Click <strong>Save &amp; Continue</strong>.</li>
+</ol>
+<h3>Define the source instance</h3>
+<ol>
+<li>
+<p>For <strong>Select source connection profile</strong>, select <strong>mysql-vm</strong>.</p>
+</li>
+<li>
+<p>Leave the defaults for the other settings.</p>
+</li>
+<li>
+<p>Click <strong>Save &amp; Continue</strong>.</p>
+</li>
+</ol>
+<h3>Create the destination instance</h3>
+<ol>
+<li>Enter the required information to create the destination instance on Cloud SQL:</li>
+</ol>
+<table>
+
+<tr>
+<th><strong>Property</strong></th>
+<th><strong>Value</strong></th>
+</tr>
+
+
+<tr>
+<td><strong>Destination Instance ID</strong></td>
+<td><strong>mysql-cloudsql</strong></td>
+</tr>
+<tr>
+<td><strong>Root password</strong></td>
+<td><strong>supersecret!</strong></td>
+</tr>
+<tr>
+<td><strong>Database version</strong></td>
+<td><strong>Cloud SQL for MySQL 5.7</strong></td>
+</tr>
+<tr>
+<td><strong>Zone</strong></td>
+<td><ql-variable key="project_0.default_zone" placeholder="default_zone"></ql-variable></td>
+</tr>
+
+</table>
+<ol start="2">
+<li>
+<p>In <strong>Connections</strong>, select <strong>Private IP</strong> and <strong>Public IP</strong>.</p>
+</li>
+<li>
+<p>Select <strong>Use an automatically allocated IP range</strong>.</p>
+</li>
+<li>
+<p>Click <strong>Allocate &amp; Connect</strong>.</p>
+</li>
+</ol>
+<ql-infobox><strong>Note: </strong>
+This step may take a few minutes. If asked to retry the request, click the Retry button to refresh the Service Networking API.
+</ql-infobox>
+<p>When this step is complete, an updated message notifies you that the instance will use the existing managed service connection.</p>
+<ol start="5">
+<li>Enter the additional information needed to create the destination instance on Cloud SQL:</li>
+</ol>
+<table>
+
+<tr>
+<th><strong>Property</strong></th>
+<th><strong>Value</strong></th>
+</tr>
+
+
+<tr>
+<td><strong>Machine shapes</strong></td>
+<td><strong>1 vCPU, 3.75 GB</strong></td>
+</tr>
+<tr>
+<td><strong>Storage type</strong></td>
+<td><strong>SSD</strong></td>
+</tr>
+<tr>
+<td><strong>Storage capacity</strong></td>
+<td><strong>10 GB</strong></td>
+</tr>
+
+</table>
+<ol start="6">
+<li>Click <strong>Create &amp; Continue</strong>.</li>
+</ol>
+<p>If prompted to confirm, click <strong>Create Destination &amp; Continue</strong>.</p>
+<h3>Define the connectivity method</h3>
+<p>A message will state that your destination database instance is being created. Continue to step 1 while you wait.</p>
+<p><img alt="The message states that the button for configure &amp; continue is enabled when the destination Cloud SQL instance has been created." src="https://cdn.qwiklabs.com/YjhH3DtvIvmtZnJVKl1ivl0gJhrIm4nhxZEnUtpbsmo%3D"></p>
+<ol>
+<li>
+<p>For <strong>Connectivity method</strong>, select <strong>VPC peering</strong>.</p>
+</li>
+<li>
+<p>For <strong>VPC</strong>, select <strong>default</strong>.</p>
+</li>
+</ol>
+<p>VPC peering is configured by Database Migration Service using the information provided for the VPC network (the default network in this example).</p>
+<p>When you see an updated message that the destination instance was created, proceed to the next step.</p>
+<ol start="3">
+<li>Click <strong>Configure &amp; Continue</strong>.</li>
+</ol>
+<h3>Test and start the continuous migration job</h3>
+<ol>
+<li>
+<p>Review the details of the migration job.</p>
+</li>
+<li>
+<p>Click <strong>Test Job</strong>.</p>
+</li>
+<li>
+<p>After a successful test, click <strong>Create &amp; Start Job</strong>.</p>
+</li>
+</ol>
+<p>If prompted to confirm, click <strong>Create &amp; Start</strong>.</p>
+<h2 id="step7">Task 4. Review the status of the continuous migration job</h2>
+<ol>
+<li>
+<p>In the Google Cloud Console, on the <strong>Navigation menu</strong> (<img alt="Navigation menu icon" src="https://cdn.qwiklabs.com/tkgw1TDgj4Q%2BYKQUW4jUFd0O5OEKlUMBRYbhlCrF0WY%3D">), click <strong>Database Migration &gt; Migration jobs</strong>.</p>
+</li>
+<li>
+<p>Click the migration job <strong>vm-to-cloudsql</strong> to see the details page.</p>
+</li>
+<li>
+<p>Review the migration job status.</p>
+<ul>
+<li>If you have not started the job, the status will show as <em>Not started</em>. You can choose to start or delete the job.</li>
+<li>After the job has started, the status will show as <em>Starting</em> and then transition to <strong>Running</strong> <em>Full Dump</em> to indicate that the initial database dump is in progress.</li>
+<li>After the initial database dump has been completed, the status will transition to <em><strong>Running</strong></em> <em>CDC in progress</em> to indicate that continuous migration is active.</li>
+</ul>
+</li>
+</ol>
+<p>When the job status changes to <em><strong>Running</strong></em> <em>CDC in progress</em>, proceed to the next task.</p>
+<ql-infobox><strong>Note: </strong>
+Continuous migration jobs remain in a running status to ensure that the destination database continues to receive data updates from the source.
+<p></p>
+A completed status is achieved after the destination database is promoted to be a standalone database for reading and writing data (see task 7).  
+</ql-infobox>
+<p>Click <em>Check my progress</em> to verify the objective.
+<ql-activity-tracking step="2">
+Create, start, and review a continuous migration job.
+</ql-activity-tracking></p>
+<h2 id="step8">Task 5. Confirm the data in Cloud SQL for MySQL</h2>
+<h3>Check the MySQL databases in Cloud SQL</h3>
+<ol>
+<li>
+<p>In the Google Cloud Console, on the <strong>Navigation menu</strong> (<img alt="Navigation menu icon" src="https://cdn.qwiklabs.com/tkgw1TDgj4Q%2BYKQUW4jUFd0O5OEKlUMBRYbhlCrF0WY%3D">), click <strong>Databases</strong> &gt; <strong>SQL</strong>.</p>
+</li>
+<li>
+<p>Click on the instance ID called <strong>mysql-cloudsql</strong> (MySQL read replica).</p>
+</li>
+<li>
+<p>In the <strong>Replica Instance</strong> menu, click <strong>Databases</strong>.</p>
+</li>
+</ol>
+<p>Notice that the databases called <strong>customers_data</strong> and <strong>sales_data</strong> have been migrated to Cloud SQL.</p>
+<h3>Connect to the MySQL instance</h3>
+<ol>
+<li>
+<p>In the <strong>Replica Instance</strong> menu, click <strong>Overview</strong>.</p>
+</li>
+<li>
+<p>Click <strong>OPEN CLOUD SHELL</strong>.</p>
+</li>
+</ol>
+<p>The command to connect to MySQL will pre-populate in Cloud Shell:</p>
+<ql-code-block language="plaintext">
+gcloud sql connect mysql-cloudsql --user=root --quiet
+</ql-code-block>
+<ol start="3">
+<li>Run the pre-populated command.</li>
+</ol>
+<p>If prompted, click <strong>Authorize</strong> for the API.</p>
+<ol start="4">
+<li>When prompted for a password, which you previously set, enter:</li>
+</ol>
+<ql-code-block language="plaintext">
+supersecret!
+</ql-code-block>
+<p>You have now activated the MySQL interactive console for the destination instance.</p>
+<h3>Review the data in the Cloud SQL for MySQL instance</h3>
+<ol>
+<li>To select the database in the MySQL interactive console, run the following command:</li>
+</ol>
+<ql-code-block language="plaintext">
+use customers_data;
+</ql-code-block>
+<ol start="2">
+<li>Query the number of records in the customers table:</li>
+</ol>
+<ql-code-block language="plaintext">
+select count(*) from customers;
+</ql-code-block>
+<p>There are 5,030 records in the customers table that were migrated from the MySQL source instance.</p>
+<ol start="3">
+<li>Sort the records in the customers table by last name and review the first ten records:</li>
+</ol>
+<ql-code-block language="plaintext">
+select * from customers
+order by lastName
+limit 10;
+</ql-code-block>
+<p>Note that the last name of the first record in the customers table is Accumsan.</p>
+<p>In the next task, you will add new records to the customers table in the source database instance. The continuous migration job will migrate the new records from the source instance to the destination instance.</p>
+<ol start="4">
+<li>Exit the MySQL interactive console:</li>
+</ol>
+<ql-code-block language="plaintext">
+exit
+</ql-code-block>
+<p>Click <em>Check my progress</em> to verify the objective.
+<ql-activity-tracking step="3">
+Confirm the migrated data in Cloud SQL for MySQL.
+</ql-activity-tracking></p>
+<h2 id="step9">Task 6. Test the continuous migration of data from the source to the destination instance</h2>
+<h3>Add new data to the source instance</h3>
+<ol>
+<li>
+<p>In the Google Cloud Console, on the <strong>Navigation menu</strong> (<img alt="Navigation menu icon" src="https://cdn.qwiklabs.com/tkgw1TDgj4Q%2BYKQUW4jUFd0O5OEKlUMBRYbhlCrF0WY%3D">), click <strong>Compute Engine</strong> &gt; <strong>VM instances</strong>.</p>
+</li>
+<li>
+<p>Locate the line with the instance called <strong>dms-mysql-training-vm-v2</strong>.</p>
+</li>
+<li>
+<p>For <strong>Connect</strong>, click <strong>SSH</strong> to open a terminal window.</p>
+</li>
+<li>
+<p>To connect to the MySQL interactive console within the terminal window, run the following command:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+mysql -u admin -p
+</ql-code-block>
+<ol start="5">
+<li>When prompted for a password, enter:</li>
+</ol>
+<ql-code-block language="plaintext">
+changeme
+</ql-code-block>
+<ol start="6">
+<li>To select the database in the MySQL interactive console, run the following command:</li>
+</ol>
+<ql-code-block language="plaintext">
+use customers_data;
+</ql-code-block>
+<ol start="7">
+<li>Add two new data records to the customers table with the following command:</li>
+</ol>
+<ql-code-block language="plaintext">
+INSERT INTO customers (customerKey, addressKey, title, firstName, lastName, birthdate, gender, maritalStatus, email, creationDate)
+VALUES ('9365552000000-999', '9999999', 'Ms', 'Magna', 'Ablorem', '1953-07-28 00:00:00', 'FEMALE', 'MARRIED', 'magna.lorem@gmail.com', CURRENT_TIMESTAMP),
+('9965552000000-9999', '99999999', 'Mr', 'Arcu', 'Abrisus', '1959-07-28 00:00:00', 'MALE', 'MARRIED', 'arcu.risus@gmail.com', CURRENT_TIMESTAMP);
+</ql-code-block>
+<ol start="8">
+<li>Query the new number of records in the customers table:</li>
+</ol>
+<ql-code-block language="plaintext">
+select count(*) from customers;
+</ql-code-block>
+<p>There are now 5,032 records in the customers table in the MySQL source instance.</p>
+<ol start="9">
+<li>Sort the records in the customers table by last name and review the first ten records:</li>
+</ol>
+<ql-code-block language="plaintext">
+select * from customers
+order by lastName
+limit 10;
+</ql-code-block>
+<p>Note that the last name of the first record in the customers table has changed to Ablorem.</p>
+<ol start="10">
+<li>Exit the MySQL interactive console:</li>
+</ol>
+<ql-code-block language="plaintext">
+exit
+</ql-code-block>
+<ol start="11">
+<li>Exit the terminal session:</li>
+</ol>
+<ql-code-block language="plaintext">
+exit
+</ql-code-block>
+<h3>Connect to the Cloud SQL for MySQL instance</h3>
+<ol>
+<li>
+<p>In the Google Cloud Console, on the <strong>Navigation menu</strong> (<img alt="Navigation menu icon" src="https://cdn.qwiklabs.com/tkgw1TDgj4Q%2BYKQUW4jUFd0O5OEKlUMBRYbhlCrF0WY%3D">), click <strong>Databases</strong> &gt; <strong>SQL</strong>.</p>
+</li>
+<li>
+<p>Click on the instance ID called <strong>mysql-cloudsql</strong> (MySQL read replica).</p>
+</li>
+<li>
+<p>In the <strong>Replica Instance</strong> menu, click <strong>Overview</strong>.</p>
+</li>
+<li>
+<p>Click <strong>OPEN CLOUD SHELL</strong>.</p>
+</li>
+</ol>
+<p>The command to connect to MySQL will pre-populate in Cloud Shell:</p>
+<ql-code-block language="plaintext">
+gcloud sql connect mysql-cloudsql --user=root --quiet
+</ql-code-block>
+<ol start="5">
+<li>Run the pre-populated command.</li>
+</ol>
+<p>If prompted, click <strong>Authorize</strong> for the API.</p>
+<ol start="6">
+<li>When prompted for a password, which you previously set, enter:</li>
+</ol>
+<ql-code-block language="plaintext">
+supersecret!
+</ql-code-block>
+<p>You have now activated the MySQL interactive console for the destination instance.</p>
+<h3>Check that the data updates have been applied to the Cloud SQL for MySQL instance</h3>
+<ol>
+<li>To select the database in the MySQL interactive console, run the following command:</li>
+</ol>
+<ql-code-block language="plaintext">
+use customers_data;
+</ql-code-block>
+<ol start="2">
+<li>Query the number of records in the customers table:</li>
+</ol>
+<ql-code-block language="plaintext">
+select count(*) from customers;
+</ql-code-block>
+<p>Notice that the two records added to the MySQL source instance have been migrated. There are now 5,032 records in the customers table in the Cloud SQL destination instance.</p>
+<ol start="3">
+<li>Sort the records in the customers table by last name and review the first ten records:</li>
+</ol>
+<ql-code-block language="plaintext">
+select * from customers
+order by lastName
+limit 10;
+</ql-code-block>
+<p>Notice that the last name of the first record in the customers table is now the same across the Cloud SQL destination instance and the MySQL source instance.</p>
+<ol start="4">
+<li>Exit the MySQL interactive console:</li>
+</ol>
+<ql-code-block language="plaintext">
+exit
+</ql-code-block>
+<p>Click <em>Check my progress</em> to verify the objective.
+<ql-activity-tracking step="4">
+Test the continuous migration of data from the source to the destination.
+</ql-activity-tracking></p>
+<h2 id="step10">Task 7. Promote Cloud SQL to be a standalone instance for reading and writing data</h2>
+<ol>
+<li>
+<p>In the Google Cloud Console, on the <strong>Navigation menu</strong> (<img alt="Navigation menu icon" src="https://cdn.qwiklabs.com/tkgw1TDgj4Q%2BYKQUW4jUFd0O5OEKlUMBRYbhlCrF0WY%3D">), click <strong>Database Migration &gt; Migration jobs</strong>.</p>
+</li>
+<li>
+<p>Click the migration job name <strong>vm-to-cloudsql</strong> to see the details page.</p>
+</li>
+<li>
+<p>Click <strong>Promote</strong>.</p>
+</li>
+</ol>
+<p>If prompted to confirm, click <strong>Promote</strong>.</p>
+<p>When the promotion is complete, the status of the job will update to <em>completed</em>.</p>
+<ol start="4">
+<li>In the Google Cloud Console, on the <strong>Navigation menu</strong> (<img alt="Navigation menu icon" src="https://cdn.qwiklabs.com/tkgw1TDgj4Q%2BYKQUW4jUFd0O5OEKlUMBRYbhlCrF0WY%3D">), click <strong>Databases</strong> &gt; <strong>SQL</strong>.</li>
+</ol>
+<p>Note that <strong>mysql-cloudsql</strong> is now a standalone instance for reading and writing data.</p>
+<p><img alt="The instance named mysql-cloudsql is labeled as the primary instance." src="https://cdn.qwiklabs.com/52AlpQkSoRFsr7bQ6Pn1iHzVRG6PaEml2KbszwGrGjw%3D"></p>
+<p>Click <em>Check my progress</em> to verify the objective.
+<ql-activity-tracking step="5">
+Promote Cloud SQL for MySQL to be a standalone instance for reading and writing data.
+</ql-activity-tracking></p>
+<h2 id="step11">End your lab</h2>
+<p>When you have completed your lab, click <strong>End Lab</strong>. Google Cloud Skills Boost removes the resources you’ve used and cleans the account for you.</p>
+<p>You will be given an opportunity to rate the lab experience. Select the applicable number of stars, type a comment, and then click <strong>Submit</strong>.</p>
+<p>The number of stars indicates the following:</p>
+<ul>
+<li>1 star = Very dissatisfied</li>
+<li>2 stars = Dissatisfied</li>
+<li>3 stars = Neutral</li>
+<li>4 stars = Satisfied</li>
+<li>5 stars = Very satisfied</li>
+</ul>
+<p>You can close the dialog box if you don't want to provide feedback.</p>
+<p>For feedback, suggestions, or corrections, please use the <strong>Support</strong> tab.</p>
+
+<p>Copyright 2022 Google LLC All rights reserved. Google and the Google logo are trademarks of Google LLC. All other company and product names may be trademarks of the respective companies with which they are associated.</p>
+
+
+
+
+
+</div>
+</div>
+
+
+<div class='lab-content__end-lab-button js-end-lab-button-container hidden'>
+<ql-lab-control-button class='js-end-lab-button' running></ql-lab-control-button>
+</div>
+<!-- / TODO: Move recommendations into the end lab modal -->
+</div>
+<div aria-label='Lab Table of Contents' class='outline-container' id='js-outline-container' role='navigation'>
+<ul class='lab-content__outline js-lab-content-outline'>
+<li><a href="#step1">Overview</a></li><li><a href="#step2">Objectives</a></li><li><a href="#step3">Setup</a></li><li><a href="#step4">Task 1. Get the connectivity information for the MySQL source instance</a></li><li><a href="#step5">Task 2. Create a new connection profile for the MySQL source instance</a></li><li><a href="#step6">Task 3. Create and start a continuous migration job</a></li><li><a href="#step7">Task 4. Review the status of the continuous migration job</a></li><li><a href="#step8">Task 5. Confirm the data in Cloud SQL for MySQL</a></li><li><a href="#step9">Task 6. Test the continuous migration of data from the source to the destination instance</a></li><li><a href="#step10">Task 7. Promote Cloud SQL to be a standalone instance for reading and writing data</a></li><li><a href="#step11">End your lab</a></li>
+</ul>
+</div>
+</ql-drawer-content>
+</ql-drawer-container>
+</ql-drawer-content>
+</ql-drawer-container>
+<ql-snackbar id='alert-snackbar'></ql-snackbar>
+
+
+
+</div>
+</main>
+
+<span class='hidden' id='flash-sibling-before'></span>
+<ql-snackbar></ql-snackbar>
+
+
+<ql-dialog headline='Score Details' icon='task_alt' id='jupyter-feedback-modal'>
+<iframe id='jupyter-feedback-frame' srcdoc='' title='Jupyter Feedback'></iframe>
+</ql-dialog>
+
+<div class='modal fade' id='lab-details-modal'>
+<div class='modal-container'>
+<div class='modal-content mdl-shadow--24dp'>
+<div class='modal-body'>
+<p class='l-mbm'>
+In this lab, you migrate an on-premises MySQL database (running on a virtual machine) to Cloud SQL for MySQL using a continuous Database Migration Service job and VPC peering for connectivity. After you create and run the migration job, you confirm that an initial copy of your database has been successfully migrated to your Cloud SQL for MySQL instance. Then, you explore how continuous migration jobs continue to apply data updates from your source database to your Cloud SQL instance until you choose to complete the job. To conclude the migration job, you promote the Cloud SQL instance to be a new standalone database for reading and writing data.
+</p>
+<p>
+This lab is included in the quest
+<a href="/quests/180">Migrate MySQL data to Cloud SQL using Database Migration Service</a>.
+If you complete this lab you&#39;ll receive credit for it when you enroll in this quest.
+</p>
+<p class='small-label l-mbs'>
+<strong>
+Duration:
+</strong>
+1m setup
+&middot;
+90m access
+&middot;
+90m completion
+</p>
+<p class='small-label l-mbs'>
+<strong>AWS Region:</strong>
+[] <strong></strong>
+</p>
+<p class='small-label l-mbs'>
+<span><strong>Levels: </strong>advanced</span>
+</p>
+<p class='small-label'>
+<strong>
+Permalink:
+</strong>
+<a href="https://googlecoursera.qwiklabs.com/catalog_lab/3531">https://googlecoursera.qwiklabs.com/catalog_lab/3531</a>
+</p>
+</div>
+<div class='modal-actions'>
+<a class='button button--text' data-dismiss='modal'>
+Got It
+</a>
+</div>
+
+
+</div>
+</div>
+<iframe class='l-ie-iframe-fix' tabindex='-1' title='modal'></iframe>
+</div>
+<ql-dialog headline='How satisfied are you with this lab?&lt;span aria-hidden=&quot;true&quot;&gt;*&lt;/span&gt;' id='lab-review-dialog'>
+<form class="simple_form js-lab-review-form" id="new_lab_review" action="/lab_reviews" accept-charset="UTF-8" data-remote="true" method="post"><input name="utf8" type="hidden" value="&#x2713;" autocomplete="off" /><div aria-labelledby='lab-review-dialog' aria-required='true' aria-valuemax='5' aria-valuemin='0' aria-valuenow='0' class='rateit js-rateit' data-rateit-max='5' data-rateit-min='0' data-rateit-resetable='false' data-rateit-step='1' data-rateit-value='0' id='lab-review-rateit' role='slider' tabindex='0'></div>
+<div class='l-mtm'>
+
+<div class="control-group hidden lab_review_user_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" value="12197799" name="lab_review[user_id]" id="lab_review_user_id" /></div></div>
+<div class="control-group hidden lab_review_classroom_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" name="lab_review[classroom_id]" id="lab_review_classroom_id" /></div></div>
+<div class="control-group hidden lab_review_lab_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" value="3531" name="lab_review[lab_id]" id="lab_review_lab_id" /></div></div>
+<div class="control-group hidden lab_review_focus_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" name="lab_review[focus_id]" id="lab_review_focus_id" /></div></div>
+<div class="control-group hidden lab_review_rating"><div class="controls"><input class="hidden js-rating-input" autocomplete="off" type="hidden" name="lab_review[rating]" id="lab_review_rating" /></div></div>
+<div class="control-group text optional lab_review_comment"><label class="text optional control-label" for="lab_review_comment">Additional Comments</label><div class="controls"><textarea class="text optional" name="lab_review[comment]" id="lab_review_comment">
+</textarea></div></div>
+</div>
+</form><ql-button disabled id='submit' label='Submit' slot='action' text></ql-button>
+</ql-dialog>
+
+<ql-dialog headline='All done? If you end this lab, you will lose all your work. You may not be able to restart the lab if there is a quota limit. Are you sure you want to end this lab?' icon='error_outline' id='js-lab-are-you-sure-dialog'>
+<ql-button id='js-are-you-sure-button' label='Submit' slot='action' text></ql-button>
+</ql-dialog>
+
+
+<script>
+  $(function() {
+    ql.initMaterialInputs();
+    initChosen();
+    initSearch();
+    initTabs();
+    ql.list.init();
+    ql.favoriting.init();
+    ql.header.myAccount.init();
+    initTooltips();
+    ql.autocomplete.init();
+    ql.modals.init();
+    ql.toggleButtons.init();
+    ql.analytics.init();
+    ql.chat.init();
+  ql.jumpContent.init();
+  ql.labControlPanel.addRecaptchaErrorHandler();
+  initLabContent();
+  ql.labOutline.links.init();
+  initLabReviewModal();
+  initLabReviewTranslations( {"star_amount_1":"1 of 5 stars","star_amount_2":"2 of 5 stars","star_amount_3":"3 of 5 stars","star_amount_4":"4 of 5 stars","star_amount_5":"5 of 5 stars"} )
+  ql.labAssessment.init();
+  ql.labData.init();
+  initLabTranslations( {"are_you_sure":"All done? If you end this lab, you will lose all your work. You may not be able to restart the lab if there is a quota limit. Are you sure you want to end this lab?","in_progress":"*In Progress*","ending":"*Ending*","starting":"*Starting, please wait*","end_concurrent_labs":"Sorry, you can only run one lab at a time. To start this lab, please confirm that you want all of your existing labs to end.","copied":"Copied","no_resource":"Error retrieving resource.","no_support":"No Support","mac_press":"Press ⌘-C to copy","thanks_review":"Thanks for reviewing this lab.","windows_press":"Press Ctrl-C to copy","days":"days"} );
+  ql.labRun.init();
+  ql.navPanel.init();
+  ql.navigation.init();
+  
+  });
+</script>
+
+</body>
+</html>
+

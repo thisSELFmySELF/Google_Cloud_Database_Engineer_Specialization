@@ -1,0 +1,937 @@
+
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<title>Creating Databases in Compute Engine | Qwiklabs</title>
+<meta name="action-cable-url" content="/cable" />
+<script>
+//<![CDATA[
+window.gon={};gon.deployment="googlecoursera-run";
+//]]>
+</script>
+<script>
+  (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer',"GTM-5XSKHDX");
+</script>
+<script src="https://cdn.qwiklabs.com/assets/hallofmirrors/polyfills/webcomponents-loader-8583b47b01e40e6ea7bf1ad443a20b7e79bbdd5eafac009806a228c91a97282c.js"></script>
+<script src="https://cdn.qwiklabs.com/assets/vendor-613520545532a2795a401a8168ca8b698b9ee765a66f5ad9ead806b5c32eabe8.js"></script>
+<script src="https://cdn.qwiklabs.com/assets/application-764552f4bc7e4ee5dc74a9b3fd7ddf41c0c326f6f8253193b6e48f971195330f.js"></script>
+<script src="https://cdn.qwiklabs.com/assets/hallofmirrors/hallofmirrors-53579c8602b4c89dd0f1ade9c7d5e535ef7c3e1546fea5e0468d970052bd60fb.js"></script>
+<!--[if lt IE 9]>  <![endif]-->
+<script src='http://html5shim.googlecode.com/svn/trunk/html5.js' type='text/javascript'></script>
+<!--[endif]>  <![endif]-->
+<script id='ze-snippet' src='https://static.zdassets.com/ekr/snippet.js?key=511e4158-0aec-4e3c-b2e6-4daa1769f51e'></script>
+
+
+<meta name="csrf-param" content="authenticity_token" />
+<meta name="csrf-token" content="FgIJH/2Dtmvuuq2dhe2HdhwrGETRO2MyK4hoUz2OhLbmW6bk5/nErLvBx5S/C6hYXbfH9A4tHSzecnctlUXGqA==" />
+<meta content='width=device-width, initial-scale=1.0, user-scalable=yes' name='viewport'>
+<meta content='1rRsY0INj8RvwB5EF5pwdxt2A2P9aDgAlsICaJ0d5w0' name='google-site-verification'>
+<meta content='#3681E4' property='msapplication-TileColor'>
+<meta content='/favicon-144.png' property='msapplication-TileImage'>
+<meta content='[{&quot;id&quot;:&quot;recaptcha_experiment&quot;,&quot;optimize_id&quot;:&quot;dpViOcLkT3qS4TvL2mRojA&quot;,&quot;title&quot;:&quot;No Recaptcha shown for trusted users&quot;,&quot;variant_index&quot;:1,&quot;variant&quot;:&quot;no_recaptcha&quot;}]' name='active-experiments'>
+<meta content='{&quot;userId&quot;:12197799,&quot;experimentIds&quot;:[&quot;course_upgrade&quot;,&quot;canonical_domain_redirect&quot;,&quot;program_resources&quot;,&quot;program_learning_assignment&quot;,&quot;program_announcements&quot;,&quot;peer_assignment&quot;,&quot;teams&quot;,&quot;oauth_risc_shutoff&quot;,&quot;show_annual_purchase_now&quot;,&quot;programs&quot;,&quot;used_in&quot;,&quot;barker&quot;,&quot;program_groups&quot;,&quot;enforce_codebuild_verdicts&quot;,&quot;chat_off_for_signed_out_users&quot;,&quot;community_forum&quot;,&quot;alexandria_show_bundle_errors&quot;]}' name='help-api-product-data'>
+<meta content='{&quot;groupIds&quot;:[&quot;non_suadmins&quot;,&quot;students&quot;,&quot;non_organization&quot;,&quot;non_program&quot;]}' name='help-api-custom-data'>
+<meta content='In this lab, you will create database servers running on Google Cloud Compute Engine. You will create both Linux and Windows servers and will use the CLI to automate the creation of a server.' name='description'>
+<meta content='Qwiklabs' name='author'>
+<meta content='Creating Databases in Compute Engine | Qwiklabs' property='og:title'>
+<meta content='website' property='og:type'>
+<meta content='/favicon-144.png' property='og:image'>
+<meta content='Qwiklabs' property='og:site_name'>
+<meta content='In this lab, you will create database servers running on Google Cloud Compute Engine. You will create both Linux and Windows servers and will use the CLI to automate the creation of a server.' property='og:description'>
+<meta content='/qwiklabs_logo_900x887.png' property='og:logo' size='900x887'>
+<meta content='/qwiklabs_logo_994x187.png' property='og:logo' size='994x187'>
+
+
+<meta property="og:url" content="https://googlecoursera.qwiklabs.com/focuses/30999303?parent=lti_session" /><link href="https://googlecoursera.qwiklabs.com/focuses/30999303?parent=lti_session" rel="canonical" />
+<link color='#3681E4' href='/favicon-svg.svg' rel='mask-icon'>
+<link href='/favicon-180.png' rel='apple-touch-icon-precomposed'>
+<link href='/favicon-32.png' rel='shortcut icon' type='image/x-icon'>
+
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Oswald:400|Roboto+Mono:400,700|Roboto:300,400,500,700|Google+Sans:300,400,500,700|Google+Sans+Display:400|Material+Icons|Google+Material+Icons|Google+Sans+Text:400,500,700" media="screen" />
+
+<link rel="stylesheet" href="https://cdn.qwiklabs.com/assets/application-edc88b659d478c138e12de45354d6e27fda904c51d367223d97eb4d41608b847.css" media="all" />
+<link rel="stylesheet" href="https://www.gstatic.com/glue/cookienotificationbar/cookienotificationbar.min.css" media="screen" />
+
+
+<style>
+  :root {
+    --primary-text-on-surface-color: #1a73e8;
+    --primary-text-on-surface-color-dark: #1568d6;
+    --primary-text-on-surface-color-darker: #135ec1;
+    --primary-text-on-surface-color-darkest: #1154ac;
+    --primary-surface-color: #1a73e8;
+    --primary-surface-color-rgb: 26,115,232;
+    --primary-surface-color-light: #d1e3fa;
+    --primary-surface-color-lightest: #e8f1fd;
+    --text-on-primary-color: #ffffff;
+    --accent-text-on-surface-color: #f29900;
+    --accent-surface-color: #f9ab00;
+    --accent-surface-color-rgb: 249,171,0;
+    --accent-surface-color-light: #ffefcc;
+    --text-on-accent-color: #202124;
+  }
+</style>
+
+<style>
+  :root {
+    --navbar-height: 64px;
+  }
+</style>
+
+
+
+</head>
+<body class='lab-show l-full no-nav application-new focuses focuses-show lab-show l-full no-nav '>
+<div class='header-container'>
+<div class='header'>
+<ql-toolbar jumpEnabled>
+<div class='header__title' slot='title'>
+<ql-icon-button label="Back" href="https://www.coursera.org/" id="88e68bc212df025b" target="_self" tip="Back">arrow_back</ql-icon-button>
+<h1 class='ql-headline-6'>Creating Databases in Compute Engine</h1>
+</div>
+<div class='header__actions' slot='action'>
+<ql-icon-button id='control-panel-target' style='display: none;'>
+dashboard
+</ql-icon-button>
+<ql-menu for='control-panel-target' id='control-panel-menu'></ql-menu>
+<ql-icon-button class='mobile-hide' icon='help_outline' id='help-menu-button' label='Open help menu' tip='Help'></ql-icon-button>
+<ql-menu for='help-menu-button' id='help-menu'>
+<ql-menu-item data-analytics-action='opened_help' data-analytics-label='lab' label='Help Center' onclick='hallofmirrors.helpService.startHelp({&quot;productData&quot;:{&quot;userId&quot;:12197799},&quot;context&quot;:&quot;lab&quot;})'></ql-menu-item>
+<ql-menu-item href='mailto:support@qwiklabs.com' label='Email support'></ql-menu-item>
+<ql-menu-item label='Chat support' onClick='ql.chat.open()'></ql-menu-item>
+</ql-menu>
+
+<ql-icon-button class='mobile-hide' icon='language' id='language' label='Select your language preference' tip='Language'></ql-icon-button>
+<ql-menu for='language'>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ar' href='/focuses/30999303?locale=ar&amp;parent=lti_session' label='العربية‬‎' lang='ar'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='de' href='/focuses/30999303?locale=de&amp;parent=lti_session' label='Deutsch' lang='de'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='en' href='/focuses/30999303?locale=en&amp;parent=lti_session' label='English' lang='en'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='es' href='/focuses/30999303?locale=es&amp;parent=lti_session' label='español (Latinoamérica)' lang='es'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='fr' href='/focuses/30999303?locale=fr&amp;parent=lti_session' label='français' lang='fr'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='fr_CA' href='/focuses/30999303?locale=fr_CA&amp;parent=lti_session' label='français (Canada)' lang='fr-CA'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='he' href='/focuses/30999303?locale=he&amp;parent=lti_session' label='עברית' lang='he'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='id' href='/focuses/30999303?locale=id&amp;parent=lti_session' label='bahasa Indonesia' lang='id'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='it' href='/focuses/30999303?locale=it&amp;parent=lti_session' label='Italiano' lang='it'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ja' href='/focuses/30999303?locale=ja&amp;parent=lti_session' label='日本語' lang='ja'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ko' href='/focuses/30999303?locale=ko&amp;parent=lti_session' label='한국어' lang='ko'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='pl' href='/focuses/30999303?locale=pl&amp;parent=lti_session' label='Polski' lang='pl'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='pt_BR' href='/focuses/30999303?locale=pt_BR&amp;parent=lti_session' label='português (Brasil)' lang='pt-BR'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='pt_PT' href='/focuses/30999303?locale=pt_PT&amp;parent=lti_session' label='português (Portugal)' lang='pt-PT'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ru' href='/focuses/30999303?locale=ru&amp;parent=lti_session' label='русский' lang='ru'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='tr' href='/focuses/30999303?locale=tr&amp;parent=lti_session' label='Türkçe' lang='tr'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='uk' href='/focuses/30999303?locale=uk&amp;parent=lti_session' label='український' lang='uk'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='zh' href='/focuses/30999303?locale=zh&amp;parent=lti_session' label='简体中文' lang='zh'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='zh_TW' href='/focuses/30999303?locale=zh_TW&amp;parent=lti_session' label='繁體中文' lang='zh-TW'></ql-menu-item>
+</ql-menu>
+
+
+<ql-icon-button id='my_account' label='My account' tip='My account'>
+<ql-avatar src='https://lh3.googleusercontent.com/a/ACg8ocI6s7UhNvX_oCOJMPhLJPmqhqIgwu_5AK0t7wpjF-5jmQo=s320-c'></ql-avatar>
+</ql-icon-button>
+<ql-menu for='my_account' id='my_account_menu' style='max-height: 640px'>
+<div class='my-account-menu'>
+<ql-avatar class='l-mtl l-mbl' size='120' src='https://lh3.googleusercontent.com/a/ACg8ocI6s7UhNvX_oCOJMPhLJPmqhqIgwu_5AK0t7wpjF-5jmQo=s320-c'></ql-avatar>
+<div class='my-account-menu__user-info l-mbl'>
+<h4 class='ql-subhead-1'>Justin Ho</h4>
+<p class='ql-body-2 text--light'>cliffdove@gmail.com</p>
+<p class='ql-body-2 text--light'>
+</p>
+<a class="text--green ql-subhead-2" href="/my_account/payments"><ql-chip positive>
+0 Credits
+</ql-chip>
+</a></div>
+<div class='buttons l-mbl'>
+<a class="button button--hairline" id="settings" href="/my_account/profile">Settings</a>
+</div>
+<hr>
+<ql-button data-analytics-action='clicked_sign_out' href='/users/sign_out' method='delete'>
+Sign Out
+</ql-button>
+<div class='privacy l-mtl'>
+<a target="_blank" class="ql-caption text--light" href="/privacy_policy">Privacy</a>
+<span class='ql-caption text--light l-mls l-mrs'>&middot;</span>
+<a class="ql-caption text--light" href="/terms_of_service">Terms</a>
+</div>
+</div>
+</ql-menu>
+
+</div>
+</ql-toolbar>
+
+</div>
+</div>
+
+<nav class='nav-panel js-nav-panel'>
+<div class='nav-panel__logo'>
+<div class="custom-logo">Qwiklabs</div>
+</div>
+<nav class='ql-sidenav'>
+<ql-sidenav-item href='/' icon='home' label='Home'></ql-sidenav-item>
+
+<ql-sidenav-item href='/catalog' icon='school' label='Catalog'></ql-sidenav-item>
+
+<ql-sidenav-item href='/profile' icon='event_note' label='Profile'></ql-sidenav-item>
+
+</nav>
+
+</nav>
+<div class='nav-panel__overlay js-nav-toggle'></div>
+
+<main class='js-main' id='jump-content'>
+<div class='l-main-wrapper' id='main-wrapper'>
+
+
+
+
+<div class='lab-assessment__tab js-open-lab-assessment-panel'>
+<button class='js-lab-assessment-total-score'>
+—/100
+</button>
+</div>
+<div aria-labelledby='lab-assessment-checkpoint' class='lab-assessment__panel js-lab-assessment-panel' role='dialog'>
+<div class='lab-assessment__panel__header'>
+<h4 id='lab-assessment-checkpoint'>Checkpoints</h4>
+<ql-icon-button class='js-close-lab-assessment-panel' icon='arrow_forward' label='Close dialog'></ql-icon-button>
+</div>
+<div class='lab-assessment__step'>
+<p class='lab-assessment__step__title' id='lab-assessment-step-title'>
+Create a MySQL database on Linux
+</p>
+<div class='lab-assessment__step__action'>
+<ql-button class='js-show-run-step-button' description='Create a MySQL database on Linux' step_no='1'>
+Check my progress
+</ql-button>
+<p class='lab-assessment__step__score'>
+<span class='js-assessment-step-score-1'>
+</span>
+/ 40
+</p>
+</div>
+</div>
+
+<div class='lab-assessment__step'>
+<p class='lab-assessment__step__title' id='lab-assessment-step-title'>
+Create a SQL Server database on Windows
+</p>
+<div class='lab-assessment__step__action'>
+<ql-button class='js-show-run-step-button' description='Create a SQL Server database on Windows' step_no='2'>
+Check my progress
+</ql-button>
+<p class='lab-assessment__step__score'>
+<span class='js-assessment-step-score-2'>
+</span>
+/ 30
+</p>
+</div>
+</div>
+
+<div class='lab-assessment__step'>
+<p class='lab-assessment__step__title' id='lab-assessment-step-title'>
+Automate server creation using the Google Cloud SDK
+</p>
+<div class='lab-assessment__step__action'>
+<ql-button class='js-show-run-step-button' description='Automate server creation using the Google Cloud SDK' step_no='3'>
+Check my progress
+</ql-button>
+<p class='lab-assessment__step__score'>
+<span class='js-assessment-step-score-3'>
+</span>
+/ 30
+</p>
+</div>
+</div>
+
+</div>
+<ql-drawer-container class='js-lab-state' data-analytics-payload='{&quot;label&quot;:&quot;Creating Databases in Compute Engine&quot;,&quot;lab_name&quot;:&quot;Creating Databases in Compute Engine&quot;,&quot;classroom_name&quot;:null,&quot;deployment&quot;:&quot;googlecoursera-run&quot;}' data-credits='0.0' data-focus-id='30999303' data-lab-billing-limit='0.0' data-lab-duration='4500' data-parent='lti_session' data-recaptcha-enabled id='lab-container'>
+<ql-drawer id='terminal-drawer' slot='drawer'>
+<iframe allow='clipboard-read' class='terminal' id='embedded-resource'></iframe>
+</ql-drawer>
+<ql-drawer-content class='js-lab-wrapper' id='lab-content' slot='drawer-content'>
+<ql-drawer-container id='lab-content-container'>
+<ql-drawer id='control-panel-drawer' open slot='drawer' width='320'>
+<ql-lab-control-panel class='ql-lab-control-panel__max-height control-panel js-lab-control-panel' connectionFiles='[]' labControlButton='{&quot;disabled&quot;:false,&quot;pending&quot;:false,&quot;running&quot;:false}' labDetails='[]' labTimer='{&quot;ticking&quot;:false,&quot;secondsRemaining&quot;:4500}' studentResources='[]'>
+<script src="https://www.recaptcha.net/recaptcha/api.js?render=6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr"   ></script>
+        <script>
+          // Define function so that we can call it again later if we need to reset it
+          // This executes reCAPTCHA and then calls our callback.
+          function executeRecaptchaForStartLab() {
+            grecaptcha.ready(function() {
+              grecaptcha.execute('6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr', {action: 'start_lab'}).then(function(token) {
+                setInputWithRecaptchaResponseTokenForStartLab('g-recaptcha-response-data-start-lab', token)
+              });
+            });
+          };
+          // Invoke immediately
+          executeRecaptchaForStartLab()
+
+          // Async variant so you can await this function from another async function (no need for
+          // an explicit callback function then!)
+          // Returns a Promise that resolves with the response token.
+          async function executeRecaptchaForStartLabAsync() {
+            return new Promise((resolve, reject) => {
+             grecaptcha.ready(async function() {
+                resolve(await grecaptcha.execute('6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr', {action: 'start_lab'}))
+              });
+            })
+          };
+
+                  var setInputWithRecaptchaResponseTokenForStartLab = function(id, token) {
+          var element = document.getElementById(id);
+          if (element !== null) element.value = token;
+        }
+
+        </script>
+<input type="hidden" name="g-recaptcha-response-data[start_lab]" id="g-recaptcha-response-data-start-lab" data-sitekey="6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr" class="g-recaptcha g-recaptcha-response "/>
+
+<div aria-live='polite' class='hidden' id='recaptcha-v2-start-lab' slot='recaptcha'>
+<script src="https://www.recaptcha.net/recaptcha/api.js" async defer ></script>
+<div data-sitekey="6LeOI8IUAAAAAPkHlMAE9NReCD_1WD81iYlBlCnV" data-callback="recaptchaComplete" data-expired-callback="expireV2Token" class="g-recaptcha "></div>
+          <noscript>
+            <div>
+              <div style="width: 302px; height: 422px; position: relative;">
+                <div style="width: 302px; height: 422px; position: absolute;">
+                  <iframe
+                    src="https://www.recaptcha.net/recaptcha/api/fallback?k=6LeOI8IUAAAAAPkHlMAE9NReCD_1WD81iYlBlCnV"
+                    name="ReCAPTCHA"
+                    style="width: 302px; height: 422px; border-style: none; border: 0; overflow: hidden;">
+                  </iframe>
+                </div>
+              </div>
+              <div style="width: 300px; height: 60px; border-style: none;
+                bottom: 12px; left: 25px; margin: 0px; padding: 0px; right: 25px;
+                background: #f9f9f9; border: 1px solid #c1c1c1; border-radius: 3px;">
+                <textarea id="g-recaptcha-response" name="g-recaptcha-response"
+                  class="g-recaptcha-response"
+                  style="width: 250px; height: 40px; border: 1px solid #c1c1c1;
+                  margin: 10px 25px; padding: 0px; resize: none;">
+                </textarea>
+              </div>
+            </div>
+          </noscript>
+
+</div>
+</ql-lab-control-panel>
+</ql-drawer>
+<ql-drawer-content id='lab-instructions' slot='drawer-content'>
+<div class='lab-content-container'>
+<div class='alert alert--fake js-alert'>
+<p class='alert__message js-alert-message' role='alert'></p>
+<ql-icon-button class='alert__close js-alert-close' icon='clear'></ql-icon-button>
+<iframe class='l-ie-iframe-fix' tabindex='-1'></iframe>
+</div>
+<div class='lab-content__renderable-instructions js-lab-content'>
+<div class='lab-preamble'>
+<h1 class='lab-preamble__title'>
+Creating Databases in Compute Engine
+</h1>
+<div class='lab-preamble__details subtitle-headline-1'>
+<span>1 hour 15 minutes</span>
+<span>Free</span>
+<div class='lab__rating'>
+<a aria-label="Lab Reviews" href="/focuses/30999303/reviews?parent=lti_session"><div class='rateit' data-rateit-readonly='true' data-rateit-value='4.3432'></div>
+
+</a></div>
+</div>
+</div>
+<div class='lab-outline-place-holder'></div>
+
+<div class='markdown-lab-instructions js-markdown-instructions' id='markdown-lab-instructions'>
+
+<h2 id="step1">Overview</h2>
+<p>In this lab, you create database servers running on Compute Engine. You create both Linux and Windows servers and use the CLI to automate the creation of a server.</p>
+<h3>Objectives</h3>
+<p>In this lab, you learn how to perform the following tasks:</p>
+<ul>
+<li>
+<p>Create a MySQL database on Linux.</p>
+</li>
+<li>
+<p>Create a SQL Server database on Windows.</p>
+</li>
+<li>
+<p>Automate server creation using the Google Cloud SDK.</p>
+</li>
+</ul>
+<h2 id="step2">Setup</h2>
+<p>In this task, you use Qwiklabs and perform initialization steps for your lab.</p>
+<p>For each lab, you get a new Google Cloud project and set of resources for a fixed time at no cost.</p>
+<ol>
+<li>
+<p>Sign in to Qwiklabs using an <strong>incognito window</strong>.</p>
+</li>
+<li>
+<p>Note the lab's access time (for example, <code>1:15:00</code>), and make sure you can finish within that time.<br>
+There is no pause feature. You can restart if needed, but you have to start at the beginning.</p>
+</li>
+<li>
+<p>When ready, click <strong>Start lab</strong>.</p>
+</li>
+<li>
+<p>Note your lab credentials (<strong>Username</strong> and <strong>Password</strong>). You will use them to sign in to the Google Cloud Console.</p>
+</li>
+<li>
+<p>Click <strong>Open Google Console</strong>.</p>
+</li>
+<li>
+<p>Click <strong>Use another account</strong> and copy/paste credentials for <strong>this</strong> lab into the prompts.<br>
+If you use other credentials, you'll receive errors or <strong>incur charges</strong>.</p>
+</li>
+<li>
+<p>Accept the terms and skip the recovery resource page.</p>
+</li>
+</ol>
+<aside class="warning"><p><strong>Note:</strong> Do not click <strong>End Lab</strong> unless you have finished the lab or want to restart it. This clears your work and removes the project.
+  </p>
+</aside>
+<h2 id="step3">Task 1. Create a MySQL database on Linux</h2>
+<ol>
+<li>
+<p>Open a new web browser window and navigate to the Google Cloud Console (console.cloud.google.com). Use the project selector to choose
+the first project with a leading name of 'qwiklabs-gcp.'</p>
+</li>
+<li>
+<p>On the <strong>Navigation menu</strong> (<img alt="Navigation menu icon" src="https://cdn.qwiklabs.com/tkgw1TDgj4Q%2BYKQUW4jUFd0O5OEKlUMBRYbhlCrF0WY%3D">), click <strong>Compute Engine &gt; VM instances</strong>.</p>
+</li>
+<li>
+<p>Click <strong>Create instance</strong>.</p>
+</li>
+<li>
+<p>For <strong>Name</strong>, type <strong>mysql-db</strong>.</p>
+</li>
+<li>
+<p>Under <strong>Boot disk</strong>, click <strong>Change</strong>.</p>
+</li>
+<li>
+<p>For Operating system, select <strong>Debian</strong>, for Version, select <strong>Debian GNU/Linux 11 (bullseye) x86/64</strong>, and then click Select.</p>
+</li>
+<li>
+<p>When the VM is ready, click <strong>SSH</strong>. <br>
+This will log you in to the server in a new tab.</p>
+</li>
+</ol>
+<p><img alt="The highlighted SSH drop-down menu in the mysql-db VM instance." src="https://cdn.qwiklabs.com/N%2FnU9XtIholyWCtKwtGzXvpiHslz4eDH2rIsUKPVSE0%3D"></p>
+<ol start="8">
+<li>
+<p>In the terminal window, to update the packages and install MySQL using the <strong>apt-get</strong> package manager, enter the following command:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+sudo apt-get update
+sudo apt-get install -y default-mysql-server
+</ql-code-block>
+<ol start="9">
+<li>
+<p>To secure the database, enter the following command:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+sudo mysql_secure_installation
+</ql-code-block>
+<ol start="10">
+<li>
+<p>When you are prompted for the current password for <strong>root</strong>, press <strong>Enter</strong> (<strong>Return</strong>) for none.</p>
+</li>
+<li>
+<p>When you are prompted for <strong>Switch to unix_socket authentication [Y/n]</strong>, press <strong>N</strong>.</p>
+</li>
+<li>
+<p>When you are prompted for <strong>Change the root password?  [Y/n]</strong>,  press <strong>Y</strong>.</p>
+</li>
+</ol>
+<p>Enter something you will remember, because you will need it later.</p>
+<ol start="13">
+<li>
+<p>When you are prompted for <strong>Remove anonymous users? [Y/n]</strong>, press <strong>N</strong>.</p>
+</li>
+<li>
+<p>When you are prompted for <strong>Disallow root login remotely? [Y/n]</strong>, press <strong>N</strong>.</p>
+</li>
+<li>
+<p>When you are prompted for <strong>Remove test database and access to it? [Y/n]</strong>, press <strong>N</strong>.</p>
+</li>
+<li>
+<p>When you are prompted for <strong>Reload privilege tables now? [Y/n]</strong>, press <strong>Y</strong>.</p>
+</li>
+<li>
+<p>Now log in to the database. Enter the following command, and then enter your password when prompted:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+sudo mysql -u root -p
+</ql-code-block>
+<ol start="18">
+<li>
+<p>At the <code>mysql&gt;</code> prompt, to see the current databases, enter the following command:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+SHOW databases;
+</ql-code-block>
+<ol start="19">
+<li>
+<p>To create a new database, enter the following command:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+CREATE database petsdb;
+</ql-code-block>
+<ol start="20">
+<li>
+<p>Switch to that database:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+USE petsdb;
+</ql-code-block>
+<ol start="21">
+<li>
+<p>Create a table:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+CREATE TABLE pets (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255),
+    breed VARCHAR(255)
+);
+</ql-code-block>
+<ol start="22">
+<li>
+<p>Add a record:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+INSERT INTO pets (name, breed)
+VALUES ('Noir', 'Schnoodle');
+</ql-code-block>
+<ol start="23">
+<li>
+<p>Confirm that your record was added:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+SELECT * FROM pets;
+</ql-code-block>
+<ol start="24">
+<li>
+<p>Type <strong>exit</strong> to log out of the database.</p>
+</li>
+<li>
+<p>Type <strong>exit</strong> again to close the SSH session.</p>
+</li>
+</ol>
+<h3>Review</h3>
+<p>You just created a MySQL database server using Debian Linux.</p>
+<p>Click <em>Check my progress</em> to verify the objective.
+<ql-activity-tracking step="1">
+Create a MySQL database on Linux
+</ql-activity-tracking></p>
+<h2 id="step4">Task 2. Create a SQL Server database on Windows</h2>
+<ol>
+<li>
+<p>Return to the Google Cloud Console and the Compute Engine service.</p>
+</li>
+<li>
+<p>Click <strong>Create instance</strong>.</p>
+</li>
+<li>
+<p>For <strong>Name</strong>, type <strong>sql-server-db</strong>.</p>
+</li>
+<li>
+<p>For <strong>Machine type</strong>, select <strong>e2-standard-4</strong>.</p>
+</li>
+<li>
+<p>Under <strong>Boot disk</strong>, click <strong>Change</strong>.</p>
+</li>
+<li>
+<p>For <strong>Operating system</strong>, select <strong>SQL Server on Windows Server</strong>, for <strong>Version</strong>, select <strong>SQL Server 2019 Web on Windows Server 2019 Datacenter</strong>, and then click <strong>Select</strong>.</p>
+</li>
+<li>
+<p>Accept the remaining defaults, and then click <strong>Create</strong>.</p>
+</li>
+<li>
+<p>When the Windows server is ready, click the dropdown arrow in the <strong>Connect</strong> column, and then select <strong>Set Windows password</strong>.</p>
+</li>
+</ol>
+<p><img alt="The option Set Windows password highlighted in the RDP drop-down menu." src="https://cdn.qwiklabs.com/aIT9yFjbM9fNNhkGYa%2FA4%2BVb34N0yQbJNIkFi%2B1buWg%3D"></p>
+<ql-infobox><b>Note:</b> If you get to this point too quickly, the Windows server may not be ready, even though a green check in the console indicates that it is. Wait a couple of minutes and try again.</ql-infobox>
+<ol start="9">
+<li>
+<p>Leave the <strong>Username</strong> as it is (the generated username is a portion of your Qwiklabs username), and then click <strong>Set</strong>.</p>
+</li>
+<li>
+<p>Copy and paste the generated password into a text file so you don't lose it, and then click <strong>Close</strong>.</p>
+</li>
+</ol>
+<p>You need to have an RDP client to log on to the Windows machine.
+11. Do one of the following:</p>
+<ul>
+<li>
+<p>If you are using Windows, you already have RDP:</p>
+<ul>
+<li>Click the dropdown arrow in the <strong>Connect</strong> column, and then select <strong>Download the RDP file</strong>.</li>
+<li>When the download is complete,  double-click the file and then log in with your username and the password you copied.</li>
+</ul>
+</li>
+<li>
+<p>If you are using a Mac:</p>
+<ul>
+<li>Install the <strong>Microsoft Remote Desktop</strong> client from the Apple App Store (<em>you may already have it installed</em>).</li>
+<li>After you install the client, download the RDP file, and then log in with your username and the password you copied.</li>
+</ul>
+</li>
+</ul>
+<ol start="12">
+<li>
+<p>When you are logged on to the Windows server, close the Server Manager Dashboard.</p>
+</li>
+<li>
+<p>On the <strong>Start</strong> menu, type <strong>SSMS</strong>, then right click the <strong>SQL Server Management Studio</strong> shortcut, and choose <strong>Run as administrator</strong> to run the program.</p>
+</li>
+<li>
+<p>On the Popup window choose <strong>Yes</strong> when prompted <strong>Do you want to allow this app to make changes to your device?</strong>.</p>
+</li>
+<li>
+<p>In the <strong>Connect to Server dialog</strong>, the server name should be <strong>SQL-SERVER-DB</strong>. Click <strong>Connect</strong>.</p>
+</li>
+<li>
+<p>In Management Studio, in the Object Explorer, right-click <strong>SQL-SERVER-DB</strong>, and select <strong>Properties</strong>.</p>
+</li>
+<li>
+<p>In the <strong>Server Properties</strong> dialog, select the <strong>Security</strong> page.</p>
+</li>
+<li>
+<p>For <strong>Server Authentication</strong>, select <strong>SQL Server and Windows Authentication mode</strong>, and then click <strong>OK</strong>.</p>
+</li>
+<li>
+<p>Read the warning message and click <strong>OK</strong> again.</p>
+</li>
+<li>
+<p>In Object Explorer, right-click the server, and select <strong>Restart</strong>.</p>
+</li>
+<li>
+<p>Click <strong>Yes</strong> when prompted. If the <strong>Restart</strong> command is disabled, click the <strong>Start</strong> menu and reboot the server. Give it a minute or two and then restart your RDP session.</p>
+</li>
+<li>
+<p>When you're logged in, return to SQL Server Management Studio and connect to the database server.</p>
+</li>
+<li>
+<p>Expand the <strong>Security</strong> and <strong>Logins</strong> branch of the tree view. Right-click on the <strong>Logins</strong> branch, and select <strong>New Login</strong>.</p>
+</li>
+<li>
+<p>For <strong>Login name</strong>, enter your first name or another unique value.</p>
+</li>
+<li>
+<p>Select <strong>SQL Server authentication</strong>.</p>
+</li>
+<li>
+<p>Enter a password you will remember (<em>paste it in a text file if you like</em>).</p>
+</li>
+<li>
+<p>Clear <strong>Enforce password policy</strong>.</p>
+<p>a. Click the <strong>Server roles</strong> page, and select the <strong>sysadmin</strong> role.</p>
+<p>b. Click the <strong>User Mapping</strong> page, and select all the databases.</p>
+<p>c. Click <strong>OK</strong>.</p>
+</li>
+<li>
+<p>To test the login you just created, in Object Explorer, click <strong>Connect</strong>, and then select <strong>Database Engine</strong>.</p>
+</li>
+<li>
+<p>For <strong>Authentication</strong>, select <strong>SQL Server Authentication</strong>.</p>
+</li>
+<li>
+<p>Enter your username and password, and then click <strong>Connect</strong>.</p>
+</li>
+<li>
+<p>In the toolbar, click <strong>New Query</strong>.</p>
+</li>
+<li>
+<p>To create a database, enter the following command, and then click <strong>Execute</strong>:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+CREATE DATABASE petsdb;
+</ql-code-block>
+<ol start="33">
+<li>
+<p>In the databases dropdown to the left of the Execute button, select your <code>petsdb</code> database.</p>
+</li>
+<li>
+<p>To create a table, enter the following command, and then click <strong>Execute</strong>:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+USE petsdb;
+CREATE TABLE pets (
+    id INT PRIMARY KEY IDENTITY (1, 1),
+    name VARCHAR (MAX),
+    breed VARCHAR (MAX)
+);
+</ql-code-block>
+<ol start="35">
+<li>
+<p>To add a record:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+INSERT INTO pets (name, breed)
+VALUES ('Noir', 'Schnoodle');
+</ql-code-block>
+<ol start="36">
+<li>
+<p>To confirm that it worked:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+SELECT * FROM pets;
+</ql-code-block>
+<ol start="37">
+<li>
+<p>Close your RDP connection.</p>
+</li>
+</ol>
+<h3>Review</h3>
+<p>You just created a SQL Server database server running on Windows.</p>
+<p>Click <em>Check my progress</em> to verify the objective.
+<ql-activity-tracking step="2">
+Create a SQL Server database on Windows
+</ql-activity-tracking></p>
+<h2 id="step5">Task 3. Automate server creation using the Google Cloud SDK</h2>
+<ol>
+<li>
+<p>Return to the Google Cloud Console and the Compute Engine service.</p>
+</li>
+<li>
+<p>Click <strong>Create Instance</strong>.</p>
+</li>
+<li>
+<p>For <strong>Name</strong>, type <strong>db-server</strong>.</p>
+</li>
+<li>
+<p>Under <strong>Boot disk</strong>, click <strong>Change</strong>.</p>
+</li>
+<li>
+<p>For <strong>Version</strong>, select <strong>Debian GNU/Linux 11 (bullseye) x86/64</strong>, and then click <strong>Select</strong>.</p>
+</li>
+<li>
+<p>Expand <strong>Advanced options</strong> then  <strong>Management</strong>.  In <strong>Automation</strong> - <strong>Startup script</strong> paste the following:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+#! /bin/bash
+apt-get update
+apt-get install -y default-mysql-server
+</ql-code-block>
+<ol start="7">
+<li>Scroll to the bottom, but <em><strong>do not</strong></em> click the Create button; instead click the <strong>Equivalent Code</strong> button and then navigate to the  <strong>Command Line</strong> pane on the right of the screen.</li>
+</ol>
+<p>This pane shows you the gcloud CLI command you can use to automate this server's creation as you configured it. Next, make a small change to this command.</p>
+<ol start="8">
+<li>
+<p>Click <strong>Copy</strong> at the bottom of the pane.</p>
+</li>
+<li>
+<p>Cancel the <strong>Create an instance wizard</strong>.</p>
+</li>
+<li>
+<p>In Notepad or similar text editor, paste the copied code.</p>
+</li>
+<li>
+<p>If present, from the list of commands remove the following parameter: <strong>--provisioning-model=STANDARD</strong></p>
+</li>
+</ol>
+<ql-warningbox><strong>Note: </strong>Please be careful to only delete the <strong>provisioning-model</strong> parameter.</ql-warningbox>
+<ol start="12">
+<li>
+<p>Select the entire edited command and copy it to the clipboard.</p>
+</li>
+<li>
+<p>Launch the Cloud Shell in the top right section of the Cloud Console page, paste the command, and press Return/Enter to create the VM.</p>
+</li>
+</ol>
+<p>If prompted, click <strong>Authorize</strong>.</p>
+<ol start="14">
+<li>
+<p>Press Return (Enter) to allow for an empty passphrase.</p>
+</li>
+<li>
+<p>Please wait for 3 to 5 minutes for the startup script to run.  Then in the Cloud Shell terminal, enter the following to log in to the virtual machine:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+gcloud compute ssh db-server --zone=us-central1-a
+</ql-code-block>
+<ol start="16">
+<li>
+<p>If asked: Do you want to continue(Y/n)?, Enter <strong>Y</strong>.  Accept all defaults for setting up secure communications.</p>
+</li>
+<li>
+<p>To see whether your database server is running, enter the following command:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+sudo systemctl status mysql
+</ql-code-block>
+<p>The output on the console should contain a row similar to the following:</p>
+<ql-code-block output="">
+Aug 17 14:32:10 db-server systemd[1]: Started MariaDB 10.5.15 database server.
+</ql-code-block>
+<ol start="18">
+<li>Press <strong>Q</strong> to exit the status screen.</li>
+</ol>
+<p>Click <em>Check my progress</em> to verify the objective.
+<ql-activity-tracking step="3">
+Automate server creation using the Google Cloud SDK
+</ql-activity-tracking></p>
+<h2 id="step6">Congratulations!</h2>
+<p>You created database servers running on Compute Engine. You created both Linux and Windows servers and have used the CLI to automate the creation of a server.</p>
+<h2 id="step7">End your lab</h2>
+<p>When you have completed your lab, click <strong>End Lab</strong>. Google Cloud Skills Boost removes the resources you’ve used and cleans the account for you.</p>
+<p>You will be given an opportunity to rate the lab experience. Select the applicable number of stars, type a comment, and then click <strong>Submit</strong>.</p>
+<p>The number of stars indicates the following:</p>
+<ul>
+<li>1 star = Very dissatisfied</li>
+<li>2 stars = Dissatisfied</li>
+<li>3 stars = Neutral</li>
+<li>4 stars = Satisfied</li>
+<li>5 stars = Very satisfied</li>
+</ul>
+<p>You can close the dialog box if you don't want to provide feedback.</p>
+<p>For feedback, suggestions, or corrections, please use the <strong>Support</strong> tab.</p>
+<p>Copyright 2022 Google LLC All rights reserved. Google and the Google logo are trademarks of Google LLC. All other company and product names may be trademarks of the respective companies with which they are associated.</p>
+
+</div>
+</div>
+
+
+<div class='lab-content__end-lab-button js-end-lab-button-container hidden'>
+<ql-lab-control-button class='js-end-lab-button' running></ql-lab-control-button>
+</div>
+<!-- / TODO: Move recommendations into the end lab modal -->
+</div>
+<div aria-label='Lab Table of Contents' class='outline-container' id='js-outline-container' role='navigation'>
+<ul class='lab-content__outline js-lab-content-outline'>
+<li><a href="#step1">Overview</a></li><li><a href="#step2">Setup</a></li><li><a href="#step3">Task 1. Create a MySQL database on Linux</a></li><li><a href="#step4">Task 2. Create a SQL Server database on Windows</a></li><li><a href="#step5">Task 3. Automate server creation using the Google Cloud SDK</a></li><li><a href="#step6">Congratulations!</a></li><li><a href="#step7">End your lab</a></li>
+</ul>
+</div>
+</ql-drawer-content>
+</ql-drawer-container>
+</ql-drawer-content>
+</ql-drawer-container>
+<ql-snackbar id='alert-snackbar'></ql-snackbar>
+
+
+
+</div>
+</main>
+
+<span class='hidden' id='flash-sibling-before'></span>
+<ql-snackbar></ql-snackbar>
+
+<script data-glue-cookie-notification-bar-category='2B' src='https://www.gstatic.com/glue/cookienotificationbar/cookienotificationbar.min.js'></script>
+
+<ql-dialog headline='Score Details' icon='task_alt' id='jupyter-feedback-modal'>
+<iframe id='jupyter-feedback-frame' srcdoc='' title='Jupyter Feedback'></iframe>
+</ql-dialog>
+
+<div class='modal fade' id='lab-details-modal'>
+<div class='modal-container'>
+<div class='modal-content mdl-shadow--24dp'>
+<div class='modal-body'>
+<p class='l-mbm'>
+In this lab, you will create database servers running on Google Cloud Compute Engine. You will create both Linux and Windows servers and will use the CLI to automate the creation of a server.
+</p>
+<p class='small-label l-mbs'>
+<strong>
+Duration:
+</strong>
+0m setup
+&middot;
+75m access
+&middot;
+75m completion
+</p>
+<p class='small-label l-mbs'>
+<strong>AWS Region:</strong>
+[] <strong></strong>
+</p>
+<p class='small-label l-mbs'>
+<span><strong>Levels: </strong>intermediate</span>
+</p>
+<p class='small-label'>
+<strong>
+Permalink:
+</strong>
+<a href="https://googlecoursera.qwiklabs.com/catalog_lab/2778">https://googlecoursera.qwiklabs.com/catalog_lab/2778</a>
+</p>
+</div>
+<div class='modal-actions'>
+<a class='button button--text' data-dismiss='modal'>
+Got It
+</a>
+</div>
+
+
+</div>
+</div>
+<iframe class='l-ie-iframe-fix' tabindex='-1' title='modal'></iframe>
+</div>
+<ql-dialog headline='How satisfied are you with this lab?&lt;span aria-hidden=&quot;true&quot;&gt;*&lt;/span&gt;' id='lab-review-dialog'>
+<form class="simple_form js-lab-review-form" id="new_lab_review" action="/lab_reviews" accept-charset="UTF-8" data-remote="true" method="post"><input name="utf8" type="hidden" value="&#x2713;" autocomplete="off" /><div aria-labelledby='lab-review-dialog' aria-required='true' aria-valuemax='5' aria-valuemin='0' aria-valuenow='0' class='rateit js-rateit' data-rateit-max='5' data-rateit-min='0' data-rateit-resetable='false' data-rateit-step='1' data-rateit-value='0' id='lab-review-rateit' role='slider' tabindex='0'></div>
+<div class='l-mtm'>
+
+<div class="control-group hidden lab_review_user_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" value="12197799" name="lab_review[user_id]" id="lab_review_user_id" /></div></div>
+<div class="control-group hidden lab_review_classroom_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" name="lab_review[classroom_id]" id="lab_review_classroom_id" /></div></div>
+<div class="control-group hidden lab_review_lab_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" value="2778" name="lab_review[lab_id]" id="lab_review_lab_id" /></div></div>
+<div class="control-group hidden lab_review_focus_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" name="lab_review[focus_id]" id="lab_review_focus_id" /></div></div>
+<div class="control-group hidden lab_review_rating"><div class="controls"><input class="hidden js-rating-input" autocomplete="off" type="hidden" name="lab_review[rating]" id="lab_review_rating" /></div></div>
+<div class="control-group text optional lab_review_comment"><label class="text optional control-label" for="lab_review_comment">Additional Comments</label><div class="controls"><textarea class="text optional" name="lab_review[comment]" id="lab_review_comment">
+</textarea></div></div>
+</div>
+</form><ql-button disabled id='submit' label='Submit' slot='action' text></ql-button>
+</ql-dialog>
+
+<ql-dialog headline='All done? If you end this lab, you will lose all your work. You may not be able to restart the lab if there is a quota limit. Are you sure you want to end this lab?' icon='error_outline' id='js-lab-are-you-sure-dialog'>
+<ql-button id='js-are-you-sure-button' label='Submit' slot='action' text></ql-button>
+</ql-dialog>
+
+
+<script>
+  $(function() {
+    ql.initMaterialInputs();
+    initChosen();
+    initSearch();
+    initTabs();
+    ql.list.init();
+    ql.favoriting.init();
+    ql.header.myAccount.init();
+    initTooltips();
+    ql.autocomplete.init();
+    ql.modals.init();
+    ql.toggleButtons.init();
+    ql.analytics.init();
+    ql.chat.init();
+  ql.jumpContent.init();
+  ql.labControlPanel.addRecaptchaErrorHandler();
+  initLabContent();
+  ql.labOutline.links.init();
+  initLabReviewModal();
+  initLabReviewTranslations( {"star_amount_1":"1 of 5 stars","star_amount_2":"2 of 5 stars","star_amount_3":"3 of 5 stars","star_amount_4":"4 of 5 stars","star_amount_5":"5 of 5 stars"} )
+  ql.labAssessment.init();
+  ql.labData.init();
+  initLabTranslations( {"are_you_sure":"All done? If you end this lab, you will lose all your work. You may not be able to restart the lab if there is a quota limit. Are you sure you want to end this lab?","in_progress":"*In Progress*","ending":"*Ending*","starting":"*Starting, please wait*","end_concurrent_labs":"Sorry, you can only run one lab at a time. To start this lab, please confirm that you want all of your existing labs to end.","copied":"Copied","no_resource":"Error retrieving resource.","no_support":"No Support","mac_press":"Press ⌘-C to copy","thanks_review":"Thanks for reviewing this lab.","windows_press":"Press Ctrl-C to copy","days":"days"} );
+  ql.labRun.init();
+  ql.navPanel.init();
+  ql.navigation.init();
+  
+  });
+</script>
+
+</body>
+</html>
+

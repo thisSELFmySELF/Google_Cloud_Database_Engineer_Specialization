@@ -1,0 +1,916 @@
+
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<title>Cloud Spanner - Loading Data and Performing Backups (OD) | Qwiklabs</title>
+<meta name="action-cable-url" content="/cable" />
+<script>
+//<![CDATA[
+window.gon={};gon.deployment="googlecoursera-run";
+//]]>
+</script>
+<script>
+  (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer',"GTM-5XSKHDX");
+</script>
+<script src="https://cdn.qwiklabs.com/assets/hallofmirrors/polyfills/webcomponents-loader-8583b47b01e40e6ea7bf1ad443a20b7e79bbdd5eafac009806a228c91a97282c.js"></script>
+<script src="https://cdn.qwiklabs.com/assets/vendor-613520545532a2795a401a8168ca8b698b9ee765a66f5ad9ead806b5c32eabe8.js"></script>
+<script src="https://cdn.qwiklabs.com/assets/application-8cadd7dbc2e82327319aa08272e6866739d7ca1cdd0369b6111a3352f062506b.js"></script>
+<script src="https://cdn.qwiklabs.com/assets/hallofmirrors/hallofmirrors-6a75474522419d1502d269c186ad8e9615ea8ffb93b320075299479d1255b437.js"></script>
+<!--[if lt IE 9]>  <![endif]-->
+<script src='http://html5shim.googlecode.com/svn/trunk/html5.js' type='text/javascript'></script>
+<!--[endif]>  <![endif]-->
+<script id='ze-snippet' src='https://static.zdassets.com/ekr/snippet.js?key=511e4158-0aec-4e3c-b2e6-4daa1769f51e'></script>
+
+
+<meta name="csrf-param" content="authenticity_token" />
+<meta name="csrf-token" content="Lnzu+GeJJyR8D9uR4i+D+HLYTWufG3dLlJlmJ+KO8y3fp1UpFvmRc1QVvOfUHlD6fDIKXtapvZ7xMtKn3QQRFQ==" />
+<meta content='width=device-width, initial-scale=1.0, user-scalable=yes' name='viewport'>
+<meta content='1rRsY0INj8RvwB5EF5pwdxt2A2P9aDgAlsICaJ0d5w0' name='google-site-verification'>
+<meta content='#3681E4' property='msapplication-TileColor'>
+<meta content='/favicon-144.png' property='msapplication-TileImage'>
+<meta content='[{&quot;id&quot;:&quot;recaptcha_experiment&quot;,&quot;optimize_id&quot;:&quot;dpViOcLkT3qS4TvL2mRojA&quot;,&quot;title&quot;:&quot;No Recaptcha shown for trusted users&quot;,&quot;variant_index&quot;:1,&quot;variant&quot;:&quot;no_recaptcha&quot;}]' name='active-experiments'>
+<meta content='{&quot;userId&quot;:12197799,&quot;experimentIds&quot;:[&quot;course_upgrade&quot;,&quot;canonical_domain_redirect&quot;,&quot;program_resources&quot;,&quot;program_learning_assignment&quot;,&quot;pre_course_quest_migration&quot;,&quot;peer_assignment&quot;,&quot;teams&quot;,&quot;oauth_risc_shutoff&quot;,&quot;search_updates&quot;,&quot;show_annual_purchase_now&quot;,&quot;programs&quot;,&quot;used_in&quot;,&quot;barker&quot;,&quot;program_groups&quot;,&quot;enforce_codebuild_verdicts&quot;,&quot;chat_off_for_signed_out_users&quot;,&quot;community_forum&quot;,&quot;alexandria_show_bundle_errors&quot;]}' name='help-api-product-data'>
+<meta content='{&quot;groupIds&quot;:[&quot;non_suadmins&quot;,&quot;students&quot;,&quot;non_organization&quot;,&quot;non_program&quot;]}' name='help-api-custom-data'>
+<meta content='In this lab you explore various ways to load data into Cloud Spanner as well as perform a backup of your database.' name='description'>
+<meta content='Qwiklabs' name='author'>
+<meta content='Cloud Spanner - Loading Data and Performing Backups (OD) | Qwiklabs' property='og:title'>
+<meta content='website' property='og:type'>
+<meta content='/favicon-144.png' property='og:image'>
+<meta content='Qwiklabs' property='og:site_name'>
+<meta content='In this lab you explore various ways to load data into Cloud Spanner as well as perform a backup of your database.' property='og:description'>
+<meta content='/qwiklabs_logo_900x887.png' property='og:logo' size='900x887'>
+<meta content='/qwiklabs_logo_994x187.png' property='og:logo' size='994x187'>
+
+
+<meta property="og:url" content="https://googlecoursera.qwiklabs.com/focuses/30867104?parent=lti_session" /><link href="https://googlecoursera.qwiklabs.com/focuses/30867104?parent=lti_session" rel="canonical" />
+<link color='#3681E4' href='/favicon-svg.svg' rel='mask-icon'>
+<link href='/favicon-180.png' rel='apple-touch-icon-precomposed'>
+<link href='/favicon-32.png' rel='shortcut icon' type='image/x-icon'>
+
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Oswald:400|Roboto+Mono:400,700|Roboto:300,400,500,700|Google+Sans:300,400,500,700|Google+Sans+Display:400|Material+Icons|Google+Material+Icons|Google+Sans+Text:400,500,700" media="screen" />
+
+<link rel="stylesheet" href="https://cdn.qwiklabs.com/assets/application-f96d7a45e06b9cdd0e47e81801741a3201e0507f98aecb38122e39639613463c.css" media="all" />
+
+
+<style>
+  :root {
+    --primary-text-on-surface-color: #1a73e8;
+    --primary-text-on-surface-color-dark: #1568d6;
+    --primary-text-on-surface-color-darker: #135ec1;
+    --primary-text-on-surface-color-darkest: #1154ac;
+    --primary-surface-color: #1a73e8;
+    --primary-surface-color-rgb: 26,115,232;
+    --primary-surface-color-light: #d1e3fa;
+    --primary-surface-color-lightest: #e8f1fd;
+    --text-on-primary-color: #ffffff;
+    --accent-text-on-surface-color: #f29900;
+    --accent-surface-color: #f9ab00;
+    --accent-surface-color-rgb: 249,171,0;
+    --accent-surface-color-light: #ffefcc;
+    --text-on-accent-color: #202124;
+  }
+</style>
+
+<style>
+  :root {
+    --navbar-height: 64px;
+  }
+</style>
+
+
+
+</head>
+<body class='lab-show l-full no-nav application-new focuses focuses-show lab-show l-full no-nav '>
+<div class='header-container'>
+<div class='header'>
+<ql-toolbar jumpEnabled>
+<div class='header__title' slot='title'>
+<ql-icon-button label="Back" href="https://www.coursera.org/" id="c7c21a11f9a15804" target="_self" tip="Back">arrow_back</ql-icon-button>
+<h1 class='ql-headline-6'>Cloud Spanner - Loading Data and Performing Backups (OD)</h1>
+</div>
+<div class='header__actions' slot='action'>
+<ql-icon-button id='control-panel-target' style='display: none;'>
+dashboard
+</ql-icon-button>
+<ql-menu for='control-panel-target' id='control-panel-menu'></ql-menu>
+<ql-icon-button class='mobile-hide' icon='help_outline' id='help-menu-button' label='Open help menu' tip='Help'></ql-icon-button>
+<ql-menu for='help-menu-button' id='help-menu'>
+<ql-menu-item data-analytics-action='opened_help' data-analytics-label='lab' label='Help Center' onclick='hallofmirrors.helpService.startHelp({&quot;productData&quot;:{&quot;userId&quot;:12197799},&quot;context&quot;:&quot;lab&quot;})'></ql-menu-item>
+<ql-menu-item href='mailto:support@qwiklabs.com' label='Email support'></ql-menu-item>
+<ql-menu-item label='Chat support' onClick='ql.chat.open()'></ql-menu-item>
+</ql-menu>
+
+<ql-icon-button class='mobile-hide' icon='language' id='language' label='Select your language preference' tip='Language'></ql-icon-button>
+<ql-menu for='language'>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ar' href='/focuses/30867104?locale=ar&amp;parent=lti_session' label='العربية‬‎' lang='ar'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='de' href='/focuses/30867104?locale=de&amp;parent=lti_session' label='Deutsch' lang='de'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='en' href='/focuses/30867104?locale=en&amp;parent=lti_session' label='English' lang='en'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='es' href='/focuses/30867104?locale=es&amp;parent=lti_session' label='español (Latinoamérica)' lang='es'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='fr' href='/focuses/30867104?locale=fr&amp;parent=lti_session' label='français' lang='fr'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='fr_CA' href='/focuses/30867104?locale=fr_CA&amp;parent=lti_session' label='français (Canada)' lang='fr-CA'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='he' href='/focuses/30867104?locale=he&amp;parent=lti_session' label='עברית' lang='he'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='id' href='/focuses/30867104?locale=id&amp;parent=lti_session' label='bahasa Indonesia' lang='id'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='it' href='/focuses/30867104?locale=it&amp;parent=lti_session' label='Italiano' lang='it'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ja' href='/focuses/30867104?locale=ja&amp;parent=lti_session' label='日本語' lang='ja'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ko' href='/focuses/30867104?locale=ko&amp;parent=lti_session' label='한국어' lang='ko'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='pl' href='/focuses/30867104?locale=pl&amp;parent=lti_session' label='Polski' lang='pl'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='pt_BR' href='/focuses/30867104?locale=pt_BR&amp;parent=lti_session' label='português (Brasil)' lang='pt-BR'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='pt_PT' href='/focuses/30867104?locale=pt_PT&amp;parent=lti_session' label='português (Portugal)' lang='pt-PT'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ru' href='/focuses/30867104?locale=ru&amp;parent=lti_session' label='русский' lang='ru'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='tr' href='/focuses/30867104?locale=tr&amp;parent=lti_session' label='Türkçe' lang='tr'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='uk' href='/focuses/30867104?locale=uk&amp;parent=lti_session' label='український' lang='uk'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='zh' href='/focuses/30867104?locale=zh&amp;parent=lti_session' label='简体中文' lang='zh'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='zh_TW' href='/focuses/30867104?locale=zh_TW&amp;parent=lti_session' label='繁體中文' lang='zh-TW'></ql-menu-item>
+</ql-menu>
+
+
+<ql-icon-button id='my_account' label='My account' tip='My account'>
+<ql-avatar src='https://lh3.googleusercontent.com/a/ACg8ocI6s7UhNvX_oCOJMPhLJPmqhqIgwu_5AK0t7wpjF-5jmQo=s320-c'></ql-avatar>
+</ql-icon-button>
+<ql-menu for='my_account' id='my_account_menu' style='max-height: 640px'>
+<div class='my-account-menu'>
+<ql-avatar class='l-mtl l-mbl' size='120' src='https://lh3.googleusercontent.com/a/ACg8ocI6s7UhNvX_oCOJMPhLJPmqhqIgwu_5AK0t7wpjF-5jmQo=s320-c'></ql-avatar>
+<div class='my-account-menu__user-info l-mbl'>
+<h4 class='ql-subhead-1'>Justin Ho</h4>
+<p class='ql-body-2 text--light'>cliffdove@gmail.com</p>
+<p class='ql-body-2 text--light'>
+</p>
+<a class="text--green ql-subhead-2" href="/my_account/payments"><ql-chip positive>
+0 Credits
+</ql-chip>
+</a></div>
+<div class='buttons l-mbl'>
+<a class="button button--hairline" id="settings" href="/my_account/profile">Settings</a>
+</div>
+<hr>
+<ql-button data-analytics-action='clicked_sign_out' href='/users/sign_out' method='delete'>
+Sign Out
+</ql-button>
+<div class='privacy l-mtl'>
+<a target="_blank" class="ql-caption text--light" href="/privacy_policy">Privacy</a>
+<span class='ql-caption text--light l-mls l-mrs'>&middot;</span>
+<a class="ql-caption text--light" href="/terms_of_service">Terms</a>
+</div>
+</div>
+</ql-menu>
+
+</div>
+</ql-toolbar>
+
+</div>
+</div>
+
+<nav class='nav-panel js-nav-panel'>
+<div class='nav-panel__logo'>
+<div class="custom-logo">Qwiklabs</div>
+</div>
+<nav class='ql-sidenav'>
+<ql-sidenav-item href='/' icon='home' label='Home'></ql-sidenav-item>
+
+<ql-sidenav-item href='/catalog' icon='school' label='Catalog'></ql-sidenav-item>
+
+<ql-sidenav-item href='/profile' icon='event_note' label='Profile'></ql-sidenav-item>
+
+</nav>
+
+</nav>
+<div class='nav-panel__overlay js-nav-toggle'></div>
+
+<main class='js-main' id='jump-content'>
+<div class='l-main-wrapper' id='main-wrapper'>
+
+
+
+
+<div class='lab-assessment__tab js-open-lab-assessment-panel'>
+<button class='js-lab-assessment-total-score'>
+100/100
+</button>
+</div>
+<div aria-labelledby='lab-assessment-checkpoint' class='lab-assessment__panel js-lab-assessment-panel' role='dialog'>
+<div class='lab-assessment__panel__header'>
+<h4 id='lab-assessment-checkpoint'>Checkpoints</h4>
+<ql-icon-button class='js-close-lab-assessment-panel' icon='arrow_forward' label='Close dialog'></ql-icon-button>
+</div>
+<div class='lab-assessment__step'>
+<p class='lab-assessment__step__title' id='lab-assessment-step-title'>
+Insert data through a client library
+</p>
+<div class='lab-assessment__step__action'>
+<ql-button class='js-show-run-step-button' description='Insert data through a client library' step_no='1'>
+Check my progress
+</ql-button>
+<p class='lab-assessment__step__score'>
+<span class='js-assessment-step-score-1'>
+30
+</span>
+/ 30
+</p>
+</div>
+</div>
+
+<div class='lab-assessment__step'>
+<p class='lab-assessment__step__title' id='lab-assessment-step-title'>
+Insert batch data through a client library
+</p>
+<div class='lab-assessment__step__action'>
+<ql-button class='js-show-run-step-button' description='Insert batch data through a client library' step_no='2'>
+Check my progress
+</ql-button>
+<p class='lab-assessment__step__score'>
+<span class='js-assessment-step-score-2'>
+30
+</span>
+/ 30
+</p>
+</div>
+</div>
+
+<div class='lab-assessment__step'>
+<p class='lab-assessment__step__title' id='lab-assessment-step-title'>
+Load data using Dataflow
+</p>
+<div class='lab-assessment__step__action'>
+<ql-button class='js-show-run-step-button' description='Load data using Dataflow' step_no='3'>
+Check my progress
+</ql-button>
+<p class='lab-assessment__step__score'>
+<span class='js-assessment-step-score-3'>
+40
+</span>
+/ 40
+</p>
+</div>
+</div>
+
+</div>
+<ql-drawer-container class='js-lab-state' data-analytics-payload='{&quot;label&quot;:&quot;Cloud Spanner - Loading Data and Performing Backups (OD)&quot;,&quot;lab_name&quot;:&quot;Cloud Spanner - Loading Data and Performing Backups (OD)&quot;,&quot;classroom_name&quot;:null,&quot;deployment&quot;:&quot;googlecoursera-run&quot;}' data-credits='0.0' data-focus-id='30867104' data-lab-billing-limit='0.0' data-lab-duration='5400' data-lab-instance-id='76598877' data-parent='lti_session' data-recaptcha-enabled id='lab-container'>
+<ql-drawer id='terminal-drawer' slot='drawer'>
+<iframe allow='clipboard-read' class='terminal' id='embedded-resource'></iframe>
+</ql-drawer>
+<ql-drawer-content class='js-lab-wrapper' id='lab-content' slot='drawer-content'>
+<ql-drawer-container id='lab-content-container'>
+<ql-drawer id='control-panel-drawer' open slot='drawer' width='320'>
+<ql-lab-control-panel class='ql-lab-control-panel__max-height control-panel js-lab-control-panel' connectionFiles='[]' labControlButton='{&quot;disabled&quot;:false,&quot;pending&quot;:false,&quot;running&quot;:true}' labDetails='[{&quot;text&quot;:&quot;Open Google Cloud console&quot;,&quot;property&quot;:&quot;console_url&quot;,&quot;resource&quot;:&quot;project_0&quot;,&quot;href&quot;:&quot;https://accounts.google.com/AddSession?service=accountsettings\u0026sarp=1\u0026continue=https%3A%2F%2Fconsole.cloud.google.com%2Fhome%2Fdashboard%3Fproject%3Dqwiklabs-gcp-01-1df0024ab778#Email=student-00-c2eb56e43c5e@qwiklabs.net&quot;,&quot;type&quot;:&quot;button&quot;},{&quot;label&quot;:&quot;Username&quot;,&quot;property&quot;:&quot;username&quot;,&quot;resource&quot;:&quot;user_0&quot;,&quot;value&quot;:&quot;student-00-c2eb56e43c5e@qwiklabs.net&quot;,&quot;type&quot;:&quot;credential&quot;},{&quot;label&quot;:&quot;Password&quot;,&quot;property&quot;:&quot;password&quot;,&quot;resource&quot;:&quot;user_0&quot;,&quot;value&quot;:&quot;Dqwr2Lx4N4gm&quot;,&quot;type&quot;:&quot;credential&quot;},{&quot;label&quot;:&quot;GCP Project ID&quot;,&quot;property&quot;:&quot;project_id&quot;,&quot;resource&quot;:&quot;project_0&quot;,&quot;value&quot;:&quot;qwiklabs-gcp-01-1df0024ab778&quot;,&quot;type&quot;:&quot;credential&quot;}]' labTimer='{&quot;ticking&quot;:true,&quot;secondsRemaining&quot;:3622}' studentResources='[]'>
+<script src="https://www.recaptcha.net/recaptcha/api.js?render=6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr"   ></script>
+        <script>
+          // Define function so that we can call it again later if we need to reset it
+          // This executes reCAPTCHA and then calls our callback.
+          function executeRecaptchaForStartLab() {
+            grecaptcha.ready(function() {
+              grecaptcha.execute('6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr', {action: 'start_lab'}).then(function(token) {
+                setInputWithRecaptchaResponseTokenForStartLab('g-recaptcha-response-data-start-lab', token)
+              });
+            });
+          };
+          // Invoke immediately
+          executeRecaptchaForStartLab()
+
+          // Async variant so you can await this function from another async function (no need for
+          // an explicit callback function then!)
+          // Returns a Promise that resolves with the response token.
+          async function executeRecaptchaForStartLabAsync() {
+            return new Promise((resolve, reject) => {
+             grecaptcha.ready(async function() {
+                resolve(await grecaptcha.execute('6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr', {action: 'start_lab'}))
+              });
+            })
+          };
+
+                  var setInputWithRecaptchaResponseTokenForStartLab = function(id, token) {
+          var element = document.getElementById(id);
+          if (element !== null) element.value = token;
+        }
+
+        </script>
+<input type="hidden" name="g-recaptcha-response-data[start_lab]" id="g-recaptcha-response-data-start-lab" data-sitekey="6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr" class="g-recaptcha g-recaptcha-response "/>
+
+<div aria-live='polite' class='hidden' id='recaptcha-v2-start-lab' slot='recaptcha'>
+<script src="https://www.recaptcha.net/recaptcha/api.js" async defer ></script>
+<div data-sitekey="6LeOI8IUAAAAAPkHlMAE9NReCD_1WD81iYlBlCnV" data-callback="recaptchaComplete" data-expired-callback="expireV2Token" class="g-recaptcha "></div>
+          <noscript>
+            <div>
+              <div style="width: 302px; height: 422px; position: relative;">
+                <div style="width: 302px; height: 422px; position: absolute;">
+                  <iframe
+                    src="https://www.recaptcha.net/recaptcha/api/fallback?k=6LeOI8IUAAAAAPkHlMAE9NReCD_1WD81iYlBlCnV"
+                    name="ReCAPTCHA"
+                    style="width: 302px; height: 422px; border-style: none; border: 0; overflow: hidden;">
+                  </iframe>
+                </div>
+              </div>
+              <div style="width: 300px; height: 60px; border-style: none;
+                bottom: 12px; left: 25px; margin: 0px; padding: 0px; right: 25px;
+                background: #f9f9f9; border: 1px solid #c1c1c1; border-radius: 3px;">
+                <textarea id="g-recaptcha-response" name="g-recaptcha-response"
+                  class="g-recaptcha-response"
+                  style="width: 250px; height: 40px; border: 1px solid #c1c1c1;
+                  margin: 10px 25px; padding: 0px; resize: none;">
+                </textarea>
+              </div>
+            </div>
+          </noscript>
+
+</div>
+</ql-lab-control-panel>
+</ql-drawer>
+<ql-drawer-content id='lab-instructions' slot='drawer-content'>
+<div class='lab-content-container'>
+<div class='alert alert--fake js-alert'>
+<p class='alert__message js-alert-message' role='alert'></p>
+<ql-icon-button class='alert__close js-alert-close' icon='clear'></ql-icon-button>
+<iframe class='l-ie-iframe-fix' tabindex='-1'></iframe>
+</div>
+<div class='lab-content__renderable-instructions js-lab-content'>
+<div class='lab-preamble'>
+<h1 class='lab-preamble__title'>
+Cloud Spanner - Loading Data and Performing Backups (OD)
+</h1>
+<div class='lab-preamble__details subtitle-headline-1'>
+<span>1 hour 30 minutes</span>
+<span>Free</span>
+<div class='lab__rating'>
+<a aria-label="Lab Reviews" href="/focuses/30867104/reviews?parent=lti_session"><div class='rateit' data-rateit-readonly='true' data-rateit-value='4.4085'></div>
+
+</a></div>
+</div>
+</div>
+<div class='lab-outline-place-holder'></div>
+
+<div class='markdown-lab-instructions js-markdown-instructions' id='markdown-lab-instructions'>
+
+<h2 id="step1">GSP1049</h2>
+<p><img alt="Google Cloud Self-Paced Labs logo" src="https://cdn.qwiklabs.com/GMOHykaqmlTHiqEeQXTySaMXYPHeIvaqa2qHEzw6Occ%3D"></p>
+<h2 id="step2">Overview</h2>
+<p>Cloud Spanner is Google’s fully managed, horizontally scalable relational database service. Customers in financial services, gaming, retail and many other industries trust it to run their most demanding workloads, where consistency and availability at scale are critical.</p>
+<p>In this lab you will explore various ways to load data into Cloud Spanner and perform a backup of your database.</p>
+<h2 id="step3">Objectives</h2>
+<p>In this lab, you will complete the following tasks.</p>
+<ul>
+<li>Insert data with DML</li>
+<li>Insert data through a client library</li>
+<li>Insert batch data through a client library</li>
+<li>Load data using Dataflow</li>
+<li>Backup your database</li>
+</ul>
+<h2 id="step4">Setup and Requirements</h2>
+<h3>Qwiklabs setup</h3>
+<h3>Before you click the Start Lab button</h3>
+<p>Read these instructions. Labs are timed and you cannot pause them. The timer, which starts when you click <strong>Start Lab</strong>, shows how long Google Cloud resources will be made available to you.</p>
+<p>This hands-on lab lets you do the lab activities yourself in a real cloud environment, not in a simulation or demo environment. It does so by giving you new, temporary credentials that you use to sign in and access Google Cloud for the duration of the lab.</p>
+<h3>What you need</h3>
+<p>To complete this lab, you need:</p>
+<ul>
+<li>Access to a standard internet browser (Chrome browser recommended).</li>
+<li>Time to complete the lab.</li>
+</ul>
+<ql-infobox>
+<strong>Note:</strong> If you have a personal Google Cloud account or project, do not use it for this lab.
+</ql-infobox>
+<ql-infobox>
+<strong>Note:</strong> If you are using a Pixelbook, open an Incognito window to run this lab.
+</ql-infobox>
+<h3>Cloud Console</h3>
+<h3>Log in to Google Cloud Console</h3>
+<ol>
+<li>Using the browser tab or window you are using for this lab session, copy the <strong>Username</strong> from the <strong>Connection Details</strong> panel and click the <strong>Open Google Console</strong> button.</li>
+</ol>
+<ql-infobox><strong>Note: </strong>If you are asked to choose an account, click <b>Use another account</b>.</ql-infobox>
+<ol start="2">
+<li>Paste in the <strong>Username</strong>, and then the <strong>Password</strong> as prompted.</li>
+<li>Click <strong>Next</strong>.</li>
+<li>Accept the terms and conditions.</li>
+</ol>
+<p>Since this is a temporary account, which will last only as long as this lab:</p>
+<ul>
+<li>Do not add recovery options</li>
+<li>Do not sign up for free trials</li>
+</ul>
+<ol start="5">
+<li>Once the console opens, view the list of services by clicking the <strong>Navigation menu</strong> (<img alt="Navigation menu icon" src="https://cdn.qwiklabs.com/tkgw1TDgj4Q%2BYKQUW4jUFd0O5OEKlUMBRYbhlCrF0WY%3D">) at the top-left.</li>
+</ol>
+<p><img alt="Navigation menu" src="https://cdn.qwiklabs.com/RIuVVYUkGtVaWhxtIFJugxyy%2FORWQYw7OrLR0bJlReI%3D"></p>
+<h3>Activate Cloud Shell</h3>
+<p>Cloud Shell is a virtual machine that contains development tools. It offers a persistent 5-GB home directory and runs on Google Cloud. Cloud Shell provides command-line access to your Google Cloud resources. <code>gcloud</code> is the command-line tool for Google Cloud. It comes pre-installed on Cloud Shell and supports tab completion.</p>
+<ol>
+<li>
+<p>Click the <strong>Activate Cloud Shell</strong> button (<img alt="Activate Cloud Shell icon" src="https://cdn.qwiklabs.com/ep8HmqYGdD%2FkUncAAYpV47OYoHwC8%2Bg0WK%2F8sidHquE%3D">) at the top right of the console.</p>
+</li>
+<li>
+<p>Click <strong>Continue</strong>.<br>
+It takes a few moments to provision and connect to the environment. When you are connected, you are also authenticated, and the project is set to your <em>PROJECT_ID</em>.</p>
+</li>
+</ol>
+<h4>Sample commands</h4>
+<ul>
+<li>List the active account name:</li>
+</ul>
+<ql-code-block language="plaintext">
+gcloud auth list
+</ql-code-block>
+<p>(Output)</p>
+<ql-code-block language="plaintext" output="">
+Credentialed accounts:
+ - &lt;myaccount&gt;@&lt;mydomain&gt;.com (active)
+</ql-code-block>
+<p>(Example output)</p>
+<ql-code-block language="plaintext" output="">
+Credentialed accounts:
+ - google1623327_student@qwiklabs.net
+</ql-code-block>
+<ul>
+<li>List the project ID:</li>
+</ul>
+<ql-code-block language="plaintext">
+gcloud config list project
+</ql-code-block>
+<p>(Output)</p>
+<ql-code-block language="plaintext" output="">
+[core]
+project = &lt;project_ID&gt;
+</ql-code-block>
+<p>(Example output)</p>
+<ql-code-block language="plaintext" output="">
+[core]
+project = qwiklabs-gcp-44776a13dea667a6
+</ql-code-block>
+<ql-infobox>
+<strong>Note: </strong>Full documentation of <strong>gcloud</strong> is available in the <a href="https://cloud.google.com/sdk/gcloud" target="_blank">gcloud CLI overview guide</a>.
+</ql-infobox>
+<h2 id="step5">Task 1. Explore the instance</h2>
+<p>During deployment, a Cloud Spanner instance, database, and table were created for you.</p>
+<ol>
+<li>From the Console, open the navigation menu (<img alt="Navigation menu" src="https://cdn.qwiklabs.com/tkgw1TDgj4Q%2BYKQUW4jUFd0O5OEKlUMBRYbhlCrF0WY%3D">), under <strong>Databases</strong> click <strong>Spanner</strong>.</li>
+</ol>
+<p>The instance name is <strong>banking-instance</strong>, click on it to explore the databases.
+The associated database is named <strong>banking-db</strong>.
+Click on it to explore and you will see there is already a table named <strong>Customer</strong>.
+Click on it and you will be able to check the schema:</p>
+<ol start="2">
+<li>The table is currently empty. On the left menu, click <strong>Query</strong> and then run the following:</li>
+</ol>
+<ql-code-block language="plaintext">
+SELECT * FROM Customer;
+</ql-code-block>
+<ol start="3">
+<li>No results are returned.</li>
+</ol>
+<h2 id="step6">Task 2. Insert data with DML</h2>
+<p>The easiest way to insert data into Spanner is via DML. Using the cloud shell and <strong>gcloud</strong> you can run any DML statement, including <strong>INSERT</strong>.</p>
+<ol>
+<li>In Cloud Shell, run the following command:</li>
+</ol>
+<ql-code-block language="plaintext">
+gcloud spanner databases execute-sql banking-db --instance=banking-instance \
+ --sql="INSERT INTO Customer (CustomerId, Name, Location) VALUES ('bdaaaa97-1b4b-4e58-b4ad-84030de92235', 'Richard Nelson', 'Ada Ohio')"
+</ql-code-block>
+<ol start="2">
+<li>Return to the Console, on the left menu click <strong>Data</strong> and you will see the row you just inserted.</li>
+</ol>
+<p>As mentioned before, you can use <strong>gcloud</strong> to run any DML command. Check the <a href="https://cloud.google.com/spanner/docs/dml-tasks#using-dml" target="_blank">documentation for DML and Spanner</a>.</p>
+<p>Of course, loading a database row by row is not very efficient.</p>
+<h2 id="step7">Task 3. Insert data through a client library</h2>
+<p>The optimal way to access Spanner is via a programmatic interface.  There are a wide variety of client libraries including <strong>C++, C#, Go, Java, Node.js, PHP, Python and Ruby</strong>.</p>
+<ol>
+<li>In the Cloud Shell enter the following command to invoke the <strong>Nano</strong> text editor and create a new empty configuration file named <strong>insert.py</strong>.</li>
+</ol>
+<ql-code-block language="plaintext">
+nano insert.py
+</ql-code-block>
+<ol start="2">
+<li>Paste the code block listed below.</li>
+</ol>
+<ql-code-block language="plaintext">
+from google.cloud import spanner
+from google.cloud.spanner_v1 import param_types
+INSTANCE_ID = "banking-instance"
+DATABASE_ID = "banking-db"
+spanner_client = spanner.Client()
+instance = spanner_client.instance(INSTANCE_ID)
+database = instance.database(DATABASE_ID)
+def insert_customer(transaction):
+    row_ct = transaction.execute_update(
+        "INSERT INTO Customer (CustomerId, Name, Location)"
+        "VALUES ('b2b4002d-7813-4551-b83b-366ef95f9273', 'Shana Underwood', 'Ely Iowa')"
+    )
+    print("{} record(s) inserted.".format(row_ct))
+database.run_in_transaction(insert_customer)
+</ql-code-block>
+<ol start="3">
+<li>
+<p>Press <strong>Ctrl+X</strong> to exit Nano,  <strong>Y</strong> to confirm the update, and press <strong>Enter</strong> to save your changes.</p>
+</li>
+<li>
+<p>Run the python code.</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+python3 insert.py
+</ql-code-block>
+<ol start="5">
+<li>Refresh the Cloud Console, or click on a different item on the left menu and then click again on <strong>Data</strong> and you will see the new row in your database.</li>
+</ol>
+<p>Like with <strong>gcloud</strong>, you can run any DML statement from the client libraries. You can find multiple examples for all the different languages <a href="https://cloud.google.com/spanner/docs/samples" target="_blank">in the documentation</a>.</p>
+<p>This is more flexible than loading data using <strong>gcloud</strong>, but still has limitations when loading a source containing a large number of rows.</p>
+<ol start="6">
+<li>Click <strong>Check my progress</strong> to verify the objective.</li>
+</ol>
+<ql-activity-tracking step="1">
+    Insert data through a client library
+</ql-activity-tracking>
+<h2 id="step8">Task 4. Insert batch data through a client library</h2>
+<p>A more optimal way to load data into Spanner is doing so in batches. All of the client libraries support batch loading. This example uses Python.</p>
+<ol>
+<li>In the Cloud Shell enter the following command to invoke the <strong>Nano</strong> text editor and create a new empty configuration file named <strong>batch_insert.py</strong>.</li>
+</ol>
+<ql-code-block language="plaintext">
+nano batch_insert.py
+</ql-code-block>
+<ol start="2">
+<li>Paste the code block listed below.</li>
+</ol>
+<ql-code-block language="plaintext">
+from google.cloud import spanner
+from google.cloud.spanner_v1 import param_types
+INSTANCE_ID = "banking-instance"
+DATABASE_ID = "banking-db"
+spanner_client = spanner.Client()
+instance = spanner_client.instance(INSTANCE_ID)
+database = instance.database(DATABASE_ID)
+with database.batch() as batch:
+    batch.insert(
+        table="Customer",
+        columns=("CustomerId", "Name", "Location"),
+        values=[
+        ('edfc683f-bd87-4bab-9423-01d1b2307c0d', 'John Elkins', 'Roy Utah'),
+        ('1f3842ca-4529-40ff-acdd-88e8a87eb404', 'Martin Madrid', 'Ames Iowa'),
+        ('3320d98e-6437-4515-9e83-137f105f7fbc', 'Theresa Henderson', 'Anna Texas'),
+        ('6b2b2774-add9-4881-8702-d179af0518d8', 'Norma Carter', 'Bend Oregon'),
+        ],
+    )
+print("Rows inserted")
+</ql-code-block>
+<ol start="3">
+<li>
+<p>Press <strong>Ctrl+X</strong> to exit Nano,  <strong>Y</strong> to confirm the update, and press <strong>Enter</strong> to save your changes.</p>
+</li>
+<li>
+<p>Run the python code.</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+python3 batch_insert.py
+</ql-code-block>
+<ol start="5">
+<li>Go back to Cloud Console, refresh to see the new data you just inserted.</li>
+</ol>
+<p>The batch method is more efficient, since it's run as a single request. Only one client-server round trip is needed, reducing latency.</p>
+<p>However this is a very slow and resource consuming method to load data.</p>
+<ol start="6">
+<li>Click <strong>Check my progress</strong> to verify the objective.</li>
+</ol>
+<ql-activity-tracking step="2">
+    Insert batch data through a client library
+</ql-activity-tracking>
+<h2 id="step9">Task 5. Load data using Dataflow</h2>
+<p><strong>Dataflow</strong> is a Google Cloud service for streaming and batch data processing at large scale. Dataflow uses multiple workers to run data processing in parallel. The way in which data is processed is defined using <strong>pipelines</strong> that transform data from its origin (<strong>sources</strong>) to its destination (<strong>sinks</strong>).</p>
+<p>There are connectors for <strong>Spanner</strong> that allow you to connect a database as a <strong>source</strong> or a <strong>sink</strong> in Dataflow.</p>
+<p>In order to load big amounts of data, you can use the serverless distributed power of <strong>Dataflow</strong> to read data from a source (for example, a CSV file in <strong>Google Cloud Storage</strong>) and load it into your <strong>Spanner</strong> database using a sink connector.</p>
+<ol>
+<li>To prepare for the Dataflow job, in the Cloud Shell run these commands to create a bucket in your project and a folder with an empty file inside it.</li>
+</ol>
+<ql-code-block templated="">
+gsutil mb gs://{{{project_0.project_id|Project ID}}}
+touch emptyfile
+gsutil cp emptyfile gs://{{{project_0.project_id|Project ID}}}/tmp/emptyfile
+</ql-code-block>
+<ol start="2">
+<li>To ensure that the proper APIs and permissions are set, execute the following block of code in the Cloud Shell.</li>
+</ol>
+<ql-code-block templated="">
+gcloud services disable dataflow.googleapis.com --force
+gcloud services enable dataflow.googleapis.com
+</ql-code-block>
+<ol start="3">
+<li>
+<p>From the Console, open the navigation menu (<img alt="Navigation menu" src="https://cdn.qwiklabs.com/tkgw1TDgj4Q%2BYKQUW4jUFd0O5OEKlUMBRYbhlCrF0WY%3D">), under <strong>Analytics</strong> click <strong>Dataflow</strong>.</p>
+</li>
+<li>
+<p>On the top of the screen, click <strong>Create Job From Template</strong>.</p>
+</li>
+<li>
+<p>Place the following values in the template:</p>
+</li>
+</ol>
+<p><strong>Job Name</strong>:  spanner-load
+<br>
+<strong>Regional endpoint</strong>:  <ql-variable key="project_0.default_region" placeholder="default-region"></ql-variable>
+<br></p>
+<ol start="6">
+<li>Scroll down the <strong>Dataflow template</strong> selector and you will see all the different blueprints you can use with Dataflow. Of course, you can also create your own tailored pipelines, using the <a href="https://beam.apache.org/documentation/" target="_blank">Beam SDK</a>.</li>
+</ol>
+<p>There are two main types of templates:</p>
+<ul>
+<li>
+<strong>Stream</strong> will create a pipeline for data that is flowing and is processed continuously (for example, online orders from a website).</li>
+<li>
+<strong>Batch</strong> will process a dataset that has a beginning and an end (for example, files stored in Google Cloud Storage).</li>
+</ul>
+<p>In your scenario, you will load data into Spanner banking database from a CSV file with over 150,000 rows.</p>
+<ol start="7">
+<li>
+<p>Select the <strong>Text Files on Cloud Storage to Cloud Spanner</strong> template.</p>
+</li>
+<li>
+<p>Place the following values in the template:</p>
+</li>
+</ol>
+<table>
+
+<tr>
+<th>Item</th>
+<th>Value</th>
+</tr>
+
+
+<tr>
+<td><strong>Cloud Spanner Instance Id</strong></td>
+<td><strong>banking-instance</strong></td>
+</tr>
+<tr>
+<td><strong>Cloud Spanner Database Id</strong></td>
+<td><strong>banking-db</strong></td>
+</tr>
+<tr>
+<td><strong>Text Import Manifest file</strong></td>
+<td><strong>cloud-training/OCBL372/manifest.json</strong></td>
+</tr>
+
+</table>
+<p><br><br></p>
+<p>The <code>manifest.json</code> file format is explained <a href="https://cloud.google.com/dataflow/docs/guides/templates/provided-batch#gcstexttocloudspanner" target="_blank">in the tutorial for this template</a> (you can access it by clicking <strong>open tutorial</strong> just above the parameter input fields).</p>
+<p>The manifest file must be stored in a Google Cloud Storage bucket that Dataflow can access to and read from. For this lab, this is the content of <strong>manifest.json</strong>:</p>
+<ql-code-block output="">
+{
+    "tables": [
+        {
+            "table_name": "Customer",
+            "file_patterns": [
+                "gs://cloud-training/OCBL372/Customer_List.csv"
+            ],
+            "columns": [
+                {"column_name" : "CustomerId", "type_name" : "STRING" },
+                {"column_name" : "Name", "type_name" : "STRING" },
+                {"column_name" : "Location", "type_name" : "STRING" }
+            ]
+        }
+    ]
+}
+</ql-code-block>
+<p>The manifest file specifies the table, name and type of the columns (in the order that they appear in the CSV file), and the CSV file itself, which is also stored in a Google Cloud Storage bucket.</p>
+<p>This is what the CSV file looks like:</p>
+<ql-code-block output="">
+9d238899-8348-4642-9c00-77dc4481145b,Nicole Anderson,Ada Ohio
+360ecaa6-9ec3-4fa0-81a5-3b0dc629e1fa,Ellen Richardson,Ada Ohio
+8ee6c2ea-923b-45db-8d51-7f8e7a117af0,Wendy Daniel,Ada Ohio
+1d7112cc-c1ee-414f-9325-95c97f9a25d3,Virginia Beasley,Ada Ohio
+...
+</ql-code-block>
+<ol start="9">
+<li>For the <strong>Temporary Location</strong> parameter input the following value:</li>
+</ol>
+<ql-code-block templated="">
+{{{project_0.project_id|Project ID}}}/tmp
+</ql-code-block>
+<ol start="10">
+<li>
+<p>Expand <strong>Optional Parameters</strong>.</p>
+</li>
+<li>
+<p>Uncheck <strong>Use default machine type</strong>.</p>
+</li>
+<li>
+<p>Under <strong>General purpose</strong>, choose the following:</p>
+</li>
+</ol>
+<p>Series: <strong>E2</strong> <br>
+Machine type:  <strong>e2-medium (2 vCPU, 4 GB memory)</strong></p>
+<ol start="13">
+<li>
+<p>Click <strong>Run Job</strong> to start the pipeline.</p>
+</li>
+<li>
+<p>The process will take around 12 to 16 minutes. You will see Dataflow go through multiple stages, first starting up the workers and analyzing the pipeline from the template. Then it will read the manifest file and will start processing the CSV file.</p>
+</li>
+</ol>
+<ql-warningbox><strong>Note:</strong> If your pipeline fails with an error related to worker nodes not being provisioned, create a new job with the same name from the same template starting from Step 4. This time choose a different Regional endpoint in the United States. For example if Step 5 lists <strong>"us-east4"</strong> as your Regional endpoint try <strong>"us-east1"</strong> for your second attempt.</ql-warningbox>
+<p>Wait until Dataflow finishes processing before proceeding.  It will have a status of <strong>Succeeded</strong> when complete.</p>
+<ol start="15">
+<li>
+<p>Go back to <strong>Spanner</strong> by selecting it in the left menu on Cloud Console. Navigate to the <strong>Customer</strong> table and select <strong>Data</strong>. You will see all the new rows that have been loaded using Dataflow.</p>
+</li>
+<li>
+<p>Click <strong>Query</strong> on the left menu and run the following to see the total number of rows in the <strong>Customer</strong> table:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+SELECT COUNT(*) FROM Customer;
+</ql-code-block>
+<p>With <strong>Dataflow</strong> templates it is easy (and quick!) to load big amounts of data. You can load dumps from other databases, and load not only CSV but also Avro files following the same procedure. You can even run the process the other way around, using your Spanner database as a source in <strong>Dataflow</strong> to export the data in CSV or Avro.</p>
+<ol start="17">
+<li>Click <strong>Check my progress</strong> to verify the objective.</li>
+</ol>
+<ql-activity-tracking step="3">
+    Load data using Dataflow
+</ql-activity-tracking>
+<h2 id="step10">Task 6. Backup your database</h2>
+<p>Using <strong>Dataflow</strong> as explained above is a way to create backups of your data. But <strong>Spanner</strong> has its own tool for backups.
+You can backup a <strong>Spanner</strong> database from the <a href="https://cloud.google.com/spanner/docs/backup/gcp" target="_blank">Cloud Console</a>, <a href="https://cloud.google.com/spanner/docs/backup/libraries" target="_blank">client libraries</a> or <a href="https://cloud.google.com/spanner/docs/backup/gcloud" target="_blank"><strong>gcloud</strong></a> commands. Check the previous links for documentation.</p>
+<p>In this lab, you will use the <strong>Cloud Console</strong> to backup your database.</p>
+<ol>
+<li>
+<p>Select <strong>Backup/Restore</strong> on the left menu of the Spanner <strong>banking-instance</strong> overview page.</p>
+</li>
+<li>
+<p>Click <strong>Create Backup</strong>.</p>
+</li>
+<li>
+<p>Place or select the following values in the wizard:</p>
+</li>
+</ol>
+<table>
+
+<tr>
+<th>Item</th>
+<th>Value</th>
+</tr>
+
+
+<tr>
+<td><strong>Database Name</strong></td>
+<td><strong>banking-db</strong></td>
+</tr>
+<tr>
+<td><strong>Backup Name</strong></td>
+<td><strong>banking-backup-001</strong></td>
+</tr>
+<tr>
+<td><strong>Expiration Date</strong></td>
+<td><strong>1 year</strong></td>
+</tr>
+
+</table>
+<p><br><br></p>
+<ol start="4">
+<li>
+<p>Click <strong>Create</strong>.</p>
+</li>
+<li>
+<p>The backup will take around 15 minutes to complete and will appear in the <strong>Backups</strong> list while being created.</p>
+</li>
+</ol>
+<h2 id="step11">Congratulations!</h2>
+<p>You now have a solid understanding of various ways to load data into Cloud Spanner Instance and perform backups.</p>
+<h3>Finish your quest</h3>
+<p>This self-paced lab is part of the <strong>Create and Manage Cloud Spanner Databases</strong> quest. A quest is a series of related labs that form a learning path. Completing this quest earns you a badge to recognize your achievement. You can make your badge (or badges) public and link to them in your online resume or social media account. Enroll in this quest and get immediate completion credit if you have successfully completed this lab. Search for other available quests in the <a href="https://www.cloudskillsboost.google/catalog/" target="_blank">Cloud Skills Boost catalog</a>.</p>
+<p>Copyright 2022 Google LLC All rights reserved. Google and the Google logo are trademarks of Google LLC. All other company and product names may be trademarks of the respective companies with which they are associated.</p>
+
+</div>
+</div>
+
+
+<div class='lab-content__end-lab-button js-end-lab-button-container hidden'>
+<ql-lab-control-button class='js-end-lab-button' running></ql-lab-control-button>
+</div>
+<!-- / TODO: Move recommendations into the end lab modal -->
+</div>
+<div aria-label='Lab Table of Contents' class='outline-container' id='js-outline-container' role='navigation'>
+<ul class='lab-content__outline js-lab-content-outline'>
+<li><a href="#step1">GSP1049</a></li><li><a href="#step2">Overview</a></li><li><a href="#step3">Objectives</a></li><li><a href="#step4">Setup and Requirements</a></li><li><a href="#step5">Task 1. Explore the instance</a></li><li><a href="#step6">Task 2. Insert data with DML</a></li><li><a href="#step7">Task 3. Insert data through a client library</a></li><li><a href="#step8">Task 4. Insert batch data through a client library</a></li><li><a href="#step9">Task 5. Load data using Dataflow</a></li><li><a href="#step10">Task 6. Backup your database</a></li><li><a href="#step11">Congratulations!</a></li>
+</ul>
+</div>
+</ql-drawer-content>
+</ql-drawer-container>
+</ql-drawer-content>
+</ql-drawer-container>
+<ql-snackbar id='alert-snackbar'></ql-snackbar>
+
+
+
+</div>
+</main>
+
+<span class='hidden' id='flash-sibling-before'></span>
+<ql-snackbar></ql-snackbar>
+
+
+<ql-dialog headline='Score Details' icon='task_alt' id='jupyter-feedback-modal'>
+<iframe id='jupyter-feedback-frame' srcdoc='' title='Jupyter Feedback'></iframe>
+</ql-dialog>
+
+<div class='modal fade' id='lab-details-modal'>
+<div class='modal-container'>
+<div class='modal-content mdl-shadow--24dp'>
+<div class='modal-body'>
+<p class='l-mbm'>
+In this lab you explore various ways to load data into Cloud Spanner as well as perform a backup of your database.
+</p>
+<p>
+This lab is included in the quest
+<a href="/quests/213">Create and Manage Cloud Spanner Databases</a>.
+If you complete this lab you&#39;ll receive credit for it when you enroll in this quest.
+</p>
+<p class='small-label l-mbs'>
+<strong>
+Duration:
+</strong>
+0m setup
+&middot;
+90m access
+&middot;
+90m completion
+</p>
+<p class='small-label l-mbs'>
+<strong>AWS Region:</strong>
+[] <strong></strong>
+</p>
+<p class='small-label l-mbs'>
+<span><strong>Levels: </strong>introductory</span>
+</p>
+<p class='small-label'>
+<strong>
+Permalink:
+</strong>
+<a href="https://googlecoursera.qwiklabs.com/catalog_lab/4993">https://googlecoursera.qwiklabs.com/catalog_lab/4993</a>
+</p>
+</div>
+<div class='modal-actions'>
+<a class='button button--text' data-dismiss='modal'>
+Got It
+</a>
+</div>
+
+
+</div>
+</div>
+<iframe class='l-ie-iframe-fix' tabindex='-1' title='modal'></iframe>
+</div>
+<ql-dialog headline='How satisfied are you with this lab?&lt;span aria-hidden=&quot;true&quot;&gt;*&lt;/span&gt;' id='lab-review-dialog'>
+<form class="simple_form js-lab-review-form" id="new_lab_review" action="/lab_reviews" accept-charset="UTF-8" data-remote="true" method="post"><input name="utf8" type="hidden" value="&#x2713;" autocomplete="off" /><div aria-labelledby='lab-review-dialog' aria-required='true' aria-valuemax='5' aria-valuemin='0' aria-valuenow='0' class='rateit js-rateit' data-rateit-max='5' data-rateit-min='0' data-rateit-resetable='false' data-rateit-step='1' data-rateit-value='0' id='lab-review-rateit' role='slider' tabindex='0'></div>
+<div class='l-mtm'>
+
+<div class="control-group hidden lab_review_user_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" value="12197799" name="lab_review[user_id]" id="lab_review_user_id" /></div></div>
+<div class="control-group hidden lab_review_classroom_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" name="lab_review[classroom_id]" id="lab_review_classroom_id" /></div></div>
+<div class="control-group hidden lab_review_lab_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" value="4993" name="lab_review[lab_id]" id="lab_review_lab_id" /></div></div>
+<div class="control-group hidden lab_review_focus_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" name="lab_review[focus_id]" id="lab_review_focus_id" /></div></div>
+<div class="control-group hidden lab_review_rating"><div class="controls"><input class="hidden js-rating-input" autocomplete="off" type="hidden" name="lab_review[rating]" id="lab_review_rating" /></div></div>
+<div class="control-group text optional lab_review_comment"><label class="text optional control-label" for="lab_review_comment">Additional Comments</label><div class="controls"><textarea class="text optional" name="lab_review[comment]" id="lab_review_comment">
+</textarea></div></div>
+</div>
+</form><ql-button disabled id='submit' label='Submit' slot='action' text></ql-button>
+</ql-dialog>
+
+<ql-dialog headline='All done? If you end this lab, you will lose all your work. You may not be able to restart the lab if there is a quota limit. Are you sure you want to end this lab?' icon='error_outline' id='js-lab-are-you-sure-dialog'>
+<ql-button id='js-are-you-sure-button' label='Submit' slot='action' text></ql-button>
+</ql-dialog>
+
+
+<script>
+  $(function() {
+    ql.initMaterialInputs();
+    initChosen();
+    initSearch();
+    initTabs();
+    ql.list.init();
+    ql.favoriting.init();
+    ql.header.myAccount.init();
+    initTooltips();
+    ql.autocomplete.init();
+    ql.modals.init();
+    ql.toggleButtons.init();
+    ql.analytics.init();
+    ql.chat.init();
+  ql.jumpContent.init();
+  ql.labControlPanel.addRecaptchaErrorHandler();
+  initLabContent();
+  ql.labOutline.links.init();
+  initLabReviewModal();
+  initLabReviewTranslations( {"star_amount_1":"1 of 5 stars","star_amount_2":"2 of 5 stars","star_amount_3":"3 of 5 stars","star_amount_4":"4 of 5 stars","star_amount_5":"5 of 5 stars"} )
+  ql.labAssessment.init();
+  ql.labData.init();
+  initLabTranslations( {"are_you_sure":"All done? If you end this lab, you will lose all your work. You may not be able to restart the lab if there is a quota limit. Are you sure you want to end this lab?","in_progress":"*In Progress*","ending":"*Ending*","starting":"*Starting, please wait*","end_concurrent_labs":"Sorry, you can only run one lab at a time. To start this lab, please confirm that you want all of your existing labs to end.","copied":"Copied","no_resource":"Error retrieving resource.","no_support":"No Support","mac_press":"Press ⌘-C to copy","thanks_review":"Thanks for reviewing this lab.","windows_press":"Press Ctrl-C to copy","days":"days"} );
+  ql.labRun.init();
+  ql.navPanel.init();
+  ql.navigation.init();
+  
+  });
+</script>
+
+</body>
+</html>
+

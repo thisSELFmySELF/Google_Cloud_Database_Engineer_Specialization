@@ -1,0 +1,1284 @@
+
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<title>Performing an Online Database Migration | Qwiklabs</title>
+<meta name="action-cable-url" content="/cable" />
+<script>
+//<![CDATA[
+window.gon={};gon.deployment="googlecoursera-run";
+//]]>
+</script>
+<script>
+  (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer',"GTM-5XSKHDX");
+</script>
+<script src="https://cdn.qwiklabs.com/assets/hallofmirrors/polyfills/webcomponents-loader-8583b47b01e40e6ea7bf1ad443a20b7e79bbdd5eafac009806a228c91a97282c.js"></script>
+<script src="https://cdn.qwiklabs.com/assets/vendor-613520545532a2795a401a8168ca8b698b9ee765a66f5ad9ead806b5c32eabe8.js"></script>
+<script src="https://cdn.qwiklabs.com/assets/application-764552f4bc7e4ee5dc74a9b3fd7ddf41c0c326f6f8253193b6e48f971195330f.js"></script>
+<script src="https://cdn.qwiklabs.com/assets/hallofmirrors/hallofmirrors-53579c8602b4c89dd0f1ade9c7d5e535ef7c3e1546fea5e0468d970052bd60fb.js"></script>
+<!--[if lt IE 9]>  <![endif]-->
+<script src='http://html5shim.googlecode.com/svn/trunk/html5.js' type='text/javascript'></script>
+<!--[endif]>  <![endif]-->
+<script id='ze-snippet' src='https://static.zdassets.com/ekr/snippet.js?key=511e4158-0aec-4e3c-b2e6-4daa1769f51e'></script>
+
+
+<meta name="csrf-param" content="authenticity_token" />
+<meta name="csrf-token" content="8fDC+Tc7TTJ1F7Yv7/5VGXUC/PCDx+PeFBpubHRcMMgB+RNenBgKEwNV7cUUDJuQoKMdehB+1RiGxpAaEbbIXw==" />
+<meta content='width=device-width, initial-scale=1.0, user-scalable=yes' name='viewport'>
+<meta content='1rRsY0INj8RvwB5EF5pwdxt2A2P9aDgAlsICaJ0d5w0' name='google-site-verification'>
+<meta content='#3681E4' property='msapplication-TileColor'>
+<meta content='/favicon-144.png' property='msapplication-TileImage'>
+<meta content='[{&quot;id&quot;:&quot;recaptcha_experiment&quot;,&quot;optimize_id&quot;:&quot;dpViOcLkT3qS4TvL2mRojA&quot;,&quot;title&quot;:&quot;No Recaptcha shown for trusted users&quot;,&quot;variant_index&quot;:1,&quot;variant&quot;:&quot;no_recaptcha&quot;}]' name='active-experiments'>
+<meta content='{&quot;userId&quot;:12197799,&quot;experimentIds&quot;:[&quot;course_upgrade&quot;,&quot;canonical_domain_redirect&quot;,&quot;program_resources&quot;,&quot;program_learning_assignment&quot;,&quot;program_announcements&quot;,&quot;peer_assignment&quot;,&quot;teams&quot;,&quot;oauth_risc_shutoff&quot;,&quot;search_updates&quot;,&quot;show_annual_purchase_now&quot;,&quot;programs&quot;,&quot;used_in&quot;,&quot;barker&quot;,&quot;program_groups&quot;,&quot;enforce_codebuild_verdicts&quot;,&quot;chat_off_for_signed_out_users&quot;,&quot;community_forum&quot;,&quot;alexandria_show_bundle_errors&quot;]}' name='help-api-product-data'>
+<meta content='{&quot;groupIds&quot;:[&quot;non_suadmins&quot;,&quot;students&quot;,&quot;non_organization&quot;,&quot;non_program&quot;]}' name='help-api-custom-data'>
+<meta content='This lab demonstrates how to perform an online migration of a SQL Server database to Cloud Spanner using Google Cloud&#39;s Data Migration Partner, Striim.' name='description'>
+<meta content='Qwiklabs' name='author'>
+<meta content='Performing an Online Database Migration | Qwiklabs' property='og:title'>
+<meta content='website' property='og:type'>
+<meta content='/favicon-144.png' property='og:image'>
+<meta content='Qwiklabs' property='og:site_name'>
+<meta content='This lab demonstrates how to perform an online migration of a SQL Server database to Cloud Spanner using Google Cloud&#39;s Data Migration Partner, Striim.' property='og:description'>
+<meta content='/qwiklabs_logo_900x887.png' property='og:logo' size='900x887'>
+<meta content='/qwiklabs_logo_994x187.png' property='og:logo' size='994x187'>
+
+
+<meta property="og:url" content="https://googlecoursera.qwiklabs.com/focuses/31027924?parent=lti_session" /><link href="https://googlecoursera.qwiklabs.com/focuses/31027924?parent=lti_session" rel="canonical" />
+<link color='#3681E4' href='/favicon-svg.svg' rel='mask-icon'>
+<link href='/favicon-180.png' rel='apple-touch-icon-precomposed'>
+<link href='/favicon-32.png' rel='shortcut icon' type='image/x-icon'>
+
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Oswald:400|Roboto+Mono:400,700|Roboto:300,400,500,700|Google+Sans:300,400,500,700|Google+Sans+Display:400|Material+Icons|Google+Material+Icons|Google+Sans+Text:400,500,700" media="screen" />
+
+<link rel="stylesheet" href="https://cdn.qwiklabs.com/assets/application-edc88b659d478c138e12de45354d6e27fda904c51d367223d97eb4d41608b847.css" media="all" />
+<link rel="stylesheet" href="https://www.gstatic.com/glue/cookienotificationbar/cookienotificationbar.min.css" media="screen" />
+
+
+<style>
+  :root {
+    --primary-text-on-surface-color: #1a73e8;
+    --primary-text-on-surface-color-dark: #1568d6;
+    --primary-text-on-surface-color-darker: #135ec1;
+    --primary-text-on-surface-color-darkest: #1154ac;
+    --primary-surface-color: #1a73e8;
+    --primary-surface-color-rgb: 26,115,232;
+    --primary-surface-color-light: #d1e3fa;
+    --primary-surface-color-lightest: #e8f1fd;
+    --text-on-primary-color: #ffffff;
+    --accent-text-on-surface-color: #f29900;
+    --accent-surface-color: #f9ab00;
+    --accent-surface-color-rgb: 249,171,0;
+    --accent-surface-color-light: #ffefcc;
+    --text-on-accent-color: #202124;
+  }
+</style>
+
+<style>
+  :root {
+    --navbar-height: 64px;
+  }
+</style>
+
+
+
+</head>
+<body class='lab-show l-full no-nav application-new focuses focuses-show lab-show l-full no-nav '>
+<div class='header-container'>
+<div class='header'>
+<ql-toolbar jumpEnabled>
+<div class='header__title' slot='title'>
+<ql-icon-button label="Back" href="https://www.coursera.org/" id="d612af6545714719" target="_self" tip="Back">arrow_back</ql-icon-button>
+<h1 class='ql-headline-6'>Performing an Online Database Migration</h1>
+</div>
+<div class='header__actions' slot='action'>
+<ql-icon-button id='control-panel-target' style='display: none;'>
+dashboard
+</ql-icon-button>
+<ql-menu for='control-panel-target' id='control-panel-menu'></ql-menu>
+<ql-icon-button class='mobile-hide' icon='help_outline' id='help-menu-button' label='Open help menu' tip='Help'></ql-icon-button>
+<ql-menu for='help-menu-button' id='help-menu'>
+<ql-menu-item data-analytics-action='opened_help' data-analytics-label='lab' label='Help Center' onclick='hallofmirrors.helpService.startHelp({&quot;productData&quot;:{&quot;userId&quot;:12197799},&quot;context&quot;:&quot;lab&quot;})'></ql-menu-item>
+<ql-menu-item href='mailto:support@qwiklabs.com' label='Email support'></ql-menu-item>
+<ql-menu-item label='Chat support' onClick='ql.chat.open()'></ql-menu-item>
+</ql-menu>
+
+<ql-icon-button class='mobile-hide' icon='language' id='language' label='Select your language preference' tip='Language'></ql-icon-button>
+<ql-menu for='language'>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ar' href='/focuses/31027924?locale=ar&amp;parent=lti_session' label='العربية‬‎' lang='ar'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='de' href='/focuses/31027924?locale=de&amp;parent=lti_session' label='Deutsch' lang='de'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='en' href='/focuses/31027924?locale=en&amp;parent=lti_session' label='English' lang='en'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='es' href='/focuses/31027924?locale=es&amp;parent=lti_session' label='español (Latinoamérica)' lang='es'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='fr' href='/focuses/31027924?locale=fr&amp;parent=lti_session' label='français' lang='fr'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='fr_CA' href='/focuses/31027924?locale=fr_CA&amp;parent=lti_session' label='français (Canada)' lang='fr-CA'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='he' href='/focuses/31027924?locale=he&amp;parent=lti_session' label='עברית' lang='he'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='id' href='/focuses/31027924?locale=id&amp;parent=lti_session' label='bahasa Indonesia' lang='id'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='it' href='/focuses/31027924?locale=it&amp;parent=lti_session' label='Italiano' lang='it'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ja' href='/focuses/31027924?locale=ja&amp;parent=lti_session' label='日本語' lang='ja'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ko' href='/focuses/31027924?locale=ko&amp;parent=lti_session' label='한국어' lang='ko'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='pl' href='/focuses/31027924?locale=pl&amp;parent=lti_session' label='Polski' lang='pl'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='pt_BR' href='/focuses/31027924?locale=pt_BR&amp;parent=lti_session' label='português (Brasil)' lang='pt-BR'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='pt_PT' href='/focuses/31027924?locale=pt_PT&amp;parent=lti_session' label='português (Portugal)' lang='pt-PT'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ru' href='/focuses/31027924?locale=ru&amp;parent=lti_session' label='русский' lang='ru'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='tr' href='/focuses/31027924?locale=tr&amp;parent=lti_session' label='Türkçe' lang='tr'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='uk' href='/focuses/31027924?locale=uk&amp;parent=lti_session' label='український' lang='uk'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='zh' href='/focuses/31027924?locale=zh&amp;parent=lti_session' label='简体中文' lang='zh'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='zh_TW' href='/focuses/31027924?locale=zh_TW&amp;parent=lti_session' label='繁體中文' lang='zh-TW'></ql-menu-item>
+</ql-menu>
+
+
+<ql-icon-button id='my_account' label='My account' tip='My account'>
+<ql-avatar src='https://lh3.googleusercontent.com/a/ACg8ocI6s7UhNvX_oCOJMPhLJPmqhqIgwu_5AK0t7wpjF-5jmQo=s320-c'></ql-avatar>
+</ql-icon-button>
+<ql-menu for='my_account' id='my_account_menu' style='max-height: 640px'>
+<div class='my-account-menu'>
+<ql-avatar class='l-mtl l-mbl' size='120' src='https://lh3.googleusercontent.com/a/ACg8ocI6s7UhNvX_oCOJMPhLJPmqhqIgwu_5AK0t7wpjF-5jmQo=s320-c'></ql-avatar>
+<div class='my-account-menu__user-info l-mbl'>
+<h4 class='ql-subhead-1'>Justin Ho</h4>
+<p class='ql-body-2 text--light'>cliffdove@gmail.com</p>
+<p class='ql-body-2 text--light'>
+</p>
+<a class="text--green ql-subhead-2" href="/my_account/payments"><ql-chip positive>
+0 Credits
+</ql-chip>
+</a></div>
+<div class='buttons l-mbl'>
+<a class="button button--hairline" id="settings" href="/my_account/profile">Settings</a>
+</div>
+<hr>
+<ql-button data-analytics-action='clicked_sign_out' href='/users/sign_out' method='delete'>
+Sign Out
+</ql-button>
+<div class='privacy l-mtl'>
+<a target="_blank" class="ql-caption text--light" href="/privacy_policy">Privacy</a>
+<span class='ql-caption text--light l-mls l-mrs'>&middot;</span>
+<a class="ql-caption text--light" href="/terms_of_service">Terms</a>
+</div>
+</div>
+</ql-menu>
+
+</div>
+</ql-toolbar>
+
+</div>
+</div>
+
+<nav class='nav-panel js-nav-panel'>
+<div class='nav-panel__logo'>
+<div class="custom-logo">Qwiklabs</div>
+</div>
+<nav class='ql-sidenav'>
+<ql-sidenav-item href='/' icon='home' label='Home'></ql-sidenav-item>
+
+<ql-sidenav-item href='/catalog' icon='school' label='Catalog'></ql-sidenav-item>
+
+<ql-sidenav-item href='/profile' icon='event_note' label='Profile'></ql-sidenav-item>
+
+</nav>
+
+</nav>
+<div class='nav-panel__overlay js-nav-toggle'></div>
+
+<main class='js-main' id='jump-content'>
+<div class='l-main-wrapper' id='main-wrapper'>
+
+
+
+
+<div class='lab-assessment__tab js-open-lab-assessment-panel'>
+<button class='js-lab-assessment-total-score'>
+100/100
+</button>
+</div>
+<div aria-labelledby='lab-assessment-checkpoint' class='lab-assessment__panel js-lab-assessment-panel' role='dialog'>
+<div class='lab-assessment__panel__header'>
+<h4 id='lab-assessment-checkpoint'>Checkpoints</h4>
+<ql-icon-button class='js-close-lab-assessment-panel' icon='arrow_forward' label='Close dialog'></ql-icon-button>
+</div>
+<div class='lab-assessment__step'>
+<p class='lab-assessment__step__title' id='lab-assessment-step-title'>
+Set up the Striim server
+</p>
+<div class='lab-assessment__step__action'>
+<ql-button class='js-show-run-step-button' description='Set up the Striim server' step_no='1'>
+Check my progress
+</ql-button>
+<p class='lab-assessment__step__score'>
+<span class='js-assessment-step-score-1'>
+30
+</span>
+/ 30
+</p>
+</div>
+</div>
+
+<div class='lab-assessment__step'>
+<p class='lab-assessment__step__title' id='lab-assessment-step-title'>
+Set up Striim Access to SQL Server
+</p>
+<div class='lab-assessment__step__action'>
+<ql-button class='js-show-run-step-button' description='Set up Striim Access to SQL Server' step_no='2'>
+Check my progress
+</ql-button>
+<p class='lab-assessment__step__score'>
+<span class='js-assessment-step-score-2'>
+30
+</span>
+/ 30
+</p>
+</div>
+</div>
+
+<div class='lab-assessment__step'>
+<p class='lab-assessment__step__title' id='lab-assessment-step-title'>
+Create a Spanner access key
+</p>
+<div class='lab-assessment__step__action'>
+<ql-button class='js-show-run-step-button' description='Create a Spanner access key' step_no='3'>
+Check my progress
+</ql-button>
+<p class='lab-assessment__step__score'>
+<span class='js-assessment-step-score-3'>
+40
+</span>
+/ 40
+</p>
+</div>
+</div>
+
+</div>
+<ql-drawer-container class='js-lab-state' data-analytics-payload='{&quot;label&quot;:&quot;Performing an Online Database Migration&quot;,&quot;lab_name&quot;:&quot;Performing an Online Database Migration&quot;,&quot;classroom_name&quot;:null,&quot;deployment&quot;:&quot;googlecoursera-run&quot;}' data-credits='0.0' data-focus-id='31027924' data-lab-billing-limit='0.0' data-lab-duration='7200' data-lab-instance-id='77475629' data-parent='lti_session' data-recaptcha-enabled id='lab-container'>
+<ql-drawer id='terminal-drawer' slot='drawer'>
+<iframe allow='clipboard-read' class='terminal' id='embedded-resource'></iframe>
+</ql-drawer>
+<ql-drawer-content class='js-lab-wrapper' id='lab-content' slot='drawer-content'>
+<ql-drawer-container id='lab-content-container'>
+<ql-drawer id='control-panel-drawer' open slot='drawer' width='320'>
+<ql-lab-control-panel class='ql-lab-control-panel__max-height control-panel js-lab-control-panel' connectionFiles='[]' labControlButton='{&quot;disabled&quot;:false,&quot;pending&quot;:false,&quot;running&quot;:true}' labDetails='[{&quot;text&quot;:&quot;Open Google Cloud console&quot;,&quot;property&quot;:&quot;console_url&quot;,&quot;resource&quot;:&quot;project_0&quot;,&quot;href&quot;:&quot;https://accounts.google.com/AddSession?service=accountsettings\u0026sarp=1\u0026continue=https%3A%2F%2Fconsole.cloud.google.com%2Fhome%2Fdashboard%3Fproject%3Dqwiklabs-gcp-01-0f2af084371d#Email=student-02-f23f0b039d07@qwiklabs.net&quot;,&quot;type&quot;:&quot;button&quot;},{&quot;label&quot;:&quot;Username&quot;,&quot;property&quot;:&quot;username&quot;,&quot;resource&quot;:&quot;user_0&quot;,&quot;value&quot;:&quot;student-02-f23f0b039d07@qwiklabs.net&quot;,&quot;type&quot;:&quot;credential&quot;},{&quot;label&quot;:&quot;Password&quot;,&quot;property&quot;:&quot;password&quot;,&quot;resource&quot;:&quot;user_0&quot;,&quot;value&quot;:&quot;gprOzHZwpOkY&quot;,&quot;type&quot;:&quot;credential&quot;},{&quot;label&quot;:&quot;GCP Project ID&quot;,&quot;property&quot;:&quot;project_id&quot;,&quot;resource&quot;:&quot;project_0&quot;,&quot;value&quot;:&quot;qwiklabs-gcp-01-0f2af084371d&quot;,&quot;type&quot;:&quot;credential&quot;}]' labTimer='{&quot;ticking&quot;:true,&quot;secondsRemaining&quot;:5355}' studentResources='[]'>
+<script src="https://www.recaptcha.net/recaptcha/api.js?render=6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr"   ></script>
+        <script>
+          // Define function so that we can call it again later if we need to reset it
+          // This executes reCAPTCHA and then calls our callback.
+          function executeRecaptchaForStartLab() {
+            grecaptcha.ready(function() {
+              grecaptcha.execute('6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr', {action: 'start_lab'}).then(function(token) {
+                setInputWithRecaptchaResponseTokenForStartLab('g-recaptcha-response-data-start-lab', token)
+              });
+            });
+          };
+          // Invoke immediately
+          executeRecaptchaForStartLab()
+
+          // Async variant so you can await this function from another async function (no need for
+          // an explicit callback function then!)
+          // Returns a Promise that resolves with the response token.
+          async function executeRecaptchaForStartLabAsync() {
+            return new Promise((resolve, reject) => {
+             grecaptcha.ready(async function() {
+                resolve(await grecaptcha.execute('6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr', {action: 'start_lab'}))
+              });
+            })
+          };
+
+                  var setInputWithRecaptchaResponseTokenForStartLab = function(id, token) {
+          var element = document.getElementById(id);
+          if (element !== null) element.value = token;
+        }
+
+        </script>
+<input type="hidden" name="g-recaptcha-response-data[start_lab]" id="g-recaptcha-response-data-start-lab" data-sitekey="6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr" class="g-recaptcha g-recaptcha-response "/>
+
+<div aria-live='polite' class='hidden' id='recaptcha-v2-start-lab' slot='recaptcha'>
+<script src="https://www.recaptcha.net/recaptcha/api.js" async defer ></script>
+<div data-sitekey="6LeOI8IUAAAAAPkHlMAE9NReCD_1WD81iYlBlCnV" data-callback="recaptchaComplete" data-expired-callback="expireV2Token" class="g-recaptcha "></div>
+          <noscript>
+            <div>
+              <div style="width: 302px; height: 422px; position: relative;">
+                <div style="width: 302px; height: 422px; position: absolute;">
+                  <iframe
+                    src="https://www.recaptcha.net/recaptcha/api/fallback?k=6LeOI8IUAAAAAPkHlMAE9NReCD_1WD81iYlBlCnV"
+                    name="ReCAPTCHA"
+                    style="width: 302px; height: 422px; border-style: none; border: 0; overflow: hidden;">
+                  </iframe>
+                </div>
+              </div>
+              <div style="width: 300px; height: 60px; border-style: none;
+                bottom: 12px; left: 25px; margin: 0px; padding: 0px; right: 25px;
+                background: #f9f9f9; border: 1px solid #c1c1c1; border-radius: 3px;">
+                <textarea id="g-recaptcha-response" name="g-recaptcha-response"
+                  class="g-recaptcha-response"
+                  style="width: 250px; height: 40px; border: 1px solid #c1c1c1;
+                  margin: 10px 25px; padding: 0px; resize: none;">
+                </textarea>
+              </div>
+            </div>
+          </noscript>
+
+</div>
+</ql-lab-control-panel>
+</ql-drawer>
+<ql-drawer-content id='lab-instructions' slot='drawer-content'>
+<div class='lab-content-container'>
+<div class='alert alert--fake js-alert'>
+<p class='alert__message js-alert-message' role='alert'></p>
+<ql-icon-button class='alert__close js-alert-close' icon='clear'></ql-icon-button>
+<iframe class='l-ie-iframe-fix' tabindex='-1'></iframe>
+</div>
+<div class='lab-content__renderable-instructions js-lab-content'>
+<div class='lab-preamble'>
+<h1 class='lab-preamble__title'>
+Performing an Online Database Migration
+</h1>
+<div class='lab-preamble__details subtitle-headline-1'>
+<span>2 hours </span>
+<span>Free</span>
+<div class='lab__rating'>
+<a aria-label="Lab Reviews" href="/focuses/31027924/reviews?parent=lti_session"><div class='rateit' data-rateit-readonly='true' data-rateit-value='3.9042'></div>
+
+</a><ql-button aria-label='Rate Lab' id='rate-lab-btn' label='Rate Lab' text></ql-button>
+</div>
+</div>
+</div>
+<div class='lab-outline-place-holder'></div>
+
+<div class='markdown-lab-instructions js-markdown-instructions' id='markdown-lab-instructions'>
+
+<h2 id="step1">Overview</h2>
+<p>This lab demonstrates how to perform an online migration of a SQL Server database to Spanner using Google Cloud's Data Migration Partner, Striim.</p>
+<p>Striim is a comprehensive streaming ETL platform that enables online data migrations and continuous streaming replication from on-premises and cloud data sources to Google Cloud data services through a graphical drag and drop interface.</p>
+<p>The following figure shows Striim's high level architecture.</p>
+<p><img alt="Striim's high level architecture diagram" src="https://cdn.qwiklabs.com/s%2BG9u4EqR2i9l8JQDomhN8cVxLn8E%2B4fZi9FwQjxA60%3D"></p>
+<ql-infobox><strong>Note: </strong>This lab will focus on the implementation of a continuous migration from SQL Server to Spanner and is not an explanation of database migration or database replication or why you might want to migrate your underlying database.
+</ql-infobox>
+<p>The figure below shows the architecture used for this lab.</p>
+<p><img alt="Lab architecture diagram" src="https://cdn.qwiklabs.com/fFfUX51Jpmi%2F%2FZknrUBP75VxHesbGT1Pgxn8nsfYSCY%3D"></p>
+<h3>What you will learn</h3>
+<p>In this lab you will learn to:</p>
+<ul>
+<li>
+<p>Access and use an existing SQL Server database running on a Compute Engine virtual machine.</p>
+</li>
+<li>
+<p>Access and use an existing Spanner database.</p>
+</li>
+<li>
+<p>Deploy Striim through the Google Cloud Marketplace.</p>
+</li>
+<li>
+<p>Use Striim to read from a source SQL Server database.</p>
+</li>
+<li>
+<p>Use Striim to continuously replicate from SQL Server to Spanner.</p>
+</li>
+</ul>
+<h2 id="step2">Setup and requirements</h2>
+<h3>What you'll need</h3>
+<p>For each lab, you get a new Google Cloud project and set of resources for a fixed time at no cost.</p>
+<ol>
+<li>
+<p>Sign in to Qwiklabs using an <strong>incognito window</strong>.</p>
+</li>
+<li>
+<p>Note the lab's access time (for example, <code>1:15:00</code>), and make sure you can finish within that time.<br>
+There is no pause feature. You can restart if needed, but you have to start at the beginning.</p>
+</li>
+<li>
+<p>When ready, click <strong>Start lab</strong>.</p>
+</li>
+<li>
+<p>Note your lab credentials (<strong>Username</strong> and <strong>Password</strong>). You will use them to sign in to the Google Cloud Console.</p>
+</li>
+<li>
+<p>Click <strong>Open Google Console</strong>.</p>
+</li>
+<li>
+<p>Click <strong>Use another account</strong> and copy/paste credentials for <strong>this</strong> lab into the prompts.<br>
+If you use other credentials, you'll receive errors or <strong>incur charges</strong>.</p>
+</li>
+<li>
+<p>Accept the terms and skip the recovery resource page.</p>
+</li>
+</ol>
+<aside class="warning"><p><strong>Note:</strong> Do not click <strong>End Lab</strong> unless you have finished the lab or want to restart it. This clears your work and removes the project.
+  </p>
+</aside>
+<h3>Activate Google Cloud Shell</h3>
+<p>Google Cloud Shell is a virtual machine that is loaded with development tools. It offers a persistent 5GB home directory and runs on the Google Cloud.</p>
+<p>Google Cloud Shell provides command-line access to your Google Cloud resources.</p>
+<ol>
+<li>
+<p>In Cloud console, on the top right toolbar, click the Open Cloud Shell button.</p>
+<p><img alt="Highlighted Cloud Shell icon" src="https://cdn.qwiklabs.com/00tA48qOVOyHrSa1DA7LwccfwQ9Z%2BE6dkvQ1MYPHzhQ%3D"></p>
+</li>
+<li>
+<p>Click <strong>Continue</strong>.</p>
+</li>
+</ol>
+<p>It takes a few moments to provision and connect to the environment. When you are connected, you are already authenticated, and the project is set to your <em>PROJECT_ID</em>. For example:</p>
+<p><img alt="Project ID highlighted in the Cloud Shell Terminal" src="https://cdn.qwiklabs.com/hmMK0W41Txk%2B20bQyuDP9g60vCdBajIS%2B52iI2f4bYk%3D"></p>
+<p><strong>gcloud</strong> is the command-line tool for Google Cloud. It comes pre-installed on Cloud Shell and supports tab-completion.</p>
+<ul>
+<li>You can list the active account name with this command:</li>
+</ul>
+<ql-code-block language="plaintext">
+gcloud auth list
+</ql-code-block>
+<p><strong>Output:</strong></p>
+<ql-code-block output="">
+Credentialed accounts:
+ - @.com (active)
+</ql-code-block>
+<p><strong>Example output:</strong></p>
+<ql-code-block output="">
+Credentialed accounts:
+ - google1623327_student@qwiklabs.net
+ </ql-code-block>
+<ul>
+<li>You can list the project ID with this command:</li>
+</ul>
+<ql-code-block language="plaintext">
+gcloud config list project
+</ql-code-block>
+<p><strong>Output:</strong></p>
+<ql-code-block output="">
+[core]
+project = 
+</ql-code-block>
+<p><strong>Example output:</strong></p>
+<ql-code-block output="">
+[core]
+project = qwiklabs-gcp-44776a13dea667a6
+</ql-code-block>
+<ql-infobox><strong>Note: </strong>
+  Full documentation of <strong>gcloud</strong> is available in the
+  <a href="https://cloud.google.com/sdk/gcloud" target="_blank">
+    gcloud CLI overview guide
+  </a>.
+</ql-infobox>
+<h3>Before you begin</h3>
+<p>In order to work on the database migration some initial configuration is required:</p>
+<ol>
+<li>
+<p>Open a new web browser window and navigate to the Google Cloud Console (console.cloud.google.com). Use the project selector to choose the project with a leading name of '<strong>qwiklabs-gcp</strong>.'</p>
+</li>
+<li>
+<p>In the Cloud Shell, install a SQL Server client to allow easy access to the SQL Server instance. Execute the following commands and accept prompts with either <strong>Y</strong> or <strong>yes</strong>:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
+curl https://packages.microsoft.com/config/ubuntu/22.04/prod.list | sudo tee /etc/apt/sources.list.d/msprod.list
+</ql-code-block>
+<ql-code-block language="plaintext">
+sudo apt-get update
+</ql-code-block>
+<ql-code-block language="plaintext">
+sudo apt-get install mssql-tools unixodbc-dev
+</ql-code-block>
+<ql-code-block language="plaintext">
+echo 'export PATH="$PATH:/opt/mssql-tools/bin"' &gt;&gt; ~/.bash_profile
+echo 'export PATH="$PATH:/opt/mssql-tools/bin"' &gt;&gt; ~/.bashrc
+source ~/.bashrc
+</ql-code-block>
+<ol start="3">
+<li>On the <strong>Navigation menu</strong>  (<img alt="Navigation menu icon" src="https://cdn.qwiklabs.com/%2BnHJDKUfemAVQPMPb%2BAcqH0ZqkvrGALIBL1p582JNCQ%3D">),  click <strong>Compute Engine</strong> &gt; <strong>VM instances</strong>. Copy the IP address for the SQL Server instance.  The value appears in the External IP column. You can simply copy this value to your clipboard by hovering over the IP address, moving your mouse to the document's image, and then clicking <strong>Copy to clipboard</strong>.</li>
+</ol>
+<p><img alt="VM instances window" src="https://cdn.qwiklabs.com/rnALE81bFG8S%2ByTpo%2BAi%2FKM4s4cUHi03LOial6KXFpA%3D"></p>
+<ol start="4">
+<li>Assign the SQL Server instance's IP address to the <strong>SQLSRVIP</strong> variable.</li>
+</ol>
+<ql-warningbox><strong>Note: </strong>Be sure to leave the outside single quotes.</ql-warningbox>
+<ql-code-block language="plaintext">
+export SQLSRVIP='SQLSRV_IP_ADDRESS'
+</ql-code-block>
+<ol start="5">
+<li>
+<p>Run the following command to view the existing data in the <strong>Orders</strong> table.  The table currently contains 10 rows.  Your results will appear as shown below.</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+sqlcmd -S $SQLSRVIP,1433 -U striim -P striim-password -d striimlab -Q "select * from striimlab.dbo.ORDERS"
+</ql-code-block>
+<p><img alt="Orders table in the terminal winow" src="https://cdn.qwiklabs.com/6WjIoyKpDHzgDDtJEovqQLkOIwCYwYsghult9lhbx58%3D"></p>
+<ol start="6">
+<li>Type "<strong>cat</strong>" into the terminal window (without double quotes) and press <strong>Return/Enter</strong>.  This will effectively pause the shell and preserve all of the configuration you have made while you perform steps outside the shell.</li>
+</ol>
+<p><img alt="cat typed in the terminal window" src="https://cdn.qwiklabs.com/8p0UIs05UWqJf5lvcTVxKAFqqeSAbgWA%2B7pfKluSwLc%3D"></p>
+<ol start="7">
+<li>
+<p>Verify that the Spanner instance has been set up with a database and table defined. In the Cloud Console, select <strong>Navigation menu &gt; Spanner</strong>.</p>
+</li>
+<li>
+<p>Click on the instance name <strong>striim-spanner-lab</strong>, and then click on the database name <strong>striimlab</strong> (under the <strong>Databases</strong> section). Confirm that the table <strong>orders</strong> is present.</p>
+</li>
+<li>
+<p>Click on the table name <strong>orders</strong> in the bottom pane under <strong>Tables</strong>. Then click <strong>Data</strong> on the left pane. The table is empty.</p>
+</li>
+</ol>
+<h2 id="step3">Task 1. Set up the Striim server</h2>
+<p>You will set up an instance of the Striim server provisioned through the Google Cloud Marketplace.</p>
+<ol>
+<li>
+<p>Click on the <strong>Navigation menu &gt; Marketplace</strong>. In the search box type <strong>Striim</strong> and hit Return or Enter. Select <strong>STRIIM ( metered )</strong> from the list of options.</p>
+</li>
+<li>
+<p>Click <strong>Launch</strong>.</p>
+</li>
+<li>
+<p>On the <strong>New STRIIM ( metered ) deployment</strong> screen that appears, leave the <strong>Zone</strong> set to the default value.</p>
+</li>
+<li>
+<p>Change the <strong>Machine Type</strong> to: <br>
+Series:  <strong>E2</strong> <br>
+Machine type:  <strong>e2-standard-4 (4 vCPU, 16 GB memory)</strong>.</p>
+</li>
+<li>
+<p>Leave the other options at their default values.</p>
+</li>
+<li>
+<p>Scroll down the page and <strong>Check</strong> the box for <strong>I accept the GCP Marketplace Terms of Service...</strong>.</p>
+</li>
+<li>
+<p>Click <strong>Deploy</strong>.</p>
+</li>
+</ol>
+<ql-infobox><strong>Note: </strong>Marketplace solutions typically come with various resources that launch together in order to support the software. Be sure to review the monthly billing estimate before launching Striim in a regular, non-training account.</ql-infobox>
+<ol start="8">
+<li>You will be redirected to the <strong>Deployment Manager</strong> page and once the environment is provisioned the deployment details will appear. Take note of the name of the VM and deployment zone (<strong>Instance</strong> and <strong>Instance zone</strong> in the example screenshot below).</li>
+</ol>
+<p><img alt="Deployment details, Instance and Instance zone, are highlighted" src="https://cdn.qwiklabs.com/bJ3e7KZN5zrufHZlAWcEehgMqytVtzPyY2Ily%2FJPwlQ%3D"></p>
+<p>Click <em>Check my progress</em> to verify the objective.
+<ql-activity-tracking step="1">
+Set up the Striim server
+</ql-activity-tracking></p>
+<ol start="12">
+<li>Return to the Cloud Shell.  Press <strong>Ctrl+C</strong> to clear the paused "<strong>cat</strong>" command. Execute the following commands after replacing the placeholder <strong>INSTANCENAME</strong> with the <strong>Instance</strong> name and the placeholder <strong>ZONENAME</strong> with the <strong>Instance zone</strong> from the deployment details pane.</li>
+</ol>
+<p>Based on the screenshot above, <strong>STRIIMVM_NAME</strong> would be set to <strong>striim-metered-1-vm</strong> and <strong>STRIIMVM_ZONE</strong> would be set to <strong>us-central1-f</strong>.  Your values may vary.</p>
+<ql-code-block language="plaintext">
+export STRIIMVM_NAME=INSTANCENAME
+</ql-code-block>
+<ql-code-block language="plaintext">
+export STRIIMVM_ZONE=ZONENAME
+</ql-code-block>
+<ol start="13">
+<li>
+<p>Type "<strong>cat</strong>" into the terminal window (without double quotes) and press <strong>Return/Enter</strong> to pause the shell.</p>
+</li>
+<li>
+<p>Return to the Deployment Manager tab, click the link for <strong>Site address</strong>. This will open up the Striim configuration wizard in a new browser tab. If there is a redirect notice, you can safely click the link provided.</p>
+</li>
+<li>
+<p>If you receive a pop-up referring to the use of cookies, click <strong>I Agree</strong>. Click <strong>Accept Striim EULA and Continue</strong> at the bottom of the page.</p>
+</li>
+<li>
+<p>Configure your Striim installation - use the values listed in the table below:</p>
+</li>
+</ol>
+<table>
+
+<tr>
+<th>Property</th>
+<th>Value (type value or select option as specified)</th>
+</tr>
+
+
+<tr>
+<td><strong>Cluster name</strong></td>
+<td><code>my_cluster</code></td>
+</tr>
+<tr>
+<td><strong>Admin password</strong></td>
+<td><code>striim-password</code></td>
+</tr>
+<tr>
+<td><strong>Re-enter Admin password</strong></td>
+<td><code>striim-password</code></td>
+</tr>
+<tr>
+<td><strong>Sys user password</strong></td>
+<td><code>striim-password</code></td>
+</tr>
+<tr>
+<td><strong>Re-enter Sys user password</strong></td>
+<td><code>striim-password</code></td>
+</tr>
+<tr>
+<td><strong>Striim Key Store password</strong></td>
+<td><code>striim-password</code></td>
+</tr>
+<tr>
+<td><strong>Re-enter Striim Key Store password</strong></td>
+<td><code>striim-password</code></td>
+</tr>
+
+</table>
+<ol start="17">
+<li>
+<p>Click <strong>Save and Continue</strong>.</p>
+</li>
+<li>
+<p>Click <strong>Launch</strong>. Processing will occur in the background. Please wait a short while. Once all actions are complete, click the green <strong>Log In</strong> button.</p>
+</li>
+<li>
+<p>Log in using the user <strong>admin</strong> and the password <strong>striim-password</strong>. This will take you to the Striim administration console.</p>
+</li>
+</ol>
+<p>You are now ready to configure a connection to the SQL Server instance.</p>
+<ql-warningbox><strong>Important:</strong> The "admin" user is a built-in user that must be used in order for login to succeed.</ql-warningbox>
+<h2 id="step4">Task 2. Set up Striim Access to SQL Server</h2>
+<p>You will now deploy the SQL Server JDBC driver to allow Striim to connect to your SQL Server instance.</p>
+<ol>
+<li>
+<p>On the Deployment Manager page for your Striim instance, click <strong>SSH</strong> located next to the blue <strong>Visit the site</strong> button. This will open up a new window and will automatically SSH into the virtual machine.</p>
+</li>
+<li>
+<p>If prompted to allow SSH-in-browser to connect to VMs click <strong>Authorize</strong>.</p>
+</li>
+</ol>
+<ql-warningbox><strong>Note:</strong> If presented with a warning of "Please consider adding the IAP-secured Tunnel User IAM role to start using Cloud IAP for TCP forwarding for better performance", you may safely ignore the warning.</ql-warningbox>
+<ol start="3">
+<li>
+<p>Run the following command to download the SQL Server JDBC driver:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+sudo wget https://storage.googleapis.com/cloud-training/dbmigration/mssql-jdbc-7.2.2.jre8.jar
+</ql-code-block>
+<ol start="4">
+<li>
+<p>Copy the java archive file to the Striim library path, allow it to be executable, and change the ownership and group:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+sudo cp mssql-jdbc-7.2.2.jre8.jar /opt/striim/lib/mssql-jdbc-7.2.2.jre8.jar
+sudo chmod +x /opt/striim/lib/mssql-jdbc-7.2.2.jre8.jar
+sudo chown striim /opt/striim/lib/mssql-jdbc-7.2.2.jre8.jar
+sudo chgrp striim /opt/striim/lib/mssql-jdbc-7.2.2.jre8.jar
+</ql-code-block>
+<ol start="5">
+<li>
+<p>Restart the Striim server to recognize the new JDBC driver:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+sudo systemctl stop striim-node
+sudo systemctl stop striim-dbms
+sudo systemctl start striim-dbms
+sudo systemctl start striim-node
+</ql-code-block>
+<ol start="6">
+<li>Close the Striim SSH window.</li>
+</ol>
+<p>Click <em>Check my progress</em> to verify the objective.
+<ql-activity-tracking step="2">
+Set up Striim Access to SQL Server
+</ql-activity-tracking></p>
+<ol start="7">
+<li>Go back to the browser tab for the Striim administration console, refresh the tab, and log in using the user <strong>admin</strong> and the password <strong>striim-password</strong>. The administration console will take a few minutes to refresh after the restart. If the administration console does not reload on the first attempt, keep refreshing until the administration console comes up.</li>
+</ol>
+<p>If the administration console does not come up, use the site address, but with port 9080 instead of 9070, i.e. <strong>http://STRIIM_IP_ADDRESS:9080/</strong>.</p>
+<h2 id="step5">Task 3. Create a Spanner access key</h2>
+<p>Striim requires an IAM access key so that it can securely connect to Spanner.  Follow these steps to create the key:</p>
+<ol>
+<li>
+<p>Return to the project Cloud Shell, press <strong>Ctrl+C</strong> to clear the paused "<strong>cat</strong>" command, and create a service account for Striim to connect to Spanner by running the commands below.  These steps will create a key named <strong>striim-spanner-key.json</strong> in your Cloud Shell's home path:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+gcloud iam service-accounts create striim-spanner --display-name striim-spanner
+</ql-code-block>
+<ql-code-block language="plaintext">
+export sa_striim_spanner=$(gcloud iam service-accounts list --filter="displayName:striim-spanner" --format='value(email)')
+</ql-code-block>
+<ql-code-block language="plaintext">
+export PROJECT=$(gcloud info --format='value(config.project)')
+</ql-code-block>
+<ql-code-block language="plaintext">
+gcloud projects add-iam-policy-binding $PROJECT --role roles/spanner.databaseUser --member serviceAccount:$sa_striim_spanner
+</ql-code-block>
+<ql-code-block language="plaintext">
+gcloud iam service-accounts keys create ~/striim-spanner-key.json --iam-account $sa_striim_spanner
+</ql-code-block>
+<ol start="2">
+<li>
+<p>On the Deployment Manager page for your Striim instance, click <strong>SSH</strong> located next to the blue <strong>Visit the site</strong> button. This will open up a new window and will automatically SSH into the virtual machine.</p>
+</li>
+<li>
+<p>Run the following command to determine the Qwiklabs student user account.  Copy the results to the clipboard:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+whoami
+</ql-code-block>
+<p>Example output:</p>
+<p><img alt="whoami results" src="https://cdn.qwiklabs.com/NM%2BPhBIgUChVZiyI%2B5tfOLcO4SBFt6A3RA4vjM595DE%3D"></p>
+<ol start="4">
+<li>
+<p>Run the following command to set a variable equal to the user account within the Striim SSH terminal.  Replace <strong>WHOAMI</strong> with the results from the last command.  In the screenshot above this value is <strong>student-03-e55b52d3ee8c</strong>:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+export USERNAME=WHOAMI
+</ql-code-block>
+<ol start="5">
+<li>
+<p>Run the following commands to create a directory and change ownership of that directory to the Qwiklabs user:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+sudo mkdir /home/$USERNAME
+sudo chown $USERNAME /home/$USERNAME 
+</ql-code-block>
+<ol start="6">
+<li>
+<p>You must close the Striim SSH window before proceeding to the next step.</p>
+</li>
+<li>
+<p>Return to the project Cloud Shell and move the Spanner key you created to the Striim VM. The command below will copy the JSON file to the Striim server. Connecting by <strong>scp</strong> (secure copy) will cause an SSH key to be generated and you will be prompted to create a passphrase. When prompted to continue, confirm with <strong>"Y"</strong> and leave the passphrase field empty. Press <strong>Return</strong> or <strong>Enter</strong> to force the passphrase to be empty on each step:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+gcloud compute scp ~/striim-spanner-key.json $STRIIMVM_NAME:~ --zone=$STRIIMVM_ZONE
+</ql-code-block>
+<ql-warningbox><strong>Important:</strong> If you receive a workgroup error in the console, you can safely ignore that message.</ql-warningbox>
+<ol start="8">
+<li>
+<p>Move the JSON file on the Striim VM to the <strong>/opt/striim</strong> directory using the command below.  The terminal will report that the connection is closed to the remote server.  This is not an error or warning.  Proceed to the next step.</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+gcloud compute ssh --zone=$STRIIMVM_ZONE $STRIIMVM_NAME -- 'sudo cp ~/striim-spanner-key.json /opt/striim &amp;&amp; sudo chown striim /opt/striim/striim-spanner-key.json'
+</ql-code-block>
+<p><img alt="Terminal report: Connection to 35.188.128.16 closed." src="https://cdn.qwiklabs.com/1mUCrwh4zaOXCB7uU0tQN0T43gKUTrDocWM%2BqqzjfZU%3D"></p>
+<ol start="9">
+<li>
+<p>Confirm that the JSON file is now on the Striim server by issuing the following command.  The key and file details appear in the output.</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+gcloud compute ssh --zone=$STRIIMVM_ZONE $STRIIMVM_NAME -- 'sudo ls -l /opt/striim/striim-spanner-key.json'
+</ql-code-block>
+<p><img alt="Output: strim root 2367 Jul 17 18:31 /opt/striim/striim-spanner-key.json" src="https://cdn.qwiklabs.com/NuVqycOYYUVa9eDyIoJ5lGLivUHCr%2FexReqALJfupto%3D"></p>
+<ol start="10">
+<li>Type "<strong>cat</strong>" into the terminal window (without double quotes) and press <strong>Return/Enter</strong> to pause the shell.</li>
+</ol>
+<p>You are now ready to create a Striim application.</p>
+<p>Click <em>Check my progress</em> to verify the objective.
+<ql-activity-tracking step="3">
+Create a Spanner access key
+</ql-activity-tracking></p>
+<h2 id="step6">Task 4. Create an online database migration</h2>
+<p>An online database migration moves data from a source database (either on-premises or hosted on a cloud provider) to a target database in Google Cloud. The source database remains fully accessible to business applications with minimal performance impact on the source database with this type of configuration.</p>
+<p>In an online migration, an initial bulk load is performed, and a continuous capture of changes is executed. You then synchronize the two databases to ensure that data isn't lost. Typically both databases will be retained for long periods of time to test and verify that the application and users are not impacted by switching to a new cloud database.</p>
+<ol>
+<li>
+<p>On the Striim administration console, click the <strong>Apps</strong> button in the middle of the page.</p>
+</li>
+<li>
+<p>Click the <strong>Create App</strong> button on the upper right hand side of the page.</p>
+</li>
+<li>
+<p>There are multiple ways to create applications in Striim. For this lab click <strong>Start From Scratch</strong> (the option on the left).</p>
+</li>
+<li>
+<p>Name the application something that is easily remembered.  For this lab use the name <strong>Batch</strong>.</p>
+</li>
+<li>
+<p>Below the application name, you can choose a namespace. These are logical groupings that help you organize applications. Use the default <strong>admin</strong> namespace. Click <strong>Save</strong> on the bottom right corner of the page.</p>
+</li>
+<li>
+<p>The Flow Designer page loads. All of the out of the box connectors needed to create streaming data applications are in the left side menu bar.</p>
+</li>
+<li>
+<p>To do a one-time, bulk initial load of data, use the Database Reader. Drag and drop the <strong>Database</strong> tile from the Sources pane to the application canvas in the middle.</p>
+</li>
+<li>
+<p>Enter the following connection properties in the <strong>New Source</strong> pane on the right of the page.</p>
+</li>
+</ol>
+<ql-warningbox><strong>Note:</strong> <strong>PRIMARY_ADDRESS</strong> is the IP address of SQL Server instance.  <strong>You must replace this placeholder with the instance's IP address</strong>.  You accessed the IP address in <strong>Setup and Requirements - step 4</strong> of this lab.
+</ql-warningbox>
+<table>
+
+<tr>
+<th>Property</th>
+<th>Value (type value or select option as specified)</th>
+</tr>
+
+
+<tr>
+<td><strong>Name</strong></td>
+<td><code>batch_source</code></td>
+</tr>
+<tr>
+<td><strong>Connection URL</strong></td>
+<td><code>jdbc:sqlserver://PRIMARY_ADDRESS:1433;DatabaseName=striimlab</code></td>
+</tr>
+<tr>
+<td><strong>Username</strong></td>
+<td><code>striim</code></td>
+</tr>
+<tr>
+<td><strong>Password</strong></td>
+<td><code>striim-password</code></td>
+</tr>
+
+</table>
+<ol start="9">
+<li>Click the <strong>Show Advanced Settings</strong> link to add one additional configuration value.</li>
+</ol>
+<table>
+
+<tr>
+<th>Property</th>
+<th>Value (type value or select option as specified)</th>
+</tr>
+
+
+<tr>
+<td><strong>Tables</strong></td>
+<td><code>striimlab.dbo.ORDERS</code></td>
+</tr>
+
+</table>
+<ol start="10">
+<li>For <strong>Output To</strong> provide the following value.</li>
+</ol>
+<table>
+
+<tr>
+<th>Property</th>
+<th>Value (type value or select option as specified)</th>
+</tr>
+
+
+<tr>
+<td><strong>New Output</strong></td>
+<td><code>batch_inprocess</code></td>
+</tr>
+
+</table>
+<ol start="11">
+<li>
+<p>Click <strong>Save</strong>.</p>
+</li>
+<li>
+<p>Next perform a quick test to see if the configuration settings are correct and that Striim can successfully connect to the SQL Server instance. On the top middle of the page, there will be a button marked <strong>Created</strong> with a drop down arrow next to it. Click the button, and select <strong>Deploy App</strong>.</p>
+</li>
+<li>
+<p>Select the <strong>default</strong> option and click <strong>Deploy</strong>.</p>
+</li>
+<li>
+<p>Click the <strong>wave</strong> button beneath your Database Reader component, and then click the <strong>eye</strong> icon next to it to preview your data as it flows through the Striim pipeline.</p>
+</li>
+</ol>
+<p><img alt="wave button highlighted" src="https://cdn.qwiklabs.com/Z6ehXTWTfKl%2Bs7krvkPhtvgho8jiBQm%2B1XKqlxnoN9w%3D"></p>
+<ol start="15">
+<li>Go back up to the top menu space, click <strong>Deployed</strong>, and then click <strong>Start App</strong>.</li>
+</ol>
+<p>You should now see the Striim application running and data flowing through the pipeline. If there are any errors, it means that there is an issue connecting to the source database since there is only a source component in the pipeline. If you see your application successfully run but no data flows through, typically that means that you don't have any existing data in your database.</p>
+<p><img alt="Application progress window" src="https://cdn.qwiklabs.com/3oA0EjHWVtPBRFVlN2Om6iPDvv5VJPvwf4b8RdKvybE%3D"></p>
+<p>You've successfully connected to your source database and tested that it can read data.</p>
+<ol start="16">
+<li>
+<p>Click <strong>Running</strong> on the top menu bar, and then select <strong>Stop App</strong>.</p>
+</li>
+<li>
+<p>Click <strong>Stopped</strong>, and then select <strong>Undeploy App</strong>. We are now ready to connect to Spanner.</p>
+</li>
+<li>
+<p>Click the <strong>wave</strong> button under the <strong>DatabaseReader</strong>. This time a <strong>"+"</strong> (plus) button will appear. Click the plus button and then select <strong>Connect next Target component</strong>.</p>
+</li>
+<li>
+<p>Name this target object <strong>batch_target</strong>. In the <strong>Adapter</strong> field search for <strong>Spanner</strong>. Select <strong>SpannerWriter</strong>.</p>
+</li>
+<li>
+<p>Enter the connection properties listed below.</p>
+</li>
+</ol>
+<table>
+
+<tr>
+<th>Property</th>
+<th>Value (type value or select option as specified)</th>
+</tr>
+
+
+<tr>
+<td><strong>Service Account Key</strong></td>
+<td><code>/opt/striim/striim-spanner-key.json</code></td>
+</tr>
+<tr>
+<td><strong>InstanceID</strong></td>
+<td><code>striim-spanner-lab</code></td>
+</tr>
+<tr>
+<td><strong>Tables</strong></td>
+<td><code>striimlab.dbo.ORDERS,striimlab.orders</code></td>
+</tr>
+
+</table>
+<ql-infobox><strong>Note: </strong>The Service Account Key property points to the fully qualified path and name of the key file that was generated earlier and moved to the Striim server.</ql-infobox>
+<ol start="21">
+<li>
+<p>Click <strong>Save</strong>.</p>
+</li>
+<li>
+<p>Click the <strong>Created</strong> link in the middle of the designer page and then click <strong>Deploy App</strong> from the drop down.</p>
+</li>
+<li>
+<p>Select the <strong>default</strong> option and click <strong>Deploy</strong>.</p>
+</li>
+<li>
+<p>Click <strong>Deployed</strong>, and then click <strong>Start App</strong>.</p>
+</li>
+<li>
+<p>Once the status of <strong>Running</strong> appears, navigate to another tab on the <strong>Navigation menu</strong> click <strong>Spanner</strong>. Click on the instance name <strong>striim-spanner-lab</strong>, and then click on the database name <strong>striimlab</strong>.</p>
+</li>
+<li>
+<p>On the left pane, click <strong>Query</strong>. In the right side query panel, run the following query:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+SELECT * from orders
+</ql-code-block>
+<ql-warningbox><strong>Note:</strong> It might take a minute or two for the data to appear due to the default configuration settings. Execute the query again until the data is loaded.</ql-warningbox>
+<p><img alt="Spanner Database query results" src="https://cdn.qwiklabs.com/Gc0uDB6IR5RZedkqr1bfWOiJUGeXa0UQPhFznef1jbE%3D"></p>
+<p>You have successfully set up your Striim environment and pipeline to perform a batch load.</p>
+<ol start="27">
+<li>
+<p>Return to your Striim application. Click <strong>Running</strong> on the top menu bar, and then select <strong>Stop App</strong>.</p>
+</li>
+<li>
+<p>Click <strong>Stopped</strong>, and then select <strong>Undeploy App</strong>.</p>
+</li>
+</ol>
+<h2 id="step7">Task 5. Create a continuous SQL Server to Spanner Data Pipeline</h2>
+<p>With an initial one time bulk load in place, you can set up a continuous replication pipeline. It will look very similar to the bulk pipeline that you just created, but with a different source object.</p>
+<ol>
+<li>Click the <strong>Apps</strong> menu and then click <strong>Create New</strong>.</li>
+</ol>
+<p><img alt="Apps menu" src="https://cdn.qwiklabs.com/aS3oahlV%2FfsqYU%2FvbuuShfKo0NRGHGu4%2Fq9wa4Bpw94%3D"></p>
+<ol start="2">
+<li>
+<p>Click <strong>Start from Scratch</strong>, and then name it <strong>CDC</strong>. Leave the namespace as the default option <strong>admin</strong>.</p>
+</li>
+<li>
+<p>Click <strong>Save</strong>.</p>
+</li>
+<li>
+<p>This time, instead of choosing a <strong>Database</strong> reader source, choose the <strong>SQL Server CDC</strong> source and drag it on the canvas.</p>
+</li>
+<li>
+<p>Enter the following connection properties in the right pane of the <strong>New Source</strong> window.</p>
+</li>
+</ol>
+<ql-warningbox><strong>Note: </strong><strong>PRIMARY_ADDRESS</strong> is the IP address of SQL Server instance.  <strong>You must replace this placeholder with the instance's IP address</strong>.  You accessed the IP address in <strong>Setup and Requirements - step 4</strong> of this lab.
+</ql-warningbox>
+<table>
+
+<tr>
+<th>Property</th>
+<th>Value (type value or select option as specified)</th>
+</tr>
+
+
+<tr>
+<td><strong>Name</strong></td>
+<td><code>cdc_source</code></td>
+</tr>
+<tr>
+<td><strong>Database Name</strong></td>
+<td><code>striimlab</code></td>
+</tr>
+<tr>
+<td><strong>Connection URL</strong></td>
+<td><code>jdbc:sqlserver://PRIMARY_ADDRESS:1433;DatabaseName=striimlab</code></td>
+</tr>
+<tr>
+<td><strong>Tables</strong></td>
+<td><code>dbo.ORDERS</code></td>
+</tr>
+
+</table>
+<ol start="6">
+<li>Click the <strong>Show Advanced Settings</strong> link to input the Username and Password.</li>
+</ol>
+<table>
+
+<tr>
+<th>Property</th>
+<th>Value (type value or select option as specified)</th>
+</tr>
+
+
+<tr>
+<td><strong>Username</strong></td>
+<td><code>striim</code></td>
+</tr>
+<tr>
+<td><strong>Password</strong></td>
+<td><code>striim-password</code></td>
+</tr>
+
+</table>
+<ol start="7">
+<li>For <strong>Output To</strong> provide the following value.</li>
+</ol>
+<table>
+
+<tr>
+<th>Property</th>
+<th>Value (type value or select option as specified)</th>
+</tr>
+
+
+<tr>
+<td><strong>New Output</strong></td>
+<td><code>cdc_inprocess</code></td>
+</tr>
+
+</table>
+<ol start="8">
+<li>
+<p>Click <strong>Save</strong>.</p>
+</li>
+<li>
+<p>Click the <strong>wave</strong> button under the <strong>cdc_Source</strong>. This time a <strong>"+"</strong> (plus) button will appear. Click the plus button and then select <strong>Connect next Target component</strong>.</p>
+</li>
+<li>
+<p>Name the target object <strong>cdc_target</strong> and then search for <strong>Spanner</strong> under the <strong>Adapter</strong> field. Select <strong>SpannerWriter</strong>.</p>
+</li>
+<li>
+<p>Enter the following connection properties.</p>
+</li>
+</ol>
+<ql-warningbox><strong>Note:</strong> The <strong>Tables</strong> mapping used in this configuration is slightly different from the one used in the batch load.</ql-warningbox>
+<table>
+
+<tr>
+<th>Property</th>
+<th>Value (type value or select option as specified)</th>
+</tr>
+
+
+<tr>
+<td><strong>Service Account Key</strong></td>
+<td><code>/opt/striim/striim-spanner-key.json</code></td>
+</tr>
+<tr>
+<td><strong>InstanceID</strong></td>
+<td><code>striim-spanner-lab</code></td>
+</tr>
+<tr>
+<td><strong>Tables</strong></td>
+<td><code>dbo.ORDERS,striimlab.orders</code></td>
+</tr>
+
+</table>
+<ol start="12">
+<li>
+<p>Click <strong>Save</strong>.</p>
+</li>
+<li>
+<p>Click the <strong>Created</strong> link in the middle of the designer page and then click <strong>Deploy App</strong> from the drop down.</p>
+</li>
+<li>
+<p>Select the <strong>default</strong> option and click <strong>Deploy</strong>.</p>
+</li>
+<li>
+<p>Click <strong>Deployed</strong>, and then click <strong>Start App</strong>.</p>
+</li>
+<li>
+<p>Wait for the CDC app to be fully running before moving to the next step.  Your screen should appear like the image below before you proceed.</p>
+</li>
+</ol>
+<p><img alt="Application Progress window" src="https://cdn.qwiklabs.com/dLTiD356LsokksIJBeVLJZ4WAv4mtS1JXLMp57QEwHA%3D"></p>
+<ol start="17">
+<li>
+<p>Go back to the Cloud Shell.  Press <strong>Ctrl+C</strong> to clear the paused "<strong>cat</strong>" command. Run the following command to add one row of data to the <strong>Orders</strong> table:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+sqlcmd -S $SQLSRVIP,1433 -U striim -P striim-password -d striimlab -Q "INSERT INTO ORDERS (ORDER_ID, ORDER_DATE, ORDER_MODE, CUSTOMER_ID, ORDER_STATUS, ORDER_TOTAL, SALES_REP_ID, PROMOTION_ID) VALUES (1011, '1568928576017', 'In-Store', 1011, 9, 13879.56, 320, 88252)"
+</ql-code-block>
+<ql-warningbox><strong>Note:</strong> The variable <strong>SQLSRVIP</strong> should still be set in the Cloud Shell.  If it is not please issue the command from <strong>Setup and Requirements - step 5</strong>.</ql-warningbox>
+<ol start="18">
+<li>
+<p>In the Cloud Console, navigate to <strong>Spanner</strong>, then to the <code>striimlab</code> database, and then the <code>orders</code> table .  Click <strong>Query</strong>. Run the following query:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+SELECT * from orders
+order by order_id desc
+</ql-code-block>
+<p>The newly inserted row, Order ID 1011, will appear at the top of the list.</p>
+<ql-warningbox><strong>Note:</strong> It might take a minute or two for the data to appear due to the default configuration settings. Please execute the query again until the data is loaded.</ql-warningbox>
+<p><img alt="Query results" src="https://cdn.qwiklabs.com/rzRP%2FEHQaCePmH0FI4nxuukaYHzSLRR12e%2Fh48oBjxM%3D"></p>
+<ol start="19">
+<li>
+<p>Return to the Cloud Shell and run the following commands consecutively to add 4 more rows of data to the <strong>Orders</strong> table:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+sqlcmd -S $SQLSRVIP,1433 -U striim -P striim-password -d striimlab -Q "INSERT INTO ORDERS (ORDER_ID, ORDER_DATE, ORDER_MODE, CUSTOMER_ID, ORDER_STATUS, ORDER_TOTAL, SALES_REP_ID, PROMOTION_ID) VALUES (1012, '1568928636017', 'CompanyA', 1012, 1, 19729.99, 76, 95203)"
+</ql-code-block>
+<ql-code-block language="plaintext">
+sqlcmd -S $SQLSRVIP,1433 -U striim -P striim-password -d striimlab -Q "INSERT INTO ORDERS (ORDER_ID, ORDER_DATE, ORDER_MODE, CUSTOMER_ID, ORDER_STATUS, ORDER_TOTAL, SALES_REP_ID, PROMOTION_ID) VALUES (1013, '1568928696017', 'In-Store', 1013, 5, 7286.68, 164, 45162)"
+</ql-code-block>
+<ql-code-block language="plaintext">
+sqlcmd -S $SQLSRVIP,1433 -U striim -P striim-password -d striimlab -Q "INSERT INTO ORDERS (ORDER_ID, ORDER_DATE, ORDER_MODE, CUSTOMER_ID, ORDER_STATUS, ORDER_TOTAL, SALES_REP_ID, PROMOTION_ID) VALUES (1014, '1568928756017', 'Online', 1014, 1, 87268.61, 909, 70407)"
+</ql-code-block>
+<ql-code-block language="plaintext">
+sqlcmd -S $SQLSRVIP,1433 -U striim -P striim-password -d striimlab -Q "INSERT INTO ORDERS (ORDER_ID, ORDER_DATE, ORDER_MODE, CUSTOMER_ID, ORDER_STATUS, ORDER_TOTAL, SALES_REP_ID, PROMOTION_ID) VALUES (1015, '1568928816017', 'CompanyB', 1015, 1, 69744.13, 424, 79401)"
+</ql-code-block>
+<ol start="20">
+<li>
+<p>Return to the Spanner tab to verify that the additional rows have made it to the database by repeating the earlier query:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+SELECT * from orders
+order by order_id desc
+</ql-code-block>
+<p><img alt="Query results" src="https://cdn.qwiklabs.com/EUzrHhLLC%2FzpNoF6l0IYZH7sTiA%2FjhYEjExcnUytyr0%3D"></p>
+<h2 id="step8">Congratulations!</h2>
+<p>You have successfully set up a streaming pipeline from SQL Server to Spanner and used Striim to achieve an online database migration.</p>
+<h3>Next steps / Learn more</h3>
+<p>Try out other Google Cloud Platform features for yourself. Have a look at our  <a href="https://cloud.google.com/docs/tutorials" target="_blank">tutorials</a>, and also be sure to take a look at the <a href="https://cloud.google.com/db-migration/" target="_blank">Google Cloud Data Migration content</a>.</p>
+<p>Copyright 2022 Google LLC All rights reserved. Google and the Google logo are trademarks of Google LLC. All other company and product names may be trademarks of the respective companies with which they are associated.</p>
+
+</div>
+</div>
+
+
+<div class='lab-content__end-lab-button js-end-lab-button-container hidden'>
+<ql-lab-control-button class='js-end-lab-button' running></ql-lab-control-button>
+</div>
+<!-- / TODO: Move recommendations into the end lab modal -->
+</div>
+<div aria-label='Lab Table of Contents' class='outline-container' id='js-outline-container' role='navigation'>
+<ul class='lab-content__outline js-lab-content-outline'>
+<li><a href="#step1">Overview</a></li><li><a href="#step2">Setup and requirements</a></li><li><a href="#step3">Task 1. Set up the Striim server</a></li><li><a href="#step4">Task 2. Set up Striim Access to SQL Server</a></li><li><a href="#step5">Task 3. Create a Spanner access key</a></li><li><a href="#step6">Task 4. Create an online database migration</a></li><li><a href="#step7">Task 5. Create a continuous SQL Server to Spanner Data Pipeline</a></li><li><a href="#step8">Congratulations!</a></li>
+</ul>
+</div>
+</ql-drawer-content>
+</ql-drawer-container>
+</ql-drawer-content>
+</ql-drawer-container>
+<ql-snackbar id='alert-snackbar'></ql-snackbar>
+
+
+
+</div>
+</main>
+
+<span class='hidden' id='flash-sibling-before'></span>
+<ql-snackbar></ql-snackbar>
+
+<script data-glue-cookie-notification-bar-category='2B' src='https://www.gstatic.com/glue/cookienotificationbar/cookienotificationbar.min.js'></script>
+
+<ql-dialog headline='Score Details' icon='task_alt' id='jupyter-feedback-modal'>
+<iframe id='jupyter-feedback-frame' srcdoc='' title='Jupyter Feedback'></iframe>
+</ql-dialog>
+
+<div class='modal fade' id='lab-details-modal'>
+<div class='modal-container'>
+<div class='modal-content mdl-shadow--24dp'>
+<div class='modal-body'>
+<p class='l-mbm'>
+This lab demonstrates how to perform an online migration of a SQL Server database to Cloud Spanner using Google Cloud's Data Migration Partner, Striim.
+</p>
+<p class='small-label l-mbs'>
+<strong>
+Duration:
+</strong>
+0m setup
+&middot;
+120m access
+&middot;
+120m completion
+</p>
+<p class='small-label l-mbs'>
+<strong>AWS Region:</strong>
+[] <strong></strong>
+</p>
+<p class='small-label l-mbs'>
+<span><strong>Levels: </strong>advanced</span>
+</p>
+<p class='small-label'>
+<strong>
+Permalink:
+</strong>
+<a href="https://googlecoursera.qwiklabs.com/catalog_lab/2785">https://googlecoursera.qwiklabs.com/catalog_lab/2785</a>
+</p>
+</div>
+<div class='modal-actions'>
+<a class='button button--text' data-dismiss='modal'>
+Got It
+</a>
+</div>
+
+
+</div>
+</div>
+<iframe class='l-ie-iframe-fix' tabindex='-1' title='modal'></iframe>
+</div>
+<ql-dialog headline='How satisfied are you with this lab?&lt;span aria-hidden=&quot;true&quot;&gt;*&lt;/span&gt;' id='lab-review-dialog'>
+<form class="simple_form js-lab-review-form" id="edit_lab_review_32746456" action="/lab_reviews/32746456" accept-charset="UTF-8" data-remote="true" method="post"><input name="utf8" type="hidden" value="&#x2713;" autocomplete="off" /><input type="hidden" name="_method" value="patch" autocomplete="off" /><div aria-labelledby='lab-review-dialog' aria-required='true' aria-valuemax='5' aria-valuemin='0' aria-valuenow='1' class='rateit js-rateit' data-rateit-max='5' data-rateit-min='0' data-rateit-resetable='false' data-rateit-step='1' data-rateit-value='1' id='lab-review-rateit' role='slider' tabindex='0'></div>
+<div class='l-mtm'>
+
+<div class="control-group hidden lab_review_user_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" value="12197799" name="lab_review[user_id]" id="lab_review_user_id" /></div></div>
+<div class="control-group hidden lab_review_classroom_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" name="lab_review[classroom_id]" id="lab_review_classroom_id" /></div></div>
+<div class="control-group hidden lab_review_lab_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" value="2785" name="lab_review[lab_id]" id="lab_review_lab_id" /></div></div>
+<div class="control-group hidden lab_review_focus_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" name="lab_review[focus_id]" id="lab_review_focus_id" /></div></div>
+<div class="control-group hidden lab_review_rating"><div class="controls"><input class="hidden js-rating-input" autocomplete="off" type="hidden" value="-2" name="lab_review[rating]" id="lab_review_rating" /></div></div>
+<div class="control-group text optional lab_review_comment"><label class="text optional control-label" for="lab_review_comment">Additional Comments</label><div class="controls"><textarea class="text optional" name="lab_review[comment]" id="lab_review_comment">
+arggggh!</textarea></div></div>
+</div>
+</form><ql-button disabled id='submit' label='Submit' slot='action' text></ql-button>
+</ql-dialog>
+
+<ql-dialog headline='All done? If you end this lab, you will lose all your work. You may not be able to restart the lab if there is a quota limit. Are you sure you want to end this lab?' icon='error_outline' id='js-lab-are-you-sure-dialog'>
+<ql-button id='js-are-you-sure-button' label='Submit' slot='action' text></ql-button>
+</ql-dialog>
+
+
+<script>
+  $(function() {
+    ql.initMaterialInputs();
+    initChosen();
+    initSearch();
+    initTabs();
+    ql.list.init();
+    ql.favoriting.init();
+    ql.header.myAccount.init();
+    initTooltips();
+    ql.autocomplete.init();
+    ql.modals.init();
+    ql.toggleButtons.init();
+    ql.analytics.init();
+    ql.chat.init();
+  ql.jumpContent.init();
+  ql.labControlPanel.addRecaptchaErrorHandler();
+  initLabContent();
+  ql.labOutline.links.init();
+  initLabReviewModal();
+  initLabReviewTranslations( {"star_amount_1":"1 of 5 stars","star_amount_2":"2 of 5 stars","star_amount_3":"3 of 5 stars","star_amount_4":"4 of 5 stars","star_amount_5":"5 of 5 stars"} )
+  ql.labAssessment.init();
+  ql.labData.init();
+  initLabTranslations( {"are_you_sure":"All done? If you end this lab, you will lose all your work. You may not be able to restart the lab if there is a quota limit. Are you sure you want to end this lab?","in_progress":"*In Progress*","ending":"*Ending*","starting":"*Starting, please wait*","end_concurrent_labs":"Sorry, you can only run one lab at a time. To start this lab, please confirm that you want all of your existing labs to end.","copied":"Copied","no_resource":"Error retrieving resource.","no_support":"No Support","mac_press":"Press ⌘-C to copy","thanks_review":"Thanks for reviewing this lab.","windows_press":"Press Ctrl-C to copy","days":"days"} );
+  ql.labRun.init();
+  ql.navPanel.init();
+  ql.navigation.init();
+  
+  });
+</script>
+
+</body>
+</html>
+

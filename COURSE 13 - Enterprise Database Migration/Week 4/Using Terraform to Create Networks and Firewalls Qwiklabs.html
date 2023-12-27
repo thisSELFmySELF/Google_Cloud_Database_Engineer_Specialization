@@ -1,0 +1,888 @@
+
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<title>Using Terraform to Create Networks and Firewalls | Qwiklabs</title>
+<meta name="action-cable-url" content="/cable" />
+<script>
+//<![CDATA[
+window.gon={};gon.deployment="googlecoursera-run";
+//]]>
+</script>
+<script>
+  (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer',"GTM-5XSKHDX");
+</script>
+<script src="https://cdn.qwiklabs.com/assets/hallofmirrors/polyfills/webcomponents-loader-8583b47b01e40e6ea7bf1ad443a20b7e79bbdd5eafac009806a228c91a97282c.js"></script>
+<script src="https://cdn.qwiklabs.com/assets/vendor-613520545532a2795a401a8168ca8b698b9ee765a66f5ad9ead806b5c32eabe8.js"></script>
+<script src="https://cdn.qwiklabs.com/assets/application-764552f4bc7e4ee5dc74a9b3fd7ddf41c0c326f6f8253193b6e48f971195330f.js"></script>
+<script src="https://cdn.qwiklabs.com/assets/hallofmirrors/hallofmirrors-53579c8602b4c89dd0f1ade9c7d5e535ef7c3e1546fea5e0468d970052bd60fb.js"></script>
+<!--[if lt IE 9]>  <![endif]-->
+<script src='http://html5shim.googlecode.com/svn/trunk/html5.js' type='text/javascript'></script>
+<!--[endif]>  <![endif]-->
+<script id='ze-snippet' src='https://static.zdassets.com/ekr/snippet.js?key=511e4158-0aec-4e3c-b2e6-4daa1769f51e'></script>
+
+
+<meta name="csrf-param" content="authenticity_token" />
+<meta name="csrf-token" content="ai702CjZyqU3CgLboHazwSQA4RHrRyot6j+NeAYJCBe9kHqjGGx+5WnZSBX6B14QmXTnZt68Vr0t0WvToYEF8A==" />
+<meta content='width=device-width, initial-scale=1.0, user-scalable=yes' name='viewport'>
+<meta content='1rRsY0INj8RvwB5EF5pwdxt2A2P9aDgAlsICaJ0d5w0' name='google-site-verification'>
+<meta content='#3681E4' property='msapplication-TileColor'>
+<meta content='/favicon-144.png' property='msapplication-TileImage'>
+<meta content='[{&quot;id&quot;:&quot;recaptcha_experiment&quot;,&quot;optimize_id&quot;:&quot;dpViOcLkT3qS4TvL2mRojA&quot;,&quot;title&quot;:&quot;No Recaptcha shown for trusted users&quot;,&quot;variant_index&quot;:1,&quot;variant&quot;:&quot;no_recaptcha&quot;}]' name='active-experiments'>
+<meta content='{&quot;userId&quot;:12197799,&quot;experimentIds&quot;:[&quot;course_upgrade&quot;,&quot;canonical_domain_redirect&quot;,&quot;program_resources&quot;,&quot;program_learning_assignment&quot;,&quot;program_announcements&quot;,&quot;peer_assignment&quot;,&quot;teams&quot;,&quot;oauth_risc_shutoff&quot;,&quot;show_annual_purchase_now&quot;,&quot;programs&quot;,&quot;used_in&quot;,&quot;barker&quot;,&quot;program_groups&quot;,&quot;enforce_codebuild_verdicts&quot;,&quot;chat_off_for_signed_out_users&quot;,&quot;community_forum&quot;,&quot;alexandria_show_bundle_errors&quot;]}' name='help-api-product-data'>
+<meta content='{&quot;groupIds&quot;:[&quot;non_suadmins&quot;,&quot;students&quot;,&quot;non_organization&quot;,&quot;non_program&quot;]}' name='help-api-custom-data'>
+<meta content='In this lab, you will create a secure network infrastructure for you database migration projects. You will create both public and private VPCs with appropriate firewall rules in each. You will add virtual machines to each network and test the commnication between them. You will do all of this using Terraform to demonstrate a more real-world workflow that you can use in your migration projects.' name='description'>
+<meta content='Qwiklabs' name='author'>
+<meta content='Using Terraform to Create Networks and Firewalls | Qwiklabs' property='og:title'>
+<meta content='website' property='og:type'>
+<meta content='/favicon-144.png' property='og:image'>
+<meta content='Qwiklabs' property='og:site_name'>
+<meta content='In this lab, you will create a secure network infrastructure for you database migration projects. You will create both public and private VPCs with appropriate firewall rules in each. You will add virtual machines to each network and test the commnication between them. You will do all of this using Terraform to demonstrate a more real-world workflow that you can use in your migration projects.' property='og:description'>
+<meta content='/qwiklabs_logo_900x887.png' property='og:logo' size='900x887'>
+<meta content='/qwiklabs_logo_994x187.png' property='og:logo' size='994x187'>
+
+
+<meta property="og:url" content="https://googlecoursera.qwiklabs.com/focuses/31002514?parent=lti_session" /><link href="https://googlecoursera.qwiklabs.com/focuses/31002514?parent=lti_session" rel="canonical" />
+<link color='#3681E4' href='/favicon-svg.svg' rel='mask-icon'>
+<link href='/favicon-180.png' rel='apple-touch-icon-precomposed'>
+<link href='/favicon-32.png' rel='shortcut icon' type='image/x-icon'>
+
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Oswald:400|Roboto+Mono:400,700|Roboto:300,400,500,700|Google+Sans:300,400,500,700|Google+Sans+Display:400|Material+Icons|Google+Material+Icons|Google+Sans+Text:400,500,700" media="screen" />
+
+<link rel="stylesheet" href="https://cdn.qwiklabs.com/assets/application-edc88b659d478c138e12de45354d6e27fda904c51d367223d97eb4d41608b847.css" media="all" />
+<link rel="stylesheet" href="https://www.gstatic.com/glue/cookienotificationbar/cookienotificationbar.min.css" media="screen" />
+
+
+<style>
+  :root {
+    --primary-text-on-surface-color: #1a73e8;
+    --primary-text-on-surface-color-dark: #1568d6;
+    --primary-text-on-surface-color-darker: #135ec1;
+    --primary-text-on-surface-color-darkest: #1154ac;
+    --primary-surface-color: #1a73e8;
+    --primary-surface-color-rgb: 26,115,232;
+    --primary-surface-color-light: #d1e3fa;
+    --primary-surface-color-lightest: #e8f1fd;
+    --text-on-primary-color: #ffffff;
+    --accent-text-on-surface-color: #f29900;
+    --accent-surface-color: #f9ab00;
+    --accent-surface-color-rgb: 249,171,0;
+    --accent-surface-color-light: #ffefcc;
+    --text-on-accent-color: #202124;
+  }
+</style>
+
+<style>
+  :root {
+    --navbar-height: 64px;
+  }
+</style>
+
+
+
+</head>
+<body class='lab-show l-full no-nav application-new focuses focuses-show lab-show l-full no-nav '>
+<div class='header-container'>
+<div class='header'>
+<ql-toolbar jumpEnabled>
+<div class='header__title' slot='title'>
+<ql-icon-button label="Back" href="https://www.coursera.org/" id="b43a6fae5211dde0" target="_self" tip="Back">arrow_back</ql-icon-button>
+<h1 class='ql-headline-6'>Using Terraform to Create Networks and Firewalls</h1>
+</div>
+<div class='header__actions' slot='action'>
+<ql-icon-button id='control-panel-target' style='display: none;'>
+dashboard
+</ql-icon-button>
+<ql-menu for='control-panel-target' id='control-panel-menu'></ql-menu>
+<ql-icon-button class='mobile-hide' icon='help_outline' id='help-menu-button' label='Open help menu' tip='Help'></ql-icon-button>
+<ql-menu for='help-menu-button' id='help-menu'>
+<ql-menu-item data-analytics-action='opened_help' data-analytics-label='lab' label='Help Center' onclick='hallofmirrors.helpService.startHelp({&quot;productData&quot;:{&quot;userId&quot;:12197799},&quot;context&quot;:&quot;lab&quot;})'></ql-menu-item>
+<ql-menu-item href='mailto:support@qwiklabs.com' label='Email support'></ql-menu-item>
+<ql-menu-item label='Chat support' onClick='ql.chat.open()'></ql-menu-item>
+</ql-menu>
+
+<ql-icon-button class='mobile-hide' icon='language' id='language' label='Select your language preference' tip='Language'></ql-icon-button>
+<ql-menu for='language'>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ar' href='/focuses/31002514?locale=ar&amp;parent=lti_session' label='العربية‬‎' lang='ar'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='de' href='/focuses/31002514?locale=de&amp;parent=lti_session' label='Deutsch' lang='de'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='en' href='/focuses/31002514?locale=en&amp;parent=lti_session' label='English' lang='en'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='es' href='/focuses/31002514?locale=es&amp;parent=lti_session' label='español (Latinoamérica)' lang='es'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='fr' href='/focuses/31002514?locale=fr&amp;parent=lti_session' label='français' lang='fr'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='fr_CA' href='/focuses/31002514?locale=fr_CA&amp;parent=lti_session' label='français (Canada)' lang='fr-CA'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='he' href='/focuses/31002514?locale=he&amp;parent=lti_session' label='עברית' lang='he'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='id' href='/focuses/31002514?locale=id&amp;parent=lti_session' label='bahasa Indonesia' lang='id'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='it' href='/focuses/31002514?locale=it&amp;parent=lti_session' label='Italiano' lang='it'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ja' href='/focuses/31002514?locale=ja&amp;parent=lti_session' label='日本語' lang='ja'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ko' href='/focuses/31002514?locale=ko&amp;parent=lti_session' label='한국어' lang='ko'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='pl' href='/focuses/31002514?locale=pl&amp;parent=lti_session' label='Polski' lang='pl'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='pt_BR' href='/focuses/31002514?locale=pt_BR&amp;parent=lti_session' label='português (Brasil)' lang='pt-BR'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='pt_PT' href='/focuses/31002514?locale=pt_PT&amp;parent=lti_session' label='português (Portugal)' lang='pt-PT'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ru' href='/focuses/31002514?locale=ru&amp;parent=lti_session' label='русский' lang='ru'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='tr' href='/focuses/31002514?locale=tr&amp;parent=lti_session' label='Türkçe' lang='tr'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='uk' href='/focuses/31002514?locale=uk&amp;parent=lti_session' label='український' lang='uk'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='zh' href='/focuses/31002514?locale=zh&amp;parent=lti_session' label='简体中文' lang='zh'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='zh_TW' href='/focuses/31002514?locale=zh_TW&amp;parent=lti_session' label='繁體中文' lang='zh-TW'></ql-menu-item>
+</ql-menu>
+
+
+<ql-icon-button id='my_account' label='My account' tip='My account'>
+<ql-avatar src='https://lh3.googleusercontent.com/a/ACg8ocI6s7UhNvX_oCOJMPhLJPmqhqIgwu_5AK0t7wpjF-5jmQo=s320-c'></ql-avatar>
+</ql-icon-button>
+<ql-menu for='my_account' id='my_account_menu' style='max-height: 640px'>
+<div class='my-account-menu'>
+<ql-avatar class='l-mtl l-mbl' size='120' src='https://lh3.googleusercontent.com/a/ACg8ocI6s7UhNvX_oCOJMPhLJPmqhqIgwu_5AK0t7wpjF-5jmQo=s320-c'></ql-avatar>
+<div class='my-account-menu__user-info l-mbl'>
+<h4 class='ql-subhead-1'>Justin Ho</h4>
+<p class='ql-body-2 text--light'>cliffdove@gmail.com</p>
+<p class='ql-body-2 text--light'>
+</p>
+<a class="text--green ql-subhead-2" href="/my_account/payments"><ql-chip positive>
+0 Credits
+</ql-chip>
+</a></div>
+<div class='buttons l-mbl'>
+<a class="button button--hairline" id="settings" href="/my_account/profile">Settings</a>
+</div>
+<hr>
+<ql-button data-analytics-action='clicked_sign_out' href='/users/sign_out' method='delete'>
+Sign Out
+</ql-button>
+<div class='privacy l-mtl'>
+<a target="_blank" class="ql-caption text--light" href="/privacy_policy">Privacy</a>
+<span class='ql-caption text--light l-mls l-mrs'>&middot;</span>
+<a class="ql-caption text--light" href="/terms_of_service">Terms</a>
+</div>
+</div>
+</ql-menu>
+
+</div>
+</ql-toolbar>
+
+</div>
+</div>
+
+<nav class='nav-panel js-nav-panel'>
+<div class='nav-panel__logo'>
+<div class="custom-logo">Qwiklabs</div>
+</div>
+<nav class='ql-sidenav'>
+<ql-sidenav-item href='/' icon='home' label='Home'></ql-sidenav-item>
+
+<ql-sidenav-item href='/catalog' icon='school' label='Catalog'></ql-sidenav-item>
+
+<ql-sidenav-item href='/profile' icon='event_note' label='Profile'></ql-sidenav-item>
+
+</nav>
+
+</nav>
+<div class='nav-panel__overlay js-nav-toggle'></div>
+
+<main class='js-main' id='jump-content'>
+<div class='l-main-wrapper' id='main-wrapper'>
+
+
+
+
+<div class='lab-assessment__tab js-open-lab-assessment-panel'>
+<button class='js-lab-assessment-total-score'>
+—/100
+</button>
+</div>
+<div aria-labelledby='lab-assessment-checkpoint' class='lab-assessment__panel js-lab-assessment-panel' role='dialog'>
+<div class='lab-assessment__panel__header'>
+<h4 id='lab-assessment-checkpoint'>Checkpoints</h4>
+<ql-icon-button class='js-close-lab-assessment-panel' icon='arrow_forward' label='Close dialog'></ql-icon-button>
+</div>
+<div class='lab-assessment__step'>
+<p class='lab-assessment__step__title' id='lab-assessment-step-title'>
+Use Terraform to automate network creation
+</p>
+<div class='lab-assessment__step__action'>
+<ql-button class='js-show-run-step-button' description='Use Terraform to automate network creation' step_no='1'>
+Check my progress
+</ql-button>
+<p class='lab-assessment__step__score'>
+<span class='js-assessment-step-score-1'>
+</span>
+/ 40
+</p>
+</div>
+</div>
+
+<div class='lab-assessment__step'>
+<p class='lab-assessment__step__title' id='lab-assessment-step-title'>
+Use Terraform to create firewall rules
+</p>
+<div class='lab-assessment__step__action'>
+<ql-button class='js-show-run-step-button' description='Use Terraform to create firewall rules' step_no='2'>
+Check my progress
+</ql-button>
+<p class='lab-assessment__step__score'>
+<span class='js-assessment-step-score-2'>
+</span>
+/ 30
+</p>
+</div>
+</div>
+
+<div class='lab-assessment__step'>
+<p class='lab-assessment__step__title' id='lab-assessment-step-title'>
+Use Terraform to create virtual machines
+</p>
+<div class='lab-assessment__step__action'>
+<ql-button class='js-show-run-step-button' description='Use Terraform to create virtual machines' step_no='3'>
+Check my progress
+</ql-button>
+<p class='lab-assessment__step__score'>
+<span class='js-assessment-step-score-3'>
+</span>
+/ 30
+</p>
+</div>
+</div>
+
+</div>
+<ql-drawer-container class='js-lab-state' data-analytics-payload='{&quot;label&quot;:&quot;Using Terraform to Create Networks and Firewalls&quot;,&quot;lab_name&quot;:&quot;Using Terraform to Create Networks and Firewalls&quot;,&quot;classroom_name&quot;:null,&quot;deployment&quot;:&quot;googlecoursera-run&quot;}' data-credits='0.0' data-focus-id='31002514' data-lab-billing-limit='0.0' data-lab-duration='7200' data-parent='lti_session' data-recaptcha-enabled id='lab-container'>
+<ql-drawer id='terminal-drawer' slot='drawer'>
+<iframe allow='clipboard-read' class='terminal' id='embedded-resource'></iframe>
+</ql-drawer>
+<ql-drawer-content class='js-lab-wrapper' id='lab-content' slot='drawer-content'>
+<ql-drawer-container id='lab-content-container'>
+<ql-drawer id='control-panel-drawer' open slot='drawer' width='320'>
+<ql-lab-control-panel class='ql-lab-control-panel__max-height control-panel js-lab-control-panel' connectionFiles='[]' labControlButton='{&quot;disabled&quot;:false,&quot;pending&quot;:false,&quot;running&quot;:false}' labDetails='[]' labTimer='{&quot;ticking&quot;:false,&quot;secondsRemaining&quot;:7200}' studentResources='[]'>
+<script src="https://www.recaptcha.net/recaptcha/api.js?render=6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr"   ></script>
+        <script>
+          // Define function so that we can call it again later if we need to reset it
+          // This executes reCAPTCHA and then calls our callback.
+          function executeRecaptchaForStartLab() {
+            grecaptcha.ready(function() {
+              grecaptcha.execute('6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr', {action: 'start_lab'}).then(function(token) {
+                setInputWithRecaptchaResponseTokenForStartLab('g-recaptcha-response-data-start-lab', token)
+              });
+            });
+          };
+          // Invoke immediately
+          executeRecaptchaForStartLab()
+
+          // Async variant so you can await this function from another async function (no need for
+          // an explicit callback function then!)
+          // Returns a Promise that resolves with the response token.
+          async function executeRecaptchaForStartLabAsync() {
+            return new Promise((resolve, reject) => {
+             grecaptcha.ready(async function() {
+                resolve(await grecaptcha.execute('6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr', {action: 'start_lab'}))
+              });
+            })
+          };
+
+                  var setInputWithRecaptchaResponseTokenForStartLab = function(id, token) {
+          var element = document.getElementById(id);
+          if (element !== null) element.value = token;
+        }
+
+        </script>
+<input type="hidden" name="g-recaptcha-response-data[start_lab]" id="g-recaptcha-response-data-start-lab" data-sitekey="6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr" class="g-recaptcha g-recaptcha-response "/>
+
+<div aria-live='polite' class='hidden' id='recaptcha-v2-start-lab' slot='recaptcha'>
+<script src="https://www.recaptcha.net/recaptcha/api.js" async defer ></script>
+<div data-sitekey="6LeOI8IUAAAAAPkHlMAE9NReCD_1WD81iYlBlCnV" data-callback="recaptchaComplete" data-expired-callback="expireV2Token" class="g-recaptcha "></div>
+          <noscript>
+            <div>
+              <div style="width: 302px; height: 422px; position: relative;">
+                <div style="width: 302px; height: 422px; position: absolute;">
+                  <iframe
+                    src="https://www.recaptcha.net/recaptcha/api/fallback?k=6LeOI8IUAAAAAPkHlMAE9NReCD_1WD81iYlBlCnV"
+                    name="ReCAPTCHA"
+                    style="width: 302px; height: 422px; border-style: none; border: 0; overflow: hidden;">
+                  </iframe>
+                </div>
+              </div>
+              <div style="width: 300px; height: 60px; border-style: none;
+                bottom: 12px; left: 25px; margin: 0px; padding: 0px; right: 25px;
+                background: #f9f9f9; border: 1px solid #c1c1c1; border-radius: 3px;">
+                <textarea id="g-recaptcha-response" name="g-recaptcha-response"
+                  class="g-recaptcha-response"
+                  style="width: 250px; height: 40px; border: 1px solid #c1c1c1;
+                  margin: 10px 25px; padding: 0px; resize: none;">
+                </textarea>
+              </div>
+            </div>
+          </noscript>
+
+</div>
+</ql-lab-control-panel>
+</ql-drawer>
+<ql-drawer-content id='lab-instructions' slot='drawer-content'>
+<div class='lab-content-container'>
+<div class='alert alert--fake js-alert'>
+<p class='alert__message js-alert-message' role='alert'></p>
+<ql-icon-button class='alert__close js-alert-close' icon='clear'></ql-icon-button>
+<iframe class='l-ie-iframe-fix' tabindex='-1'></iframe>
+</div>
+<div class='lab-content__renderable-instructions js-lab-content'>
+<div class='lab-preamble'>
+<h1 class='lab-preamble__title'>
+Using Terraform to Create Networks and Firewalls
+</h1>
+<div class='lab-preamble__details subtitle-headline-1'>
+<span>2 hours </span>
+<span>Free</span>
+<div class='lab__rating'>
+<a aria-label="Lab Reviews" href="/focuses/31002514/reviews?parent=lti_session"><div class='rateit' data-rateit-readonly='true' data-rateit-value='4.1201'></div>
+
+</a></div>
+</div>
+</div>
+<div class='lab-outline-place-holder'></div>
+
+<div class='markdown-lab-instructions js-markdown-instructions' id='markdown-lab-instructions'>
+
+<h2 id="step1">Overview</h2>
+<p>In this lab, you create a secure network infrastructure for your database migration projects. You create both public and private VPCs with appropriate firewall rules in each. You add virtual machines to each network and test the communication between them. You do all of this using Terraform to demonstrate a more real-world workflow that you can use in your migration projects.</p>
+<h3>Objectives</h3>
+<p>In this lab, you learn how to perform the following tasks with Terraform:</p>
+<ul>
+<li>
+<p>Automate network creation.</p>
+</li>
+<li>
+<p>Create firewall rules.</p>
+</li>
+<li>
+<p>Create virtual machines.</p>
+</li>
+<li>
+<p>Create a private network.</p>
+</li>
+</ul>
+<h2 id="step2">Setup and requirements</h2>
+<p>In this task, you use Qwiklabs and perform initialization steps for your lab.</p>
+<p>For each lab, you get a new Google Cloud project and set of resources for a fixed time at no cost.</p>
+<ol>
+<li>
+<p>Sign in to Qwiklabs using an <strong>incognito window</strong>.</p>
+</li>
+<li>
+<p>Note the lab's access time (for example, <code>1:15:00</code>), and make sure you can finish within that time.<br>
+There is no pause feature. You can restart if needed, but you have to start at the beginning.</p>
+</li>
+<li>
+<p>When ready, click <strong>Start lab</strong>.</p>
+</li>
+<li>
+<p>Note your lab credentials (<strong>Username</strong> and <strong>Password</strong>). You will use them to sign in to the Google Cloud Console.</p>
+</li>
+<li>
+<p>Click <strong>Open Google Console</strong>.</p>
+</li>
+<li>
+<p>Click <strong>Use another account</strong> and copy/paste credentials for <strong>this</strong> lab into the prompts.<br>
+If you use other credentials, you'll receive errors or <strong>incur charges</strong>.</p>
+</li>
+<li>
+<p>Accept the terms and skip the recovery resource page.</p>
+</li>
+</ol>
+<aside class="warning"><p><strong>Note:</strong> Do not click <strong>End Lab</strong> unless you have finished the lab or want to restart it. This clears your work and removes the project.
+  </p>
+</aside>
+<h2 id="step3">Task 1. Use Terraform to automate network creation</h2>
+<ol>
+<li>
+<p>In the <strong>Navigation menu</strong> (<img alt="Navigation menu icon" src="https://cdn.qwiklabs.com/tkgw1TDgj4Q%2BYKQUW4jUFd0O5OEKlUMBRYbhlCrF0WY%3D">), click <strong>Home</strong>.</p>
+</li>
+<li>
+<p>In the <strong>Project info</strong> section, find your Project ID and copy and paste it into a text file. You will need it later.</p>
+</li>
+</ol>
+<p><img alt="The Project ID highlighted in the Project info section" src="https://cdn.qwiklabs.com/lvp5vE9Mcrkq1JgUUxV2lai21m%2BHnhf1tPAj7C%2BUr1w%3D"></p>
+<ol start="3">
+<li>
+<p>Click the <strong>Activate Cloud Shell</strong> (<img alt="Activate Cloud Shell icon" src="https://cdn.qwiklabs.com/ep8HmqYGdD%2FkUncAAYpV47OYoHwC8%2Bg0WK%2F8sidHquE%3D">) icon in the upper right of the Console. The Cloud Shell terminal opens in a pane at the bottom of the window.</p>
+</li>
+<li>
+<p>Create a directory called <strong>terraform-networks</strong> and change to it:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+mkdir terraform-networks
+cd terraform-networks
+</ql-code-block>
+<ol start="5">
+<li>
+<p>Create the required Terraform files for this lab:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+touch provider.tf
+touch terraform.tfvars
+touch test-server-linux.tf
+touch variables.tf
+touch vpc-network-public.tf
+touch vpc-firewall-rules-public.tf
+touch public-test-server-linux.tf
+touch random-id-generator.tf
+</ql-code-block>
+<ol start="6">
+<li>
+<p>Enter <code>ls</code> to verify that your files were created in the <strong>terraform-networks</strong> folder.</p>
+</li>
+<li>
+<p>Click <strong>Open Editor</strong> in Cloud Shell, and then select the <strong>terraform-networks</strong> folder and open the <strong>provider.tf</strong> file.</p>
+</li>
+<li>
+<p>Enter the following code to configure the Google Cloud Terraform provider:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+terraform {
+  required_version = "&gt;= 0.12"
+}
+provider "google" {
+  project = var.project_id
+  region  = var.gcp_region_1
+  zone    = var.gcp_zone_1
+}
+</ql-code-block>
+<p>Notice the variables in the above code. You create those and some other variables now.</p>
+<ol start="9">
+<li>
+<p>Open the <strong>variables.tf</strong> file and enter the following code:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+# GCP Project ID
+variable "project_id" {
+  type = string
+  description = "GCP Project ID"
+}
+# Region to use for Subnet 1
+variable "gcp_region_1" {
+  type = string
+  description = "GCP Region"
+}
+# Zone used for VMs
+variable "gcp_zone_1" {
+  type = string
+  description = "GCP Zone"
+}
+# Define subnet for public network
+variable "subnet_cidr_public" {
+  type = string
+  description = "Subnet CIDR for Public Network"
+}
+</ql-code-block>
+<p>You defined the variables in the previous file, and you set the variables in another file.</p>
+<ol start="10">
+<li>Open the <strong>terraform.tfvars</strong> file and add the following code:</li>
+</ol>
+<ql-code-block templated="">
+# GCP Settings
+project_id    = "{{{project_0.project_id|Project ID}}}"
+gcp_region_1  = "us-central1"
+gcp_zone_1    = "us-central1-a"
+# GCP Network Variables
+subnet_cidr_public  = "10.1.1.0/24"
+</ql-code-block>
+<ol start="11">
+<li>
+<p>Open the <strong>vpc-network-public.tf</strong> file and add the following:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+resource "google_compute_network" "public-vpc" {
+  name                    = "public-vpc"
+  auto_create_subnetworks = "false"
+  routing_mode            = "GLOBAL"
+}
+resource "google_compute_subnetwork" "public-subnet_1" {
+  name          = "public-subnet-1"
+  ip_cidr_range = var.subnet_cidr_public
+  network       = google_compute_network.public-vpc.name
+  region        = var.gcp_region_1
+}
+</ql-code-block>
+<ql-infobox><b>Note:</b> The above Terraform code creates a VPC with one subnet. In the subnet, notice the two variables for <b>ip_cidr_range</b> and <b>region</b>. Also notice how the <b>network</b> property refers back to the VPC created before the subnet.</ql-infobox>
+<ol start="12">
+<li>
+<p>To confirm that the procedure has worked up to this point, in the Google Cloud Console, on the <strong>Navigation menu</strong> (<img alt="Navigation menu icon" src="https://cdn.qwiklabs.com/tkgw1TDgj4Q%2BYKQUW4jUFd0O5OEKlUMBRYbhlCrF0WY%3D">), click <strong>VPC network</strong>. You should have one network named <strong>default</strong>.</p>
+</li>
+<li>
+<p>In Cloud Shell, click <strong>Open Terminal</strong>. Make sure you are in the correct folder:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+cd ~/terraform-networks
+</ql-code-block>
+<ol start="14">
+<li>
+<p>To initialize Terraform, enter the following command:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+terraform init
+</ql-code-block>
+<p>A message should indicate that <em>"Terraform has been successfully initialized!".</em></p>
+<ol start="15">
+<li>
+<p>To build the Terraform plan, enter the following command:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+terraform plan
+</ql-code-block>
+<p>Make sure there are no errors and look at what resources will be created.</p>
+<p>The plan should tell you that two resources will be created: <em>a network and a subnetwork</em>.</p>
+<ol start="16">
+<li>To create the resources, run the following command:</li>
+</ol>
+<ql-code-block language="plaintext">
+terraform apply -auto-approve
+</ql-code-block>
+<p><em>The <code>-auto-approve</code> parameter runs the script without prompting you.</em></p>
+<ol start="17">
+<li>Wait for the script to complete, and then in the Console, click <strong>Refresh</strong> in the VPC networks toolbar. You see your new network and subnet.</li>
+</ol>
+<p>You're not done configuring the network.</p>
+<ol start="18">
+<li>
+<p>Delete what you just created with the following command:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+terraform destroy -auto-approve
+</ql-code-block>
+<ol start="19">
+<li>Click <strong>Refresh</strong> to verify that the network was deleted.</li>
+</ol>
+<p>Click <em>Check my progress</em> to verify the objective.
+<ql-activity-tracking step="1">
+Use Terraform to automate network creation
+</ql-activity-tracking></p>
+<h3>Review</h3>
+<p>At this point, you have used Terraform to create a network and subnet. Next, you create some firewall rules.</p>
+<h2 id="step4">Task 2. Use Terraform to create firewall rules</h2>
+<ol>
+<li>
+<p>In Cloud Shell, click <strong>Open Editor</strong>. Open the <strong>vpc-firewall-rules-public.tf</strong> file in the <strong>terraform-networks</strong> folder.</p>
+</li>
+<li>
+<p>To add a firewall rule that will allow SSH into machines in this network, add the following code:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+# allow ssh
+resource "google_compute_firewall" "public-allow-ssh" {
+  name    = "${google_compute_network.public-vpc.name}-allow-ssh"
+  network = google_compute_network.public-vpc.name
+  allow {
+    protocol = "tcp"
+    ports    = ["22"]
+  }
+  source_ranges = [
+    "0.0.0.0/0"
+  ]
+  target_tags = ["allow-ssh"]
+}
+</ql-code-block>
+<ql-infobox><b>Note:</b> This rule allows SSH from everywhere, but only to machines that have the "allow-ssh" tag.</ql-infobox>
+<ol start="3">
+<li>
+<p>Windows machines require RDP, not SSH. Add the following RDP rule below the SSH rule:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+# allow rdp
+resource "google_compute_firewall" "public-allow-rdp" {
+  name    = "${google_compute_network.public-vpc.name}-allow-rdp"
+  network = google_compute_network.public-vpc.name
+  allow {
+    protocol = "tcp"
+    ports    = ["3389"]
+  }
+  source_ranges = [
+    "0.0.0.0/0"
+  ]
+  target_tags = ["allow-rdp"]
+}
+</ql-code-block>
+<p>Ping is useful for testing.</p>
+<ol start="4">
+<li>
+<p>Add the following rule below the previous rules to enable it:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+# allow ping only from everywhere
+resource "google_compute_firewall" "public-allow-ping" {
+  name    = "${google_compute_network.public-vpc.name}-allow-ping"
+  network = google_compute_network.public-vpc.name
+  allow {
+    protocol = "icmp"
+  }
+  source_ranges = [
+    "0.0.0.0/0"
+  ]
+}
+</ql-code-block>
+<ol start="5">
+<li>
+<p>As you did before, switch the terminal and run the following command to check for errors and see what will be created:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+terraform plan
+</ql-code-block>
+<ol start="6">
+<li>
+<p>Run the following Terraform command and verify that the network, subnet, and firewall rules are all being created using the Console:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+terraform apply -auto-approve
+</ql-code-block>
+<p>Click <em>Check my progress</em> to verify the objective.
+<ql-activity-tracking step="2">
+Use Terraform to create firewall rules
+</ql-activity-tracking></p>
+<h3>Review</h3>
+<p>Now you have a network and some firewall rules. Next, you add a test server to the network and see whether the firewall rules work.</p>
+<h2 id="step5">Task 3. Use Terraform to create virtual machines</h2>
+<ol>
+<li>
+<p>Open the Cloud Shell code editor, and then open the file <strong>random-id-generator.tf</strong> and add the following code:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+# Terraform plugin for creating random ids
+resource "random_id" "instance_id" {
+ byte_length = 4
+}
+</ql-code-block>
+<p><em>This Terraform plug-in is used to generate a unique name for VMs added programatically</em>.</p>
+<ol start="2">
+<li>
+<p>To create a virtual machine in the public network, open the <strong>test-server-linux.tf</strong> file and add the following code:</p>
+</li>
+</ol>
+<ql-code-block language="plaintext">
+# Create Test Server in Public VPC
+resource "google_compute_instance" "test-server-linux" {
+  name         = "public-test-server-linux-${random_id.instance_id.hex}"
+  machine_type = "f1-micro"
+  zone         = var.gcp_zone_1
+  tags         = ["allow-ssh"]
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-11"
+    }
+  }
+  metadata_startup_script = "sudo apt-get update;"
+  network_interface {
+    network        = google_compute_network.public-vpc.name
+    subnetwork     = google_compute_subnetwork.public-subnet_1.name
+    access_config { }
+  }
+}
+output "test-server-linux" {
+  value = google_compute_instance.test-server-linux.name
+}
+output "test-server-linux-external-ip" {
+  value = google_compute_instance.test-server-linux.network_interface.0.access_config.0.nat_ip
+}
+output "test-server-linux-internal-ip" {
+  value = google_compute_instance.test-server-linux.network_interface.0.network_ip
+}
+</ql-code-block>
+<ql-infobox><b>Note:</b> The output variables will return the name and internal and external IP addresses for the machine created. Also, this machine is tagged with the "allow-ssh" tag so you can connect to it. 
+<p></p>
+Lastly, take a look at the code in the network_interface section that configures this machine to be in the public network you created earlier.</ql-infobox>
+<ol start="3">
+<li>Run the Terraform plan and apply commands as you did earlier to create this machine. If an error appears, you may need to run terraform init again before running the other two commands.</li>
+</ol>
+<p>When the commands complete, you should see the VM name and internal and external IP addresses.</p>
+<ol start="4">
+<li>
+<p>From the Cloud Shell terminal, make sure you can ping the external IP address of that machine.</p>
+</li>
+<li>
+<p>In the Console, go to the Compute Engine service to see the VM you just created.</p>
+</li>
+<li>
+<p>Click SSH to make sure your firewall rule works, and then exit the SSH session.</p>
+</li>
+</ol>
+<p>Click <em>Check my progress</em> to verify the objective.
+<ql-activity-tracking step="3">
+Use Terraform to create virtual machines
+</ql-activity-tracking></p>
+<h2 id="step6">Task 4. Use Terraform to create a private network</h2>
+<ol>
+<li>
+<p>Use the configuration of the public network as a guide and create a second private network. In the <strong>variables.tf</strong> file, add a variable for the private subnet IP CIDR range, and set its value in the <strong>terraform.tfvars</strong> file.</p>
+</li>
+<li>
+<p>Duplicate the <strong>vpc-network-public.tf</strong> file and change the names and variables appropriately.</p>
+</li>
+<li>
+<p>Using the public firewall rules as a guide, add firewall rules for the private network. In the <strong>source_ranges</strong> section, don't allow traffic from all sources: only allow traffic from the public subnet IP CIDR range.</p>
+</li>
+<li>
+<p>Create a test server in the private network, using the public one as a guide.</p>
+</li>
+</ol>
+<ql-infobox><strong>Note:</strong> Try to complete this lab on your own. If you get stuck, there is a complete solution in GitHub at the following URL: <a href="https://github.com/GoogleCloudPlatform/training-data-analyst/tree/master/courses/db-migration/terraform-networks-completed" target="_blank">GoogleCloudPlatform/training-data-analyst</a>.</ql-infobox>
+<ol start="5">
+<li>When you have everything created, try to SSH into the public test server. The server in the private network won't be accessible yet. You will fix that in the next lab.</li>
+</ol>
+<p>Congratulations! You have created a secure network infrastructure for your database migration projects. You created both public and private VPCs with appropriate firewall rules in each. You added virtual machines to each network and tested the communication between them. You did all of this using Terraform.</p>
+<h2 id="step7">End your lab</h2>
+<p>When you have completed your lab, click <strong>End Lab</strong>. Google Cloud Skills Boost removes the resources you’ve used and cleans the account for you.</p>
+<p>You will be given an opportunity to rate the lab experience. Select the applicable number of stars, type a comment, and then click <strong>Submit</strong>.</p>
+<p>The number of stars indicates the following:</p>
+<ul>
+<li>1 star = Very dissatisfied</li>
+<li>2 stars = Dissatisfied</li>
+<li>3 stars = Neutral</li>
+<li>4 stars = Satisfied</li>
+<li>5 stars = Very satisfied</li>
+</ul>
+<p>You can close the dialog box if you don't want to provide feedback.</p>
+<p>For feedback, suggestions, or corrections, please use the <strong>Support</strong> tab.</p>
+<p>Copyright 2022 Google LLC All rights reserved. Google and the Google logo are trademarks of Google LLC. All other company and product names may be trademarks of the respective companies with which they are associated.</p>
+
+</div>
+</div>
+
+
+<div class='lab-content__end-lab-button js-end-lab-button-container hidden'>
+<ql-lab-control-button class='js-end-lab-button' running></ql-lab-control-button>
+</div>
+<!-- / TODO: Move recommendations into the end lab modal -->
+</div>
+<div aria-label='Lab Table of Contents' class='outline-container' id='js-outline-container' role='navigation'>
+<ul class='lab-content__outline js-lab-content-outline'>
+<li><a href="#step1">Overview</a></li><li><a href="#step2">Setup and requirements</a></li><li><a href="#step3">Task 1. Use Terraform to automate network creation</a></li><li><a href="#step4">Task 2. Use Terraform to create firewall rules</a></li><li><a href="#step5">Task 3. Use Terraform to create virtual machines</a></li><li><a href="#step6">Task 4. Use Terraform to create a private network</a></li><li><a href="#step7">End your lab</a></li>
+</ul>
+</div>
+</ql-drawer-content>
+</ql-drawer-container>
+</ql-drawer-content>
+</ql-drawer-container>
+<ql-snackbar id='alert-snackbar'></ql-snackbar>
+
+
+
+</div>
+</main>
+
+<span class='hidden' id='flash-sibling-before'></span>
+<ql-snackbar></ql-snackbar>
+
+<script data-glue-cookie-notification-bar-category='2B' src='https://www.gstatic.com/glue/cookienotificationbar/cookienotificationbar.min.js'></script>
+
+<ql-dialog headline='Score Details' icon='task_alt' id='jupyter-feedback-modal'>
+<iframe id='jupyter-feedback-frame' srcdoc='' title='Jupyter Feedback'></iframe>
+</ql-dialog>
+
+<div class='modal fade' id='lab-details-modal'>
+<div class='modal-container'>
+<div class='modal-content mdl-shadow--24dp'>
+<div class='modal-body'>
+<p class='l-mbm'>
+In this lab, you will create a secure network infrastructure for you database migration projects. You will create both public and private VPCs with appropriate firewall rules in each. You will add virtual machines to each network and test the commnication between them. You will do all of this using Terraform to demonstrate a more real-world workflow that you can use in your migration projects.
+</p>
+<p class='small-label l-mbs'>
+<strong>
+Duration:
+</strong>
+0m setup
+&middot;
+120m access
+&middot;
+60m completion
+</p>
+<p class='small-label l-mbs'>
+<strong>AWS Region:</strong>
+[] <strong></strong>
+</p>
+<p class='small-label l-mbs'>
+<span><strong>Levels: </strong>intermediate</span>
+</p>
+<p class='small-label'>
+<strong>
+Permalink:
+</strong>
+<a href="https://googlecoursera.qwiklabs.com/catalog_lab/2784">https://googlecoursera.qwiklabs.com/catalog_lab/2784</a>
+</p>
+</div>
+<div class='modal-actions'>
+<a class='button button--text' data-dismiss='modal'>
+Got It
+</a>
+</div>
+
+
+</div>
+</div>
+<iframe class='l-ie-iframe-fix' tabindex='-1' title='modal'></iframe>
+</div>
+<ql-dialog headline='How satisfied are you with this lab?&lt;span aria-hidden=&quot;true&quot;&gt;*&lt;/span&gt;' id='lab-review-dialog'>
+<form class="simple_form js-lab-review-form" id="new_lab_review" action="/lab_reviews" accept-charset="UTF-8" data-remote="true" method="post"><input name="utf8" type="hidden" value="&#x2713;" autocomplete="off" /><div aria-labelledby='lab-review-dialog' aria-required='true' aria-valuemax='5' aria-valuemin='0' aria-valuenow='0' class='rateit js-rateit' data-rateit-max='5' data-rateit-min='0' data-rateit-resetable='false' data-rateit-step='1' data-rateit-value='0' id='lab-review-rateit' role='slider' tabindex='0'></div>
+<div class='l-mtm'>
+
+<div class="control-group hidden lab_review_user_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" value="12197799" name="lab_review[user_id]" id="lab_review_user_id" /></div></div>
+<div class="control-group hidden lab_review_classroom_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" name="lab_review[classroom_id]" id="lab_review_classroom_id" /></div></div>
+<div class="control-group hidden lab_review_lab_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" value="2784" name="lab_review[lab_id]" id="lab_review_lab_id" /></div></div>
+<div class="control-group hidden lab_review_focus_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" name="lab_review[focus_id]" id="lab_review_focus_id" /></div></div>
+<div class="control-group hidden lab_review_rating"><div class="controls"><input class="hidden js-rating-input" autocomplete="off" type="hidden" name="lab_review[rating]" id="lab_review_rating" /></div></div>
+<div class="control-group text optional lab_review_comment"><label class="text optional control-label" for="lab_review_comment">Additional Comments</label><div class="controls"><textarea class="text optional" name="lab_review[comment]" id="lab_review_comment">
+</textarea></div></div>
+</div>
+</form><ql-button disabled id='submit' label='Submit' slot='action' text></ql-button>
+</ql-dialog>
+
+<ql-dialog headline='All done? If you end this lab, you will lose all your work. You may not be able to restart the lab if there is a quota limit. Are you sure you want to end this lab?' icon='error_outline' id='js-lab-are-you-sure-dialog'>
+<ql-button id='js-are-you-sure-button' label='Submit' slot='action' text></ql-button>
+</ql-dialog>
+
+
+<script>
+  $(function() {
+    ql.initMaterialInputs();
+    initChosen();
+    initSearch();
+    initTabs();
+    ql.list.init();
+    ql.favoriting.init();
+    ql.header.myAccount.init();
+    initTooltips();
+    ql.autocomplete.init();
+    ql.modals.init();
+    ql.toggleButtons.init();
+    ql.analytics.init();
+    ql.chat.init();
+  ql.jumpContent.init();
+  ql.labControlPanel.addRecaptchaErrorHandler();
+  initLabContent();
+  ql.labOutline.links.init();
+  initLabReviewModal();
+  initLabReviewTranslations( {"star_amount_1":"1 of 5 stars","star_amount_2":"2 of 5 stars","star_amount_3":"3 of 5 stars","star_amount_4":"4 of 5 stars","star_amount_5":"5 of 5 stars"} )
+  ql.labAssessment.init();
+  ql.labData.init();
+  initLabTranslations( {"are_you_sure":"All done? If you end this lab, you will lose all your work. You may not be able to restart the lab if there is a quota limit. Are you sure you want to end this lab?","in_progress":"*In Progress*","ending":"*Ending*","starting":"*Starting, please wait*","end_concurrent_labs":"Sorry, you can only run one lab at a time. To start this lab, please confirm that you want all of your existing labs to end.","copied":"Copied","no_resource":"Error retrieving resource.","no_support":"No Support","mac_press":"Press ⌘-C to copy","thanks_review":"Thanks for reviewing this lab.","windows_press":"Press Ctrl-C to copy","days":"days"} );
+  ql.labRun.init();
+  ql.navPanel.init();
+  ql.navigation.init();
+  
+  });
+</script>
+
+</body>
+</html>
+

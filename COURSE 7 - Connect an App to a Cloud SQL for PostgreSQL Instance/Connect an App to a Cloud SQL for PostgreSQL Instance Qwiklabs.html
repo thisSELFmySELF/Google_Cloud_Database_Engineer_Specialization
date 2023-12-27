@@ -1,0 +1,929 @@
+
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<title>Connect an App to a Cloud SQL for PostgreSQL Instance | Qwiklabs</title>
+<meta name="action-cable-url" content="/cable" />
+<script>
+//<![CDATA[
+window.gon={};gon.deployment="googlecoursera-run";
+//]]>
+</script>
+<script>
+  (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer',"GTM-5XSKHDX");
+</script>
+<script src="https://cdn.qwiklabs.com/assets/hallofmirrors/polyfills/webcomponents-loader-8583b47b01e40e6ea7bf1ad443a20b7e79bbdd5eafac009806a228c91a97282c.js"></script>
+<script src="https://cdn.qwiklabs.com/assets/vendor-613520545532a2795a401a8168ca8b698b9ee765a66f5ad9ead806b5c32eabe8.js"></script>
+<script src="https://cdn.qwiklabs.com/assets/application-b4c1ba27bff5cfc342d726ccb6d3a8cb4b5ac06e2e4f81b428783b0e94509b48.js"></script>
+<script src="https://cdn.qwiklabs.com/assets/hallofmirrors/hallofmirrors-6a75474522419d1502d269c186ad8e9615ea8ffb93b320075299479d1255b437.js"></script>
+<!--[if lt IE 9]>  <![endif]-->
+<script src='http://html5shim.googlecode.com/svn/trunk/html5.js' type='text/javascript'></script>
+<!--[endif]>  <![endif]-->
+<script id='ze-snippet' src='https://static.zdassets.com/ekr/snippet.js?key=511e4158-0aec-4e3c-b2e6-4daa1769f51e'></script>
+
+
+<meta name="csrf-param" content="authenticity_token" />
+<meta name="csrf-token" content="N7wdeXPQc+Dku8M9WpIzOn1bIkVB4eS8HsYpueQFP+72257SMrhfo+XuJ65Iljujz9SUNHsb+Knai8IWo5AyNw==" />
+<meta content='width=device-width, initial-scale=1.0, user-scalable=yes' name='viewport'>
+<meta content='1rRsY0INj8RvwB5EF5pwdxt2A2P9aDgAlsICaJ0d5w0' name='google-site-verification'>
+<meta content='#3681E4' property='msapplication-TileColor'>
+<meta content='/favicon-144.png' property='msapplication-TileImage'>
+<meta content='[{&quot;id&quot;:&quot;recaptcha_experiment&quot;,&quot;optimize_id&quot;:&quot;dpViOcLkT3qS4TvL2mRojA&quot;,&quot;title&quot;:&quot;No Recaptcha shown for trusted users&quot;,&quot;variant_index&quot;:1,&quot;variant&quot;:&quot;no_recaptcha&quot;}]' name='active-experiments'>
+<meta content='{&quot;userId&quot;:12197799,&quot;experimentIds&quot;:[&quot;course_upgrade&quot;,&quot;canonical_domain_redirect&quot;,&quot;show_annual_purchase_now&quot;,&quot;oauth_risc_shutoff&quot;,&quot;chat_off_for_signed_out_users&quot;,&quot;teams&quot;,&quot;enforce_codebuild_verdicts&quot;,&quot;community_forum&quot;,&quot;peer_assignment&quot;,&quot;program_resources&quot;,&quot;barker&quot;,&quot;program_learning_assignment&quot;,&quot;pre_course_quest_migration&quot;,&quot;program_groups&quot;,&quot;alexandria_show_bundle_errors&quot;,&quot;programs&quot;,&quot;used_in&quot;]}' name='help-api-product-data'>
+<meta content='{&quot;groupIds&quot;:[&quot;non_suadmins&quot;,&quot;students&quot;,&quot;non_organization&quot;,&quot;non_program&quot;]}' name='help-api-custom-data'>
+<meta content='In this lab you will create a Kubernetes cluster and deploy a simple application to that cluster. Then, connect the application to the supplied Cloud SQL for PostgreSQL database instance and confirm that it is able to write to and read from it.' name='description'>
+<meta content='Qwiklabs' name='author'>
+<meta content='Connect an App to a Cloud SQL for PostgreSQL Instance | Qwiklabs' property='og:title'>
+<meta content='website' property='og:type'>
+<meta content='/favicon-144.png' property='og:image'>
+<meta content='Qwiklabs' property='og:site_name'>
+<meta content='In this lab you will create a Kubernetes cluster and deploy a simple application to that cluster. Then, connect the application to the supplied Cloud SQL for PostgreSQL database instance and confirm that it is able to write to and read from it.' property='og:description'>
+<meta content='/qwiklabs_logo_900x887.png' property='og:logo' size='900x887'>
+<meta content='/qwiklabs_logo_994x187.png' property='og:logo' size='994x187'>
+
+
+<meta property="og:url" content="https://googlecoursera.qwiklabs.com/focuses/30758874?parent=lti_session" /><link href="https://googlecoursera.qwiklabs.com/focuses/30758874?parent=lti_session" rel="canonical" />
+<link color='#3681E4' href='/favicon-svg.svg' rel='mask-icon'>
+<link href='/favicon-180.png' rel='apple-touch-icon-precomposed'>
+<link href='/favicon-32.png' rel='shortcut icon' type='image/x-icon'>
+
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Oswald:400|Roboto+Mono:400,700|Roboto:300,400,500,700|Google+Sans:300,400,500,700|Google+Sans+Display:400|Material+Icons|Google+Material+Icons|Google+Sans+Text:400,500,700" media="screen" />
+
+<link rel="stylesheet" href="https://cdn.qwiklabs.com/assets/application-de99c9a7d498d77141405f7054ca08b1e88a44676934f8cf8a3e6f2e0bbc55b4.css" media="all" />
+
+
+<style>
+  :root {
+    --primary-text-on-surface-color: #1a73e8;
+    --primary-text-on-surface-color-dark: #1568d6;
+    --primary-text-on-surface-color-darker: #135ec1;
+    --primary-text-on-surface-color-darkest: #1154ac;
+    --primary-surface-color: #1a73e8;
+    --primary-surface-color-rgb: 26,115,232;
+    --primary-surface-color-light: #d1e3fa;
+    --primary-surface-color-lightest: #e8f1fd;
+    --text-on-primary-color: #ffffff;
+    --accent-text-on-surface-color: #f29900;
+    --accent-surface-color: #f9ab00;
+    --accent-surface-color-rgb: 249,171,0;
+    --accent-surface-color-light: #ffefcc;
+    --text-on-accent-color: #202124;
+  }
+</style>
+
+<style>
+  :root {
+    --navbar-height: 64px;
+  }
+</style>
+
+
+
+</head>
+<body class='lab-show l-full no-nav application-new focuses focuses-show lab-show l-full no-nav '>
+<div class='header-container'>
+<div class='header'>
+<ql-toolbar jumpEnabled>
+<div class='header__title' slot='title'>
+<ql-icon-button label="Back" href="https://www.coursera.org/" id="3485b71e4b596b23" target="_self" tip="Back">arrow_back</ql-icon-button>
+<h1 class='ql-headline-6'>Connect an App to a Cloud SQL for PostgreSQL Instance</h1>
+</div>
+<div class='header__actions' slot='action'>
+<ql-icon-button id='control-panel-target' style='display: none;'>
+dashboard
+</ql-icon-button>
+<ql-menu for='control-panel-target' id='control-panel-menu'></ql-menu>
+<ql-icon-button class='mobile-hide' icon='help_outline' id='help-menu-button' label='Open help menu' tip='Help'></ql-icon-button>
+<ql-menu for='help-menu-button' id='help-menu'>
+<ql-menu-item data-analytics-action='opened_help' data-analytics-label='lab' label='Help Center' onclick='hallofmirrors.helpService.startHelp({&quot;productData&quot;:{&quot;userId&quot;:12197799},&quot;context&quot;:&quot;lab&quot;})'></ql-menu-item>
+<ql-menu-item href='mailto:support@qwiklabs.com' label='Email support'></ql-menu-item>
+<ql-menu-item label='Chat support' onClick='ql.chat.open()'></ql-menu-item>
+</ql-menu>
+
+<ql-icon-button class='mobile-hide' icon='language' id='language' label='Select your language preference' tip='Language'></ql-icon-button>
+<ql-menu for='language'>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ar' href='/focuses/30758874?locale=ar&amp;parent=lti_session' label='العربية‬‎' lang='ar'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='de' href='/focuses/30758874?locale=de&amp;parent=lti_session' label='Deutsch' lang='de'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='en' href='/focuses/30758874?locale=en&amp;parent=lti_session' label='English' lang='en'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='es' href='/focuses/30758874?locale=es&amp;parent=lti_session' label='español (Latinoamérica)' lang='es'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='fr' href='/focuses/30758874?locale=fr&amp;parent=lti_session' label='français' lang='fr'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='fr_CA' href='/focuses/30758874?locale=fr_CA&amp;parent=lti_session' label='français (Canada)' lang='fr-CA'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='he' href='/focuses/30758874?locale=he&amp;parent=lti_session' label='עברית' lang='he'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='id' href='/focuses/30758874?locale=id&amp;parent=lti_session' label='bahasa Indonesia' lang='id'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='it' href='/focuses/30758874?locale=it&amp;parent=lti_session' label='Italiano' lang='it'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ja' href='/focuses/30758874?locale=ja&amp;parent=lti_session' label='日本語' lang='ja'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ko' href='/focuses/30758874?locale=ko&amp;parent=lti_session' label='한국어' lang='ko'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='pl' href='/focuses/30758874?locale=pl&amp;parent=lti_session' label='Polski' lang='pl'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='pt_BR' href='/focuses/30758874?locale=pt_BR&amp;parent=lti_session' label='português (Brasil)' lang='pt-BR'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='pt_PT' href='/focuses/30758874?locale=pt_PT&amp;parent=lti_session' label='português (Portugal)' lang='pt-PT'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='ru' href='/focuses/30758874?locale=ru&amp;parent=lti_session' label='русский' lang='ru'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='tr' href='/focuses/30758874?locale=tr&amp;parent=lti_session' label='Türkçe' lang='tr'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='uk' href='/focuses/30758874?locale=uk&amp;parent=lti_session' label='український' lang='uk'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='zh' href='/focuses/30758874?locale=zh&amp;parent=lti_session' label='简体中文' lang='zh'></ql-menu-item>
+<ql-menu-item data-analytics-action='changed_locale' data-analytics-label='zh_TW' href='/focuses/30758874?locale=zh_TW&amp;parent=lti_session' label='繁體中文' lang='zh-TW'></ql-menu-item>
+</ql-menu>
+
+
+<ql-icon-button id='my_account' label='My account' tip='My account'>
+<ql-avatar src='https://lh3.googleusercontent.com/a/ACg8ocI6s7UhNvX_oCOJMPhLJPmqhqIgwu_5AK0t7wpjF-5jmQo=s320-c'></ql-avatar>
+</ql-icon-button>
+<ql-menu for='my_account' id='my_account_menu' style='max-height: 640px'>
+<div class='my-account-menu'>
+<ql-avatar class='l-mtl l-mbl' size='120' src='https://lh3.googleusercontent.com/a/ACg8ocI6s7UhNvX_oCOJMPhLJPmqhqIgwu_5AK0t7wpjF-5jmQo=s320-c'></ql-avatar>
+<div class='my-account-menu__user-info l-mbl'>
+<h4 class='ql-subhead-1'>Justin Ho</h4>
+<p class='ql-body-2 text--light'>cliffdove@gmail.com</p>
+<p class='ql-body-2 text--light'>
+</p>
+<a class="text--green ql-subhead-2" href="/my_account/payments"><ql-chip positive>
+0 Credits
+</ql-chip>
+</a></div>
+<div class='buttons l-mbl'>
+<a class="button button--hairline" id="settings" href="/my_account/profile">Settings</a>
+</div>
+<hr>
+<ql-button data-analytics-action='clicked_sign_out' href='/users/sign_out' method='delete'>
+Sign Out
+</ql-button>
+<div class='privacy l-mtl'>
+<a target="_blank" class="ql-caption text--light" href="/privacy_policy">Privacy</a>
+<span class='ql-caption text--light l-mls l-mrs'>&middot;</span>
+<a class="ql-caption text--light" href="/terms_of_service">Terms</a>
+</div>
+</div>
+</ql-menu>
+
+</div>
+</ql-toolbar>
+
+</div>
+</div>
+
+<nav class='nav-panel js-nav-panel'>
+<div class='nav-panel__logo'>
+<div class="custom-logo">Qwiklabs</div>
+</div>
+<nav class='ql-sidenav'>
+<ql-sidenav-item href='/' icon='home' label='Home'></ql-sidenav-item>
+
+<ql-sidenav-item href='/catalog' icon='school' label='Catalog'></ql-sidenav-item>
+
+<ql-sidenav-item href='/profile' icon='event_note' label='Profile'></ql-sidenav-item>
+
+</nav>
+
+</nav>
+<div class='nav-panel__overlay js-nav-toggle'></div>
+
+<main class='js-main' id='jump-content'>
+<div class='l-main-wrapper' id='main-wrapper'>
+
+
+
+
+<div class='lab-assessment__tab js-open-lab-assessment-panel'>
+<button class='js-lab-assessment-total-score'>
+—/100
+</button>
+</div>
+<div aria-labelledby='lab-assessment-checkpoint' class='lab-assessment__panel js-lab-assessment-panel' role='dialog'>
+<div class='lab-assessment__panel__header'>
+<h4 id='lab-assessment-checkpoint'>Checkpoints</h4>
+<ql-icon-button class='js-close-lab-assessment-panel' icon='arrow_forward' label='Close dialog'></ql-icon-button>
+</div>
+<div class='lab-assessment__step'>
+<p class='lab-assessment__step__title' id='lab-assessment-step-title'>
+Create a Service Account for Cloud SQL.
+</p>
+<div class='lab-assessment__step__action'>
+<ql-button class='js-show-run-step-button' description='Create a Service Account for Cloud SQL.' step_no='1'>
+Check my progress
+</ql-button>
+<p class='lab-assessment__step__score'>
+<span class='js-assessment-step-score-1'>
+</span>
+/ 25
+</p>
+</div>
+</div>
+
+<div class='lab-assessment__step'>
+<p class='lab-assessment__step__title' id='lab-assessment-step-title'>
+Deploy a lightweight GKE application.
+</p>
+<div class='lab-assessment__step__action'>
+<ql-button class='js-show-run-step-button' description='Deploy a lightweight GKE application.' step_no='2'>
+Check my progress
+</ql-button>
+<p class='lab-assessment__step__score'>
+<span class='js-assessment-step-score-2'>
+</span>
+/ 25
+</p>
+</div>
+</div>
+
+<div class='lab-assessment__step'>
+<p class='lab-assessment__step__title' id='lab-assessment-step-title'>
+Connect the GKE application to an external load balancer
+</p>
+<div class='lab-assessment__step__action'>
+<ql-button class='js-show-run-step-button' description='Connect the GKE application to an external load balancer' step_no='3'>
+Check my progress
+</ql-button>
+<p class='lab-assessment__step__score'>
+<span class='js-assessment-step-score-3'>
+</span>
+/ 25
+</p>
+</div>
+</div>
+
+<div class='lab-assessment__step'>
+<p class='lab-assessment__step__title' id='lab-assessment-step-title'>
+Verify full read/write capabilities of application to database.
+</p>
+<div class='lab-assessment__step__action'>
+<ql-button class='js-show-run-step-button' description='Verify full read/write capabilities of application to database.' step_no='4'>
+Check my progress
+</ql-button>
+<p class='lab-assessment__step__score'>
+<span class='js-assessment-step-score-4'>
+</span>
+/ 25
+</p>
+</div>
+</div>
+
+</div>
+<ql-drawer-container class='js-lab-state' data-analytics-payload='{&quot;label&quot;:&quot;Connect an App to a Cloud SQL for PostgreSQL Instance&quot;,&quot;lab_name&quot;:&quot;Connect an App to a Cloud SQL for PostgreSQL Instance&quot;,&quot;classroom_name&quot;:null,&quot;deployment&quot;:&quot;googlecoursera-run&quot;}' data-credits='0.0' data-focus-id='30758874' data-lab-billing-limit='0.0' data-lab-duration='3600' data-parent='lti_session' data-recaptcha-enabled id='lab-container'>
+<ql-drawer id='terminal-drawer' slot='drawer'>
+<iframe allow='clipboard-read' class='terminal' id='embedded-resource'></iframe>
+</ql-drawer>
+<ql-drawer-content class='js-lab-wrapper' id='lab-content' slot='drawer-content'>
+<ql-drawer-container id='lab-content-container'>
+<ql-drawer id='control-panel-drawer' open slot='drawer' width='320'>
+<ql-lab-control-panel class='ql-lab-control-panel__max-height control-panel js-lab-control-panel' connectionFiles='[]' labControlButton='{&quot;disabled&quot;:false,&quot;pending&quot;:false,&quot;running&quot;:false}' labDetails='[]' labTimer='{&quot;ticking&quot;:false,&quot;secondsRemaining&quot;:3600}' studentResources='[]'>
+<script src="https://www.recaptcha.net/recaptcha/api.js?render=6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr"   ></script>
+        <script>
+          // Define function so that we can call it again later if we need to reset it
+          // This executes reCAPTCHA and then calls our callback.
+          function executeRecaptchaForStartLab() {
+            grecaptcha.ready(function() {
+              grecaptcha.execute('6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr', {action: 'start_lab'}).then(function(token) {
+                setInputWithRecaptchaResponseTokenForStartLab('g-recaptcha-response-data-start-lab', token)
+              });
+            });
+          };
+          // Invoke immediately
+          executeRecaptchaForStartLab()
+
+          // Async variant so you can await this function from another async function (no need for
+          // an explicit callback function then!)
+          // Returns a Promise that resolves with the response token.
+          async function executeRecaptchaForStartLabAsync() {
+            return new Promise((resolve, reject) => {
+             grecaptcha.ready(async function() {
+                resolve(await grecaptcha.execute('6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr', {action: 'start_lab'}))
+              });
+            })
+          };
+
+                  var setInputWithRecaptchaResponseTokenForStartLab = function(id, token) {
+          var element = document.getElementById(id);
+          if (element !== null) element.value = token;
+        }
+
+        </script>
+<input type="hidden" name="g-recaptcha-response-data[start_lab]" id="g-recaptcha-response-data-start-lab" data-sitekey="6LeVI8IUAAAAAJNdox5eTkYrw9SbvhZ1TFyv3iHr" class="g-recaptcha g-recaptcha-response "/>
+
+<div aria-live='polite' class='hidden' id='recaptcha-v2-start-lab' slot='recaptcha'>
+<script src="https://www.recaptcha.net/recaptcha/api.js" async defer ></script>
+<div data-sitekey="6LeOI8IUAAAAAPkHlMAE9NReCD_1WD81iYlBlCnV" data-callback="recaptchaComplete" data-expired-callback="expireV2Token" class="g-recaptcha "></div>
+          <noscript>
+            <div>
+              <div style="width: 302px; height: 422px; position: relative;">
+                <div style="width: 302px; height: 422px; position: absolute;">
+                  <iframe
+                    src="https://www.recaptcha.net/recaptcha/api/fallback?k=6LeOI8IUAAAAAPkHlMAE9NReCD_1WD81iYlBlCnV"
+                    name="ReCAPTCHA"
+                    style="width: 302px; height: 422px; border-style: none; border: 0; overflow: hidden;">
+                  </iframe>
+                </div>
+              </div>
+              <div style="width: 300px; height: 60px; border-style: none;
+                bottom: 12px; left: 25px; margin: 0px; padding: 0px; right: 25px;
+                background: #f9f9f9; border: 1px solid #c1c1c1; border-radius: 3px;">
+                <textarea id="g-recaptcha-response" name="g-recaptcha-response"
+                  class="g-recaptcha-response"
+                  style="width: 250px; height: 40px; border: 1px solid #c1c1c1;
+                  margin: 10px 25px; padding: 0px; resize: none;">
+                </textarea>
+              </div>
+            </div>
+          </noscript>
+
+</div>
+</ql-lab-control-panel>
+</ql-drawer>
+<ql-drawer-content id='lab-instructions' slot='drawer-content'>
+<div class='lab-content-container'>
+<div class='alert alert--fake js-alert'>
+<p class='alert__message js-alert-message' role='alert'></p>
+<ql-icon-button class='alert__close js-alert-close' icon='clear'></ql-icon-button>
+<iframe class='l-ie-iframe-fix' tabindex='-1'></iframe>
+</div>
+<div class='lab-content__renderable-instructions js-lab-content'>
+<div class='lab-preamble'>
+<h1 class='lab-preamble__title'>
+Connect an App to a Cloud SQL for PostgreSQL Instance
+</h1>
+<div class='lab-preamble__details subtitle-headline-1'>
+<span>1 hour </span>
+<span>Free</span>
+<div class='lab__rating'>
+<a aria-label="Lab Reviews" href="/focuses/30758874/reviews?parent=lti_session"><div class='rateit' data-rateit-readonly='true' data-rateit-value='4.3862'></div>
+
+</a></div>
+</div>
+</div>
+<div class='lab-outline-place-holder'></div>
+
+<div class='markdown-lab-instructions js-markdown-instructions' id='markdown-lab-instructions'>
+
+<h2 id="step1">GSP919</h2>
+<p><img alt="Google Cloud self-paced labs logo" src="https://cdn.qwiklabs.com/GMOHykaqmlTHiqEeQXTySaMXYPHeIvaqa2qHEzw6Occ%3D"></p>
+<h2 id="step2">Overview</h2>
+<p>This lab guides you through connecting an application to a Cloud SQL for PostgreSQL database. In this lab you will create a Kubernetes cluster and deploy a simple application to that cluster. You will then connect the application to the supplied Cloud SQL for PostgreSQL database instance and confirm that it is able to write to and read from it You must create or configure the services and resources that are specified for each task and you must follow any detailed instructions that are provided in order to successfully complete each task.</p>
+<h3>Objectives</h3>
+<p>In this lab, you will:</p>
+<ul>
+<li>Create a Kubernetes cluster and deploy a simple application to that cluster.</li>
+<li>Connect the application to the supplied Cloud SQL for PostgreSQL database instance.</li>
+<li>Confirm that the application is able to write to and read from the database.</li>
+</ul>
+<h2 id="step3">Setup and requirements</h2>
+<h3>Before you click the Start Lab button</h3>
+<p>Read these instructions. Labs are timed and you cannot pause them. The timer, which starts when you click <strong>Start Lab</strong>, shows how long Google Cloud resources will be made available to you.</p>
+<p>This hands-on lab lets you do the lab activities yourself in a real cloud environment, not in a simulation or demo environment. It does so by giving you new, temporary credentials that you use to sign in and access Google Cloud for the duration of the lab.</p>
+<p>To complete this lab, you need:</p>
+<ul>
+<li>Access to a standard internet browser (Chrome browser recommended).</li>
+</ul>
+<ql-warningbox>
+<strong>Note:</strong> Use an Incognito or private browser window to run this lab. This prevents any conflicts between your personal account and the Student account, which may cause extra charges incurred to your personal account.
+</ql-warningbox>
+<ul>
+<li>Time to complete the lab---remember, once you start, you cannot pause a lab.</li>
+</ul>
+<ql-warningbox>
+<strong>Note:</strong> If you already have your own personal Google Cloud account or project, do not use it for this lab to avoid extra charges to your account.
+</ql-warningbox>
+<h3>How to start your lab and sign in to the Google Cloud Console</h3>
+<ol>
+<li>
+<p>Click the <strong>Start Lab</strong> button. If you need to pay for the lab, a pop-up opens for you to select your payment method.
+On the left is the <strong>Lab Details</strong> panel with the following:</p>
+<ul>
+<li>The <strong>Open Google Console</strong> button</li>
+<li>Time remaining</li>
+<li>The temporary credentials that you must use for this lab</li>
+<li>Other information, if needed, to step through this lab</li>
+</ul>
+</li>
+<li>
+<p>Click <strong>Open Google Console</strong>.
+The lab spins up resources, and then opens another tab that shows the <strong>Sign in</strong> page.</p>
+<p><strong><em>Tip:</em></strong> Arrange the tabs in separate windows, side-by-side.</p>
+<ql-infobox>
+<strong>Note: </strong>If you see the <strong>Choose an account</strong> dialog, click <strong>Use Another Account</strong>.        
+ </ql-infobox>
+</li>
+<li>
+<p>If necessary, copy the <strong>Username</strong> from the <strong>Lab Details</strong> panel and paste it into the <strong>Sign in</strong> dialog. Click <strong>Next</strong>.</p>
+</li>
+<li>
+<p>Copy the <strong>Password</strong> from the <strong>Lab Details</strong> panel and paste it into the <strong>Welcome</strong> dialog. Click <strong>Next</strong>.</p>
+<ql-infobox>
+<strong>Important: </strong>You must use the credentials from the left panel. Do not use your Google Cloud Skills Boost credentials. 
+ </ql-infobox>
+<ql-warningbox>
+<strong>Note: </strong>Using your own Google Cloud account for this lab may incur extra charges.
+ </ql-warningbox>
+</li>
+<li>
+<p>Click through the subsequent pages:</p>
+<ul>
+<li>Accept the terms and conditions.</li>
+<li>Do not add recovery options or two-factor authentication (because this is a temporary account).</li>
+<li>Do not sign up for free trials.</li>
+</ul>
+</li>
+</ol>
+<p>After a few moments, the Cloud Console opens in this tab.</p>
+<ql-infobox>
+<strong>Note:</strong> You can view the menu with a list of Google Cloud Products and Services by clicking the <strong>Navigation menu</strong> at the top-left.
+<img alt="Navigation menu icon" src="https://cdn.qwiklabs.com/nUxFb6oRFr435O3t6V7WYJAjeDFcrFb16G9wHWp5BzU%3D">
+</ql-infobox>
+<h3>Activate Cloud Shell</h3>
+<p>Cloud Shell is a virtual machine that is loaded with development tools. It offers a persistent 5GB home directory and runs on the Google Cloud. Cloud Shell provides command-line access to your Google Cloud resources.</p>
+<ol>
+<li>Click <strong>Activate Cloud Shell</strong> <img alt="Activate Cloud Shell icon" src="https://cdn.qwiklabs.com/ep8HmqYGdD%2FkUncAAYpV47OYoHwC8%2Bg0WK%2F8sidHquE%3D"> at the top of the Google Cloud console.</li>
+</ol>
+<p>When you are connected, you are already authenticated, and the project is set to your <strong>PROJECT_ID</strong>. The output contains a line that declares the <strong>PROJECT_ID</strong> for this session:</p>
+<ql-code-block output="">
+Your Cloud Platform project in this session is set to YOUR_PROJECT_ID
+</ql-code-block>
+<p><code>gcloud</code> is the command-line tool for Google Cloud. It comes pre-installed on Cloud Shell and supports tab-completion.</p>
+<ol start="2">
+<li>(Optional) You can list the active account name with this command:</li>
+</ol>
+<ql-code-block language="plaintext">
+gcloud auth list
+</ql-code-block>
+<ol start="3">
+<li>
+<p>Click <strong>Authorize</strong>.</p>
+</li>
+<li>
+<p>Your output should now look like this:</p>
+</li>
+</ol>
+<p><strong>Output:</strong></p>
+<ql-code-block language="plaintext" output="">
+ACTIVE: *
+ACCOUNT: student-01-xxxxxxxxxxxx@qwiklabs.net
+To set the active account, run:
+    $ gcloud config set account `ACCOUNT`
+</ql-code-block>
+<ol start="5">
+<li>(Optional) You can list the project ID with this command:</li>
+</ol>
+<ql-code-block language="plaintext">
+gcloud config list project
+</ql-code-block>
+<p><strong>Output:</strong></p>
+<ql-code-block language="plaintext" output="">
+[core]
+project = &lt;project_ID&gt;
+</ql-code-block>
+<p><strong>Example output:</strong></p>
+<ql-code-block language="plaintext" output="">
+[core]
+project = qwiklabs-gcp-44776a13dea667a6
+</ql-code-block>
+<ql-infobox>
+<strong>Note: </strong>For full documentation of <code>gcloud</code>, in Google Cloud, refer to <a href="https://cloud.google.com/sdk/gcloud" target="_blank">the gcloud CLI overview guide</a>.
+</ql-infobox>
+<h3>Set your region and zone</h3>
+<p>Certain Compute Engine resources live in regions and zones. A region is a specific geographical location where you can run your resources. Each region has one or more zones.</p>
+<aside>
+Learn more about regions and zones and see a complete list in <a href="https://cloud.google.com/compute/docs/regions-zones/" target="_blank">Regions &amp; Zones documentation</a>.
+</aside>
+<p>Run the following gcloud commands in Cloud Console to set the default region and zone for your lab:</p>
+<ql-code-block templated="">
+gcloud config set compute/zone "{{{project_0.default_zone|ZONE}}}"
+export ZONE=$(gcloud config get compute/zone)
+gcloud config set compute/region "{{{project_0.default_region|REGION}}}"
+export REGION=$(gcloud config get compute/region)
+</ql-code-block>
+<h2 id="step4">Task 1. Initialize APIs and create a Cloud IAM service account</h2>
+<p>To complete this task you must initialize the APIs and create an IAM service account that will be used to allow your application to connect to the Cloud SQL database.</p>
+<h3>Enable the APIs</h3>
+<p>You must enable the required APIs for this lab. You will build and push a container to the Artifact Registry in a later task, so you must enable the Artifact Registry API first.</p>
+<ol>
+<li>In Cloud Shell, run the following command to enable the Artifact Registry API:</li>
+</ol>
+<ql-code-block language="bash">
+gcloud services enable artifactregistry.googleapis.com
+</ql-code-block>
+<h3>Create a Service Account for Cloud SQL</h3>
+<p>You need to configure IAM service account credentials for the application that you will deploy later. The service account must be bound to a role that allows it to create and access Cloud SQL databases.</p>
+<ol>
+<li>In Cloud Shell, create a Service Account and bind it to the Cloud SQL admin role in the lab project:</li>
+</ol>
+<ql-code-block language="bash" nowrap>
+export PROJECT_ID=$(gcloud config list --format 'value(core.project)')
+export CLOUDSQL_SERVICE_ACCOUNT=cloudsql-service-account
+gcloud iam service-accounts create $CLOUDSQL_SERVICE_ACCOUNT --project=$PROJECT_ID
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+--member="serviceAccount:$CLOUDSQL_SERVICE_ACCOUNT@$PROJECT_ID.iam.gserviceaccount.com" \
+--role="roles/cloudsql.admin" </ql-code-block>
+<ol start="2">
+<li>In Cloud Shell, create and export keys to a local file:</li>
+</ol>
+<ql-code-block language="bash" nowrap>
+gcloud iam service-accounts keys create $CLOUDSQL_SERVICE_ACCOUNT.json \
+    --iam-account=$CLOUDSQL_SERVICE_ACCOUNT@$PROJECT_ID.iam.gserviceaccount.com \
+    --project=$PROJECT_ID
+</ql-code-block>
+<p>The file will be saved to your home folder in Cloud Shell.</p>
+<p>Click <strong>Check my progress</strong> to verify the objective. <ql-activity-tracking step="1"> Create an IAM service account for Cloud SQL. </ql-activity-tracking></p>
+<h2 id="step5">Task 2. Deploy a lightweight GKE application</h2>
+<p>In this task you will create a Kubernetes cluster and deploy a lightweight Google Kubernetes Engine (GKE) application on that cluster. You will configure the application to have access to the supplied Cloud SQL instance.</p>
+<p>The application provided is a simple Flask-SQLAlchemy web application called gMemegen. It creates memes by supplying a set of photographs and capturing header and footer text, storing them in the database and rendering the meme to a local folder. It runs on a single pod with two containers; one for the application and one for the Cloud SQL Auth Proxy deployed in the side-car pattern.</p>
+<p>A load balancer will marshal requests between the app and the database through the side-car. This load balancer will expose an external Ingress IP address through which you will access the app in your browser.</p>
+<h3>Create a Kubernetes cluster</h3>
+<p>In this step, you will create a minimal Kubernetes cluster. The cluster will take a couple of minutes to be deployed.</p>
+<ol>
+<li>In Cloud Shell, create a minimal Kubernetes cluster as follows:</li>
+</ol>
+<ql-code-block language="bash" templated="">
+ZONE={{{project_0.default_zone|ZONE}}}
+gcloud container clusters create postgres-cluster \
+--zone=$ZONE --num-nodes=2
+</ql-code-block>
+<h3>Create Kubernetes secrets for database access</h3>
+<p>In this step you will create a pair of Kubernetes secrets containing the credentials that are needed to connect to the Cloud SQL instance and database.</p>
+<ol>
+<li>In Cloud Shell, run the following commands to create the secrets:</li>
+</ol>
+<ql-code-block language="bash" nowrap>
+kubectl create secret generic cloudsql-instance-credentials \
+--from-file=credentials.json=$CLOUDSQL_SERVICE_ACCOUNT.json
+    
+kubectl create secret generic cloudsql-db-credentials \
+--from-literal=username=postgres \
+--from-literal=password=supersecret! \
+--from-literal=dbname=gmemegen_db
+</ql-code-block>
+<h3>Download and build the GKE application container</h3>
+<p>Before you can deploy the gMemegen application to your GKE cluster you need to build the container and push it to a repository.</p>
+<ol>
+<li>In Cloud Shell, download the provided application code and change to the application directory:</li>
+</ol>
+<ql-code-block language="bash" nowrap>
+gsutil -m cp -r gs://spls/gsp919/gmemegen .
+cd gmemegen
+</ql-code-block>
+<ol start="2">
+<li>Create environment variables for the region, Project ID and Artifact Registry repository:</li>
+</ol>
+<ql-code-block language="bash" nowrap templated="">
+export REGION={{{ project_0.default_region | "REGION" }}}
+export PROJECT_ID=$(gcloud config list --format 'value(core.project)')
+export REPO=gmemegen
+</ql-code-block>
+<ol start="3">
+<li>Configure Docker authentication for the Artifact Registry:</li>
+</ol>
+<ql-code-block language="bash" nowrap>
+gcloud auth configure-docker ${REGION}-docker.pkg.dev
+</ql-code-block>
+<ul>
+<li>Enter <code>Y</code> if you are asked for confirmation.</li>
+</ul>
+<ol start="4">
+<li>Create the Artifact Registry repository:</li>
+</ol>
+<ql-code-block language="bash" nowrap>
+gcloud artifacts repositories create $REPO \
+    --repository-format=docker --location=$REGION
+</ql-code-block>
+<ol start="5">
+<li>Build a local Docker image:</li>
+</ol>
+<ql-code-block language="bash">
+docker build -t ${REGION}-docker.pkg.dev/${PROJECT_ID}/gmemegen/gmemegen-app:v1 .
+</ql-code-block>
+<p>For the purposes of this lab, you may ignore the warning about running 'pip' as the 'root' user, although you should note that, in general, especially when working on your local machine, it is best practice to use a virtual environment.</p>
+<ol start="6">
+<li>Push the image to the Artifact Registry:</li>
+</ol>
+<ql-code-block language="bash">
+docker push ${REGION}-docker.pkg.dev/${PROJECT_ID}/gmemegen/gmemegen-app:v1
+</ql-code-block>
+<h3>Configure and deploy the GKE application</h3>
+<p>You must modify the Kubernetes deployment manifest for the gMemegen application to point at the correct container and configure the Cloud SQL Auth Proxy side-car with the connection string for the Cloud SQL PostgreSQL instance.</p>
+<p>The instructions explain how to edit the file using the Cloud Shell Editor, but if you prefer you can use another editor, such as <code>vi</code> or <code>nano</code>, from Cloud Shell for these steps.</p>
+<ol>
+<li>
+<p>On the Cloud Shell menu bar, click <strong>Open Editor</strong> to open the Cloud Shell Editor.</p>
+</li>
+<li>
+<p>Navigate the <strong>Explorer</strong> panel on the left hand side, expanding the <code>gmemegen</code> folder and then selecting <code>gmemegen_deployment.yaml</code> to edit the file.</p>
+</li>
+<li>
+<p>On <strong>line 33</strong>, in the <code>image</code> attribute, replace <code>${REGION}</code> with <ql-variable key="project_0.default_region" placeholder=""></ql-variable> and <code>${PROJECT_ID}</code> with <ql-variable id key="project_0.project_id" placeholder=""></ql-variable>. The line should now read:</p>
+</li>
+</ol>
+<ql-code-block nowrap output="" templated="">
+image: {{{ project_0.default_region | "REGION" }}}-docker.pkg.dev/{{{ project_0.project_id | "Project ID" }}}/gmemegen/gmemegen-app:v1
+</ql-code-block>
+<ol start="4">
+<li>On <strong>line 60</strong>, replace replace <code>${REGION}</code> with <ql-variable key="project_0.default_region" placeholder=""></ql-variable> and <code>${PROJECT_ID}</code> with <ql-variable id key="project_0.project_id" placeholder=""></ql-variable>. The line should now read:</li>
+</ol>
+<ql-code-block nowrap output="" templated="">
+-instances={{{ project_0.project_id | "Project ID" }}}:{{{ project_0.default_region | "REGION" }}}:postgres-gmemegen=tcp:5432
+</ql-code-block>
+<p>To confirm that the connection name is correct, in the Cloud Console, navigate to <strong>Databases</strong> &gt; <strong>SQL</strong>, select the <code>postgres-gmemegen</code> instance and compare with the <strong>Connection name</strong> in the <strong>Overview</strong> pane. A valid connection name is of the format <code>PROJECT_ID:REGION:CLOUD_SQL_INSTANCE_ID</code>.</p>
+<ol start="5">
+<li>
+<p>Save your changes by selecting <strong>File</strong> &gt; <strong>Save</strong> from the Cloud Shell Editor menu.</p>
+</li>
+<li>
+<p>In the Cloud console click the <strong>Open Terminal</strong> to re-open Cloud Shell. You may need to resize the Terminal window by dragging down the handle at the centre top of the menu bar, in order to see your Cloud Console window above.</p>
+</li>
+<li>
+<p>In Cloud Shell, deploy the application by running the following command:</p>
+</li>
+</ol>
+<ql-code-block language="bash">
+kubectl create -f gmemegen_deployment.yaml
+</ql-code-block>
+<ol start="8">
+<li>In Cloud Shell, check that the deployment was successful by running the following command:</li>
+</ol>
+<ql-code-block language="bash">
+kubectl get pods
+</ql-code-block>
+<p>It may take a minute or so for the pods to start up, because they need to pull the image from the repository. Repeat the above command until you see a pod, with 2 containers, with status <code>Running</code>.</p>
+<p>Click <strong>Check my progress</strong> to verify the objective. <ql-activity-tracking step="2"> Deploy a lightweight GKE application. </ql-activity-tracking></p>
+<h2 id="step6">Task 3. Connect the GKE application to an external load balancer</h2>
+<p>In this task you will create a load balancer to marshal requests between the containers in your GKE pods and access the application using its external IP address from your browser.</p>
+<h3>Create a load balancer to make your GKE application accessible from the web</h3>
+<p>In this step you will create a Kubernetes load balancer service that will provide your application with a public IP address.</p>
+<ol>
+<li>In Cloud Shell, run the following command to create a load balancer for the application:</li>
+</ol>
+<ql-code-block language="bash">
+kubectl expose deployment gmemegen \
+    --type "LoadBalancer" \
+    --port 80 --target-port 8080
+</ql-code-block>
+<h3>Test the application to generate some data</h3>
+<p>In this step you will access the gMemegen application from your web browser.</p>
+<p>The application has a very simple interface. It launches to the application home page, which displays 6 candidate images for making memes. You can select an image by clicking on it.</p>
+<p>The <strong>Create Meme</strong> page is displayed, where you enter two items of text, to be displayed at the top and bottom of the image. Clicking <strong>Submit</strong> renders the meme and displays it. The interface provides no navigation from the completed meme page. You will have to use the browser's back button to return to the home page.</p>
+<p>There are two other pages, <strong>Recent</strong> and <strong>Random</strong>, which display a set of recently generated memes and a random meme, respectively. Generating memes and navigating the UI will generate database activity which you can view in the logs as described below.</p>
+<p>Wait for the load balancer to expose an external IP, which you can retrieve as follows:</p>
+<ol>
+<li>In Cloud Shell, copy the external IP address attribute of the <code>LoadBalancer Ingress</code> from the output of:</li>
+</ol>
+<ql-code-block language="bash">
+kubectl describe service gmemegen
+</ql-code-block>
+<p><strong>Output:</strong></p>
+<ql-code-block nowrap output="">
+Name:                     gmemegen
+Namespace:                default
+Labels:                   app=gmemegen
+Annotations:              
+Selector:                 app=gmemegen
+Type:                     LoadBalancer
+IP Families:              
+IP:                       10.3.240.201
+IPs:                      10.3.240.201
+LoadBalancer Ingress:     34.67.122.203
+Port:                       80/TCP
+TargetPort:               8080/TCP
+NodePort:                   31837/TCP
+Endpoints:                10.0.0.7:8080
+Session Affinity:         None
+External Traffic Policy:  Cluster
+Events:
+  Type    Reason                Age   From                Message
+  ----    ------                ----  ----                -------
+  Normal  EnsuringLoadBalancer  85s   service-controller  Ensuring load balancer
+  Normal  EnsuredLoadBalancer   36s   service-controller  Ensured load balancer
+</ql-code-block>
+<p>It will take a minute or so for the <code>LoadBalancer Ingress</code> attribute to be included in the output (see above), so repeat the command until it is there before performing the next step.</p>
+<ol start="2">
+<li>In a browser, navigate to the load balancer's Ingress IP address.</li>
+</ol>
+<p>You can create a clickable link to the external IP address of the load balancer in Cloud Shell using the following commands:</p>
+<ql-code-block language="bash" nowrap>
+export LOAD_BALANCER_IP=$(kubectl get svc gmemegen \
+-o=jsonpath='{.status.loadBalancer.ingress[0].ip}' -n default)
+echo gMemegen Load Balancer Ingress IP: http://$LOAD_BALANCER_IP
+</ql-code-block>
+<ol start="4">
+<li>
+<p>Click the link in Cloud Shell and you will see the gMemegen application running in a new tab in your browser.</p>
+</li>
+<li>
+<p>Create a meme as follows:</p>
+<ul>
+<li>On the <strong>Home</strong> page, click on one of the presented images.</li>
+<li>Enter text in the <strong>Top</strong> and <strong>Bottom</strong> text boxes.</li>
+<li>Click the <strong>Submit</strong> button.</li>
+</ul>
+</li>
+</ol>
+<p>Your new meme is displayed.</p>
+<p><img alt="Meme for GKE app connected to cloud SQL." src="https://cdn.qwiklabs.com/oekx%2FE%2BF2t0sTgr2pfDNTAHa6NGx3MHINYBYlI4gq7U%3D"></p>
+<ol start="6">
+<li>
+<p>To create more memes, use the browser's back buttton to navigate to the home page.</p>
+</li>
+<li>
+<p>To view existing memes, click <strong>Recent</strong> or <strong>Random</strong> in the application menu. (Note that <strong>Random</strong> opens a new browser tab)</p>
+</li>
+<li>
+<p>In Cloud Shell, view the application’s activity by running the following:</p>
+</li>
+</ol>
+<ql-code-block language="bash" nowrap>
+POD_NAME=$(kubectl get pods --output=json | jq -r ".items[0].metadata.name")
+kubectl logs $POD_NAME gmemegen | grep "INFO"
+</ql-code-block>
+<p>This queries the logs from the <code>gmemegen</code> container and will display the activity of the application on the pod, including the SQL statements, which are logged to stderr as they are executed.</p>
+<p>Click <strong>Check my progress</strong> to verify the objective. <ql-activity-tracking step="3"> Connect the GKE application to an external load balancer. </ql-activity-tracking></p>
+<h2 id="step7">Task 4. Verify full read/write capabilities of application to database</h2>
+<p>In this task you will verify that the application is able to write to and read from the database.</p>
+<h3>Connect to the database and query an application table</h3>
+<p>In this step you will connect to the Cloud SQL instance by running <strong>PL/SQL</strong> in Cloud Shell.</p>
+<ol>
+<li>
+<p>In Google Cloud Console, navigate to <strong>Databases</strong> &gt; <strong>SQL</strong> and select the <code>postgres-gmemegen</code> instance.</p>
+</li>
+<li>
+<p>In the <strong>Overview</strong> pane , scroll down to <strong>Connect to this instance</strong> and click the <strong>Open Cloud Shell</strong> button.</p>
+</li>
+<li>
+<p>Run the auto-populated command in Cloud Shell.</p>
+</li>
+<li>
+<p>When prompted, enter the password: <code>supersecret!</code></p>
+</li>
+<li>
+<p>At the <code>postgres=&gt;</code> prompt enter the following command to select the gmemegen_db database:</p>
+</li>
+</ol>
+<ql-code-block language="postgresql">
+\c gmemegen_db
+</ql-code-block>
+<ol start="6">
+<li>
+<p>When prompted, enter the password: <code>supersecret!</code></p>
+</li>
+<li>
+<p>At the <code>gmemegen_db=&gt;</code> prompt enter:</p>
+</li>
+</ol>
+<ql-code-block language="postgresql">
+select * from meme;
+</ql-code-block>
+<p>This will display a row for each meme you have generated through the gMemegen app.</p>
+<p>Click <strong>Check my progress</strong> to verify the objective. <ql-activity-tracking step="4"> Verify full read/write capabilities of the application to its database. </ql-activity-tracking></p>
+<h2 id="step8">Congratulations</h2>
+<p>Congratulations! In this lab, you have configured an application to access a Cloud SQL for PostgreSQL database. You created a Kubernetes cluster and deployed a simple meme generation application to that cluster, as well as connected the application to the supplied Cloud SQL for PostgreSQL database instance and confirmed that it is able to write to and read from it.</p>
+<h3>Finish your quest</h3>
+<p>This self-paced lab is part of the <a href="https://www.cloudskillsboost.google/quests/186" target="_blank">Manage PostgreSQL Databases on Cloud SQL</a> quest. A quest is a series of related labs that form a learning path. Completing this quest earns you a badge to recognize your achievement. You can make your badge or badges public and link to them in your online resume or social media account. <a href="https://www.cloudskillsboost.google/quests/186/enroll" target="_blank">Enroll in a quest</a> and get immediate completion credit if you've taken this lab. Refer to the <a href="http://cloudskillsboost.google/catalog" target="_blank">Google Cloud Skills Boost catalog</a> for all available quests.</p>
+<h2 id="step9">End your lab</h2>
+<p>When you have completed your lab, click <strong>End Lab</strong>. Your account and the resources you've used are removed from the lab platform.</p>
+<p>You will be given an opportunity to rate the lab experience. Select the applicable number of stars, type a comment, and then click <strong>Submit</strong>.</p>
+<p>The number of stars indicates the following:</p>
+<ul>
+<li>1 star = Very dissatisfied</li>
+<li>2 stars = Dissatisfied</li>
+<li>3 stars = Neutral</li>
+<li>4 stars = Satisfied</li>
+<li>5 stars = Very satisfied</li>
+</ul>
+<p>You can close the dialog box if you don't want to provide feedback.</p>
+<p>For feedback, suggestions, or corrections, please use the <strong>Support</strong> tab.</p>
+<p><strong>Manual Last Updated: August 1, 2023</strong></p>
+<p><strong>Lab Last Tested: August 1, 2023</strong></p>
+<p>Copyright 2023 Google LLC All rights reserved. Google and the Google logo are trademarks of Google LLC. All other company and product names may be trademarks of the respective companies with which they are associated.</p>
+
+</div>
+</div>
+
+
+<div class='lab-content__end-lab-button js-end-lab-button-container hidden'>
+<ql-lab-control-button class='js-end-lab-button' running></ql-lab-control-button>
+</div>
+<!-- / TODO: Move recommendations into the end lab modal -->
+</div>
+<div aria-label='Lab Table of Contents' class='outline-container' id='js-outline-container' role='navigation'>
+<ul class='lab-content__outline js-lab-content-outline'>
+<li><a href="#step1">GSP919</a></li><li><a href="#step2">Overview</a></li><li><a href="#step3">Setup and requirements</a></li><li><a href="#step4">Task 1. Initialize APIs and create a Cloud IAM service account</a></li><li><a href="#step5">Task 2. Deploy a lightweight GKE application</a></li><li><a href="#step6">Task 3. Connect the GKE application to an external load balancer</a></li><li><a href="#step7">Task 4. Verify full read/write capabilities of application to database</a></li><li><a href="#step8">Congratulations</a></li><li><a href="#step9">End your lab</a></li>
+</ul>
+</div>
+</ql-drawer-content>
+</ql-drawer-container>
+</ql-drawer-content>
+</ql-drawer-container>
+<ql-snackbar id='alert-snackbar'></ql-snackbar>
+
+
+
+</div>
+</main>
+
+<span class='hidden' id='flash-sibling-before'></span>
+<ql-snackbar></ql-snackbar>
+
+
+<ql-dialog headline='Score Details' icon='task_alt' id='jupyter-feedback-modal'>
+<iframe id='jupyter-feedback-frame' srcdoc='' title='Jupyter Feedback'></iframe>
+</ql-dialog>
+
+<div class='modal fade' id='lab-details-modal'>
+<div class='modal-container'>
+<div class='modal-content mdl-shadow--24dp'>
+<div class='modal-body'>
+<p class='l-mbm'>
+In this lab you will create a Kubernetes cluster and deploy a simple application to that cluster. Then, connect the application to the supplied Cloud SQL for PostgreSQL database instance and confirm that it is able to write to and read from it.
+</p>
+<p>
+This lab is included in the quest
+<a href="/quests/186">Manage PostgreSQL Databases on Cloud SQL</a>.
+If you complete this lab you&#39;ll receive credit for it when you enroll in this quest.
+</p>
+<p class='small-label l-mbs'>
+<strong>
+Duration:
+</strong>
+9m setup
+&middot;
+60m access
+&middot;
+40m completion
+</p>
+<p class='small-label l-mbs'>
+<strong>AWS Region:</strong>
+[] <strong></strong>
+</p>
+<p class='small-label l-mbs'>
+<span><strong>Levels: </strong>introductory</span>
+</p>
+<p class='small-label'>
+<strong>
+Permalink:
+</strong>
+<a href="https://googlecoursera.qwiklabs.com/catalog_lab/4199">https://googlecoursera.qwiklabs.com/catalog_lab/4199</a>
+</p>
+</div>
+<div class='modal-actions'>
+<a class='button button--text' data-dismiss='modal'>
+Got It
+</a>
+</div>
+
+
+</div>
+</div>
+<iframe class='l-ie-iframe-fix' tabindex='-1' title='modal'></iframe>
+</div>
+<ql-dialog headline='How satisfied are you with this lab?&lt;span aria-hidden=&quot;true&quot;&gt;*&lt;/span&gt;' id='lab-review-dialog'>
+<form class="simple_form js-lab-review-form" id="new_lab_review" action="/lab_reviews" accept-charset="UTF-8" data-remote="true" method="post"><input name="utf8" type="hidden" value="&#x2713;" autocomplete="off" /><div aria-labelledby='lab-review-dialog' aria-required='true' aria-valuemax='5' aria-valuemin='0' aria-valuenow='0' class='rateit js-rateit' data-rateit-max='5' data-rateit-min='0' data-rateit-resetable='false' data-rateit-step='1' data-rateit-value='0' id='lab-review-rateit' role='slider' tabindex='0'></div>
+<div class='l-mtm'>
+
+<div class="control-group hidden lab_review_user_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" value="12197799" name="lab_review[user_id]" id="lab_review_user_id" /></div></div>
+<div class="control-group hidden lab_review_classroom_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" name="lab_review[classroom_id]" id="lab_review_classroom_id" /></div></div>
+<div class="control-group hidden lab_review_lab_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" value="4199" name="lab_review[lab_id]" id="lab_review_lab_id" /></div></div>
+<div class="control-group hidden lab_review_focus_id"><div class="controls"><input class="hidden" autocomplete="off" type="hidden" name="lab_review[focus_id]" id="lab_review_focus_id" /></div></div>
+<div class="control-group hidden lab_review_rating"><div class="controls"><input class="hidden js-rating-input" autocomplete="off" type="hidden" name="lab_review[rating]" id="lab_review_rating" /></div></div>
+<div class="control-group text optional lab_review_comment"><label class="text optional control-label" for="lab_review_comment">Additional Comments</label><div class="controls"><textarea class="text optional" name="lab_review[comment]" id="lab_review_comment">
+</textarea></div></div>
+</div>
+</form><ql-button disabled id='submit' label='Submit' slot='action' text></ql-button>
+</ql-dialog>
+
+<ql-dialog headline='All done? If you end this lab, you will lose all your work. You may not be able to restart the lab if there is a quota limit. Are you sure you want to end this lab?' icon='error_outline' id='js-lab-are-you-sure-dialog'>
+<ql-button id='js-are-you-sure-button' label='Submit' slot='action' text></ql-button>
+</ql-dialog>
+
+
+<script>
+  $(function() {
+    ql.initMaterialInputs();
+    initChosen();
+    initSearch();
+    initTabs();
+    ql.list.init();
+    ql.favoriting.init();
+    ql.header.myAccount.init();
+    initTooltips();
+    ql.autocomplete.init();
+    ql.modals.init();
+    ql.toggleButtons.init();
+    ql.analytics.init();
+    ql.chat.init();
+  ql.jumpContent.init();
+  ql.labControlPanel.addRecaptchaErrorHandler();
+  initLabContent();
+  ql.labOutline.links.init();
+  initLabReviewModal();
+  initLabReviewTranslations( {"star_amount_1":"1 of 5 stars","star_amount_2":"2 of 5 stars","star_amount_3":"3 of 5 stars","star_amount_4":"4 of 5 stars","star_amount_5":"5 of 5 stars"} )
+  ql.labAssessment.init();
+  ql.labData.init();
+  initLabTranslations( {"are_you_sure":"All done? If you end this lab, you will lose all your work. You may not be able to restart the lab if there is a quota limit. Are you sure you want to end this lab?","in_progress":"*In Progress*","ending":"*Ending*","starting":"*Starting, please wait*","end_concurrent_labs":"Sorry, you can only run one lab at a time. To start this lab, please confirm that you want all of your existing labs to end.","copied":"Copied","no_resource":"Error retrieving resource.","no_support":"No Support","mac_press":"Press ⌘-C to copy","thanks_review":"Thanks for reviewing this lab.","windows_press":"Press Ctrl-C to copy","days":"days"} );
+  ql.labRun.init();
+  ql.navPanel.init();
+  ql.navigation.init();
+  
+  });
+</script>
+
+</body>
+</html>
+
